@@ -40,10 +40,5 @@ nosetests.xml
 coverage.xml
 
 #CSV
-/CVS/*
-*/CVS/*
-.cvsignore
-*.csvingnore
-*/.cvsignore
-*.csv/
+*.csv
 
