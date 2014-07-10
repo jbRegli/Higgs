@@ -40,4 +40,8 @@ nosetests.xml
 coverage.xml
 
 #CSV
+*.csv/
 CVS/
+CSV/
+cvs/
+csv/
