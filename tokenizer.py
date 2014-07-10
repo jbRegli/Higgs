@@ -10,16 +10,24 @@ import numpy as np
 import random,string,math,csv
 import matplotlib.pyplot as plt
 
-from sklearn.naive_bayes import GaussianNB
-from sklearn.ensemble import *
+#from sklearn.naive_bayes import GaussianNB
+#from sklearn.ensemble import *
+
+<<<<<<< HEAD
+import preTreatment
+
+
+def get_all_data(normalize = True, noise_variance = 0., ratio_train = 0.9):
+=======
 
 def get_all_data(normalize = False, noise_variance = 0., ratio_train = 0.9):
+>>>>>>> FETCH_HEAD
     """
     normalize : binary
     if True normalize all the data
 
     noise_variance : float
-    variance of the gaussian noise added to the signal. 
+    variance of the gaussian noise added to the signal.
     if noise_variance == 0. we don't add noise
 
     ratio_train = float
@@ -30,11 +38,11 @@ def get_all_data(normalize = False, noise_variance = 0., ratio_train = 0.9):
     (xsTrain, yTrain, weightsTrain), (xsValidation, yValidation, weightsValidation)
     xsTrain : np array of size((training_ratio*250000, 30)) of float representing the features
     yTrain : np array of size(training_ratio*250000) of int representing the label of the data (1 if boson, 0 else)
-    weightsTrain : np array of size(training_ratio*250000) of float representing the weights 
+    weightsTrain : np array of size(training_ratio*250000) of float representing the weights
 
     xsValidation : np array of size(((1-training_ratio)*250000, 30)) of float representing the features
     yValidation : np array of size((1-training_ratio)*250000) of int representing the label of the data (1 if boson, 0 else)
-    weightsValidation : np array of size((1-training_ratio)*250000) of float representing the weights 
+    weightsValidation : np array of size((1-training_ratio)*250000) of float representing the weights
 
 
     """
@@ -44,22 +52,13 @@ def get_all_data(normalize = False, noise_variance = 0., ratio_train = 0.9):
     (numPoints,numFeatures) = xs.shape
 
     #normalize
-    if normalize:
-        for i in xrange(250000):
-            L = []
-            for j in range(30):
-                if xs[i,j]!=-999:
-                    L.append(xs[i,j])
-            x = np.array(L)
-            mean = np.mean(x)
-            var = np.var(x)
-            for j in range(30):
-                if xs[i,j]!=-999:
-                    xs[i,j] = (xs[i,j]-mean)/var
+    if normalize == True:
+        xs = preTreatment.normalize(xs)
 
     #add gaussian noise
     if noise_variance != 0.:
-        xs = np.add(xs, np.random.normal(0.0, noise_variance, xs.shape))
+        xs = preTreatment.add_noise(xs)
+
 
     #select label
     sSelector = np.array([row[-1] == 's' for row in all[1:]])
@@ -90,7 +89,7 @@ def get_all_data(normalize = False, noise_variance = 0., ratio_train = 0.9):
     for n in xrange(numPointsTrain):
         if sSelectorTrain[n]:
             yTrain[n] = 1
-    
+
     for n in xrange(numPointsValidation):
         if sSelectorValidation[n]:
             yValidation[n] = 1
@@ -104,16 +103,24 @@ def get_all_data(normalize = False, noise_variance = 0., ratio_train = 0.9):
 
     return (xsTrain, yTrain, weightsTrain), (xsValidation, yValidation, weightsValidation)
 
+
+<<<<<<< HEAD
+def get_8_bins(normalize = True, noise_variance = 0.):
+=======
 def get_8_bins(normalize = False, noise_variance = 0.):
+>>>>>>> FETCH_HEAD
     """
     returns (xsTrain_s, yTrain_s, weightsTrain_s), (xsValidation_s, yValidation_s, weightsValidation_s)
     list of the data containing the eight different groups
     """
+
+    # Extracting the data:
     Train, Validation = get_all_data(normalize = normalize, noise_variance = noise_variance)
 
     xsTrain, yTrain, weightsTrain  = Train[0], Train[1], Train[2]
     xsValidation, yValidation, weightsValidation = Validation[0], Validation[1], Validation[2]
 
+    # Splitting them into sub-groups:
     xsTrain_s = []
     yTrain_s = []
     weightsTrain_s =[]
@@ -215,19 +222,22 @@ def get_8_bins(normalize = False, noise_variance = 0.):
                 yValidation_s[7] = np.append(yValidation_s[7], yValidation[i])
                 weightsValidation_s[7] = np.append(weightsValidation_s[7], weightsValidation[i])
 
-    #delete the column full of -999 (if u see any suspicious looking person, or article ...)
+    # Delete the columns full of -999
+    # (if u see any suspicious looking person, or article ...)
     for i in range(8):
         for index_column in range(xsTrain.shape[1]):
-            print "index colonne ="+str(index_column)
             if xsTrain_s[i].shape[1] > index_column:
                 if xsTrain_s[i][0,index_column] == -999:
                     xsTrain_s[i] = np.delete(xsTrain_s[i], np.s_[index_column],1)
                 if xsValidation_s[i][0,index_column] == -999:
                     xsValidation_s[i] = np.delete(xsValidation_s[i], np.s_[index_column],1)
-        xsTrain_s[i] = np.delete(xsTrain_s[i], np.s_[22],1)    # this feature is the same within a group
+
+        # Deleting the feature identical within each group:
+        xsTrain_s[i] = np.delete(xsTrain_s[i], np.s_[22],1)
         xsValidation_s[i] = np.delete(xsValidation_s[i], np.s_[22],1)
 
     return (xsTrain_s, yTrain_s, weightsTrain_s), (xsValidation_s, yValidation_s, weightsValidation_s)
+
 
 def get_test_data():
 
