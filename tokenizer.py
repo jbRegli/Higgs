@@ -8,20 +8,11 @@ Load the dataset
 
 import numpy as np
 import random,string,math,csv
-import matplotlib.pyplot as plt
 
-#from sklearn.naive_bayes import GaussianNB
-#from sklearn.ensemble import *
-
-<<<<<<< HEAD
 import preTreatment
 
 
 def get_all_data(normalize = True, noise_variance = 0., ratio_train = 0.9):
-=======
-
-def get_all_data(normalize = False, noise_variance = 0., ratio_train = 0.9):
->>>>>>> FETCH_HEAD
     """
     normalize : binary
     if True normalize all the data
@@ -104,11 +95,7 @@ def get_all_data(normalize = False, noise_variance = 0., ratio_train = 0.9):
     return (xsTrain, yTrain, weightsTrain), (xsValidation, yValidation, weightsValidation)
 
 
-<<<<<<< HEAD
 def get_8_bins(normalize = True, noise_variance = 0.):
-=======
-def get_8_bins(normalize = False, noise_variance = 0.):
->>>>>>> FETCH_HEAD
     """
     returns (xsTrain_s, yTrain_s, weightsTrain_s), (xsValidation_s, yValidation_s, weightsValidation_s)
     list of the data containing the eight different groups
