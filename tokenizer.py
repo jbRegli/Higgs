@@ -35,8 +35,6 @@ def get_all_data(normalize = True, noise_variance = 0., ratio_train = 0.9):
     xsValidation : np array of size(((1-training_ratio)*250000, 30)) of float representing the features
     yValidation : np array of size((1-training_ratio)*250000) of int representing the label of the data (1 if boson, 0 else)
     weightsValidation : np array of size((1-training_ratio)*250000) of float representing the weights
-
-
     """
     # Extracting training.csv:
     all = list(csv.reader(open("training.csv","rb"), delimiter=','))
@@ -112,7 +110,7 @@ def get_all_data(normalize = True, noise_variance = 0., ratio_train = 0.9):
            (eventID_test, xsTest))
 
 
-def get_8_bins(normalize = True, noise_variance = 0.):
+def get_8_bins(normalize = True, noise_variance = 0., ratio_train= 0.9):
     """
     returns (xsTrain_s, yTrain_s, weightsTrain_s), (xsValidation_s, yValidation_s, weightsValidation_s)
     list of the data containing the eight different groups
@@ -120,7 +118,8 @@ def get_8_bins(normalize = True, noise_variance = 0.):
 
     # Extracting the train set, the validation set and the test set:
     Train, Validation, Test = get_all_data(normalize = normalize,
-                                     noise_variance = noise_variance)
+                                     noise_variance = noise_variance,
+                                     ratio_train= ratio_train)
 
     ID_train, xsTrain, yTrain, weightsTrain  = Train[0], Train[1], Train[2], \
                                                Train[3]
@@ -178,5 +177,19 @@ def get_8_bins(normalize = True, noise_variance = 0.):
            (ID_valid_s, xsValid_s, yValid_s, weightsValid_s), \
            (ID_test_s, xsTest_s)
 
+
+def extract_data(split= True, normalize= True, noise_variance= 0.,
+                 ratio_train= 0.9):
+    """
+    Function wrapping the extraction of the data for any of the possible cases.
+    """
+    if split == True:
+        # Split the data into 8 sub-datasets:
+        return get_8_bins(normalize= normalize, noise_variance= noise_variance,
+                          ratio_train= ratio_train)
+    else:
+        # Extract the data as a unique dataset:
+        return get_all_data(normalize= normalize, noise_variance= noise_variance,
+                            ratio_train = ratio_train)
 
 

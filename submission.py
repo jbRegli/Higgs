@@ -3,8 +3,11 @@ Given a prediction compute the grading and a submission file
 """
 
 import numpy as np
+import time
+import csv
 
-def print_submission(testIDs, RankOrder, yLabels):
+def print_submission(testIDs, RankOrder, yLabels,
+    name = 'submission_'+'_'+time.strftime("%H:%M:%S")):
     """
     Creates the csv submission file
     ----------
@@ -43,7 +46,13 @@ def print_submission(testIDs, RankOrder, yLabels):
     sub = sub[sub[:,0].argsort()]
     sub = np.append([['EventID', 'RankOrder', 'Class']], sub, axis = 0)
 
-    np.savetxt("submission.csv",sub,fmt='%s',delimiter=',')
+    with open(name + '.csv', 'wb') as csvfile:
+        writer = csv.writer(csvfile, delimiter=',',
+                            quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        for i in range(sub.shape[0]):
+            writer.writerow(sub[i])
+
+    #np.savetxt(name + ".csv",sub,fmt='%s',delimiter=',')
 
     return sub
 

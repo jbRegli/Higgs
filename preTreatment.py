@@ -159,7 +159,6 @@ def add_noise(x):
     x = np.add(x, np.random.normal(0.0, noise_variance, x.shape))
 
 
-
 def split_8_matrix(ID, x, y= None, weights= None):
     """
     Given a dataset split it in 8 sub-datasets (according to some parameter defined or
@@ -196,7 +195,7 @@ def split_8_matrix(ID, x, y= None, weights= None):
     ID_s[6] = ID[np.logical_and(x[:,0]==-999., x[:,22]==2.)]
     ID_s[7] = ID[np.logical_and(x[:,0]==-999., x[:,22]==3.)]
 
-   # xs_s
+    # xs_s
     xs_s[0] = x[np.logical_and(x[:,0]!=-999, x[:,22]==0)]
     xs_s[1] = x[np.logical_and(x[:,0]!=-999, x[:,22]==1)]
     xs_s[2] = x[np.logical_and(x[:,0]!=-999, x[:,22]==2)]
@@ -242,4 +241,23 @@ def split_8_matrix(ID, x, y= None, weights= None):
         else:
             print ("Not a normal splitting case...")
             exit()
+
+
+def ratio_sig_per_dataset(y_s):
+    """
+    Compute the percentage of signal among a given dataset
+    """
+    # If we work with the splitted dataset:
+    if type(y_s) == list:
+        average = []
+        for i in range(len(y_s)):
+            average.append(float(np.sum(y_s[i]))/(y_s[i].shape[0]))
+            print ("dataset %i: %i elements - %.2f%% of signal.") \
+                    %(i, y_s[i].shape[0], average[-1])
+    else:
+        average = float(np.sum(y_s))/(y_s.shape[0])
+        print ("dataset: %i elements - %.2f%% of signal.") \
+                    %(y_s.shape[0], average)
+
+    return average
 
