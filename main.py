@@ -18,6 +18,29 @@ import randomForest
 
 
 def importation():
+
+    return train_s, valid_s, test_s
+
+
+def save_importation(train_s, valid_s, test_s):
+
+    np.savetxt("Reshape_dataset/train_ID.csv", train_s[0], delimiter=",")
+    np.savetxt("Reshape_dataset/train_data.csv", train_s[1], delimiter=",")
+    np.savetxt("Reshape_dataset/train_label.csv", train_s[2], delimiter=",")
+    np.savetxt("Reshape_dataset/train_weights.csv", train_s[3], delimiter=",")
+
+    np.savetxt("Reshape_dataset/valid_ID.csv", train_s[0], delimiter=",")
+    np.savetxt("Reshape_dataset/valid_data.csv", train_s[1], delimiter=",")
+    np.savetxt("Reshape_dataset/valid_label.csv", train_s[2], delimiter=",")
+    np.savetxt("Reshape_dataset/valid_weights.csv", train_s[3], delimiter=",")
+
+    np.savetxt("Reshape_dataset/test_ID.csv", train_s[0], delimiter=",")
+    np.savetxt("Reshape_dataset/test_data.csv", train_s[1], delimiter=",")
+
+    return 0
+
+
+def main():
     ###############
     ### IMPORT ####
     ###############
@@ -29,15 +52,6 @@ def importation():
     stop = time.clock()
     print ("Extraction time: %i s") %(stop-start)
 
-    return train_s, valid_s, test_s
-
-
-def save_importation()
-
-    return 0
-
-
-def main(train_s, valid_s, test_s):
     ######################
     ### PRE-TREATMENT ####
     ######################
@@ -59,12 +73,20 @@ def main(train_s, valid_s, test_s):
     # AMS:
     AMS = ams.AMS(final_s * 550000 /25000, final_b* 550000 /25000)
     print ("The expected score for naive bayse is %f") %AMS
+
+    # Numerical score:
+    for i in range(8):
+        sum_s, sum_b = submission.get_numerical_score(yPredicted_s[i],
+                                                       valid_s[2][i])
+        print "We have: sum_s[%i]= %i and sum_b[%i]= %i" %(i, sum_s, i, sum_b)
+        print yPredicted_s[i].shape
     print(" ")
 
     ### Random forest:
     # Prediction on the vaidation set:
     print("Random forest prediction...")
-    predictor_s, yPredicted_s, yProba_s =  randomForest.get_yPredicted_s(train_s[1],
+    predictor_s, yPredicted_s, yProba_s = randomForest.get_yPredicted_s(
+                                                            train_s[1],
                                                             train_s[2],
                                                             valid_s[1],
                                                             n_trees = 10)
@@ -77,6 +99,13 @@ def main(train_s, valid_s, test_s):
     print ("The expected score for random forest is %f") %AMS
     print(" ")
 
+    # Numerical score:
+    for i in range(8):
+        sum_s, sum_b = submission.get_numerical_score(yPredicted_s[i],
+                                                       valid_s[2][i])
+        print "We have: sum_s[%i]= %i and sum_b[%i]= %i" %(i, sum_s, i, sum_b)
+
+
     ##################
     # POST-TREATMENT #
     ##################
@@ -85,7 +114,7 @@ def main(train_s, valid_s, test_s):
     ##############
     # SUBMISSION #
     ##############
-    test_prediction, test_proba = get_test_prediction(predictor_s, test_s[1])
+    test_prediction, test_proba = randomForest.get_test_prediction(predictor_s, test_s[1])
 
     # Create a submission file:
     sub = submission.print_submission(np.concatenate(test_s[0]), test_proba ,

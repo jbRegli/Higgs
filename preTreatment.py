@@ -101,12 +101,11 @@ def split_8(ID, x, y= None, weights= None):
             print ("Not a normal splitting case...")
             exit()
     else:
-        if weight == None:
+        if weights == None:
             return ID_s, xs_s
         else:
             print ("Not a normal splitting case...")
             exit()
-
 
 
 def normalize(x_train, x_test):
@@ -161,4 +160,86 @@ def add_noise(x):
 
 
 
+def split_8_matrix(ID, x, y= None, weights= None):
+    """
+    Given a dataset split it in 8 sub-datasets (according to some parameter defined or
+    not
+    """
+    ID_s = []
+    xs_s = []
+
+    if y != None:
+        y_s = []
+    if weights != None:
+        weights_s =[]
+
+    for n in range(8):
+        ID_s.append(np.zeros(0))
+        xs_s.append(np.zeros((0,x.shape[1])))
+        if y != None:
+            y_s.append(np.zeros(0))
+        if weights != None:
+            weights_s.append(np.zeros(0))
+
+    # Splitting the set:
+    # Criteria 1: Is the first column equal to -999?
+    # Criteria 2: Is the 22th column equal to 0, 1, 2 or 3?
+
+    # ID_s:
+    ID_s[0] = ID[np.logical_and(x[:,0]!=-999., x[:,22]==0.)]
+    ID_s[1] = ID[np.logical_and(x[:,0]!=-999., x[:,22]==1.)]
+    ID_s[2] = ID[np.logical_and(x[:,0]!=-999., x[:,22]==2.)]
+    ID_s[3] = ID[np.logical_and(x[:,0]!=-999., x[:,22]==3.)]
+
+    ID_s[4] = ID[np.logical_and(x[:,0]==-999., x[:,22]==0.)]
+    ID_s[5] = ID[np.logical_and(x[:,0]==-999., x[:,22]==1.)]
+    ID_s[6] = ID[np.logical_and(x[:,0]==-999., x[:,22]==2.)]
+    ID_s[7] = ID[np.logical_and(x[:,0]==-999., x[:,22]==3.)]
+
+   # xs_s
+    xs_s[0] = x[np.logical_and(x[:,0]!=-999, x[:,22]==0)]
+    xs_s[1] = x[np.logical_and(x[:,0]!=-999, x[:,22]==1)]
+    xs_s[2] = x[np.logical_and(x[:,0]!=-999, x[:,22]==2)]
+    xs_s[3] = x[np.logical_and(x[:,0]!=-999, x[:,22]==3)]
+
+    xs_s[4] = x[np.logical_and(x[:,0]==-999, x[:,22]==0)]
+    xs_s[5] = x[np.logical_and(x[:,0]==-999, x[:,22]==1)]
+    xs_s[6] = x[np.logical_and(x[:,0]==-999, x[:,22]==2)]
+    xs_s[7] = x[np.logical_and(x[:,0]==-999, x[:,22]==3)]
+
+    # y_s
+    if y != None:
+        y_s[0] = y[np.logical_and(x[:,0]!=-999, x[:,22]==0)]
+        y_s[1] = y[np.logical_and(x[:,0]!=-999, x[:,22]==1)]
+        y_s[2] = y[np.logical_and(x[:,0]!=-999, x[:,22]==2)]
+        y_s[3] = y[np.logical_and(x[:,0]!=-999, x[:,22]==3)]
+
+        y_s[4] = y[np.logical_and(x[:,0]==-999, x[:,22]==0)]
+        y_s[5] = y[np.logical_and(x[:,0]==-999, x[:,22]==1)]
+        y_s[6] = y[np.logical_and(x[:,0]==-999, x[:,22]==2)]
+        y_s[7] = y[np.logical_and(x[:,0]==-999, x[:,22]==3)]
+
+    if weights != None:
+        weights_s[0] = weights[np.logical_and(x[:,0]!=-999, x[:,22]==0)]
+        weights_s[1] = weights[np.logical_and(x[:,0]!=-999, x[:,22]==1)]
+        weights_s[2] = weights[np.logical_and(x[:,0]!=-999, x[:,22]==2)]
+        weights_s[3] = weights[np.logical_and(x[:,0]!=-999, x[:,22]==3)]
+
+        weights_s[4] = weights[np.logical_and(x[:,0]==-999, x[:,22]==0)]
+        weights_s[5] = weights[np.logical_and(x[:,0]==-999, x[:,22]==1)]
+        weights_s[6] = weights[np.logical_and(x[:,0]==-999, x[:,22]==2)]
+        weights_s[7] = weights[np.logical_and(x[:,0]==-999, x[:,22]==3)]
+
+    if y != None:
+        if weights != None:
+            return ID_s, xs_s, y_s, weights_s
+        else:
+            print ("Not a normal splitting case...")
+            exit()
+    else:
+        if weights == None:
+            return ID_s, xs_s
+        else:
+            print ("Not a normal splitting case...")
+            exit()
 

@@ -49,7 +49,7 @@ def get_yPredicted_s(xsTrain_s, yTrain_s, xsValidation_s, n_trees= 10):
         # Training:
         rdf = classifier(xsTrain_s[n], yTrain_s[n], n_trees= n_trees)
 
-        predicor_s.append(rdf)
+        predictor_s.append(rdf)
 
         #Prediction:
         label_predicted, proba_predicted = prediction(rdf, xsValidation_s[n])
@@ -66,13 +66,16 @@ def get_test_prediction(predictor_s, xsTest_s):
     test_proba_s = []
 
     for n in range(8):
-        label_predicted, proba_predicted = prediction(rdf, xsValidation_s[n])
+        label_predicted, proba_predicted = prediction(predictor_s[n],
+                                                      xsTest_s[n])
 
         test_prediction_s.append(label_predicted)
 
-        print np.asarray(proba_predicted).shape
-        print type(proba_predicted)
+        test_proba_s.append(np.max(proba_predicted,axis=1))
 
-        test_proba_s.append(np.max(np.asarray(proba_predicted),axis=0))
+    test_prediction = np.concatenate(test_prediction_s)
+    test_proba = np.concatenate(test_proba_s)
 
-    return np.concatenate(test_prediction_s), np.concatenate(test_proba_s)
+
+
+    return test_prediction, test_proba

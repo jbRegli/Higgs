@@ -28,7 +28,18 @@ def print_submission(testIDs, RankOrder, yLabels):
         Class)
 
     """
-    sub = np.array([[str(testIDs[i]), str(RankOrder[i]), 's' if yLabels[i] == 1 else 'b'] for i in range(len(testIDs))])
+    RankOrder = np.arange(1,550001)
+
+    labels = []
+    for i in range(len(testIDs)):
+        if yLabels[i] == 1:
+            labels.append('s')
+        else:
+            labels.append('b')
+
+    labels = np.array(labels)
+
+    sub = np.array([[str(testIDs[i]), str(RankOrder[i]), labels[i] ] for i in range(len(testIDs))])
     sub = sub[sub[:,0].argsort()]
     sub = np.append([['EventID', 'RankOrder', 'Class']], sub, axis = 0)
 
@@ -45,7 +56,8 @@ def get_s_b(yPredicted, yValidation, weightsValidation):
     weighted sum of the real negative (b)
     """
 
-    if yPredicted.shape != yValidation.shape or yValidation.shape != weightsValidation.shape:
+    if yPredicted.shape != yValidation.shape or \
+            yValidation.shape != weightsValidation.shape:
         print "Bad inputs shapes. Inputs must be the same size"
         exit()
 
@@ -55,6 +67,20 @@ def get_s_b(yPredicted, yValidation, weightsValidation):
     b = np.dot(yPredicted*yValidationComp, weightsValidation)
 
     return s, b
+
+
+def get_numerical_score(yPredicted, yValidation):
+
+    if yPredicted.shape != yValidation.shape:
+        print "Bad inputs shapes. Inputs must be the same size"
+        exit()
+
+    sum_s = np.sum(yPredicted*yValidation)
+    #yPredictedComp = np.ones(yPredicted.shape) - yPredicted #vector with label 0 for event and label 1 for non event
+    yValidationComp = np.ones(yValidation.shape) - yValidation #vector with label 0 for event and label 1 for non event
+    sum_b = np.sum(yPredicted*yValidationComp)
+
+    return sum_s, sum_b
 
 
 def get_s_b_8(yPredicted_s, yValidation_s, weightsValidation_s):

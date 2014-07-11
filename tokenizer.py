@@ -107,9 +107,9 @@ def get_all_data(normalize = True, noise_variance = 0., ratio_train = 0.9):
     sumSWeightsTrain = np.sum(weightsTrain[sSelectorTrain])
     sumBWeightsTrain = np.sum(weightsTrain[bSelectorTrain])
 
-    return (eventID_train, xsTrain, yTrain, weightsTrain), \
+    return ((eventID_train, xsTrain, yTrain, weightsTrain), \
            (eventID_valid, xsValidation, yValidation, weightsValidation), \
-           (eventID_test, xsTest)
+           (eventID_test, xsTest))
 
 
 def get_8_bins(normalize = True, noise_variance = 0.):
@@ -129,20 +129,23 @@ def get_8_bins(normalize = True, noise_variance = 0.):
 
     ID_test, xsTest = Test[0], Test[1]
 
-
     # Splitting the data into sub-groups:
-    print("    Splitting the train set")
     ID_train_s, xsTrain_s, yTrain_s, weightsTrain_s = preTreatment.\
-                                split_8(ID_train, xsTrain, yTrain, weightsTrain)
+                           split_8_matrix(ID_train, xsTrain, yTrain, weightsTrain)
+
+
 
     print("    Splitting the valid set")
     ID_valid_s, xsValid_s,yValid_s, weightsValid_s = preTreatment.\
-                                split_8(ID_valid, xsValid, yValid, weightsValid)
+                           split_8_matrix(ID_valid, xsValid, yValid, weightsValid)
+
 
     print("    Splitting the test set")
-    Id_test_s, xsTest_s = preTreatment.split_8(ID_test, xsTest)
+    ID_test_s, xsTest_s = preTreatment.split_8_matrix(ID_test, xsTest)
 
     # Delete the columns full of -999
+    print("    Deleting the invalid inputs")
+    print("    WARNING: I'm not really sure of what is done here. To be checked.")
     # (if u see any suspicious looking person, or article ...)
     for i in range(8):
         for index_column in range(xsTrain.shape[1]):
@@ -150,12 +153,21 @@ def get_8_bins(normalize = True, noise_variance = 0.):
                 # Train set:
                 if xsTrain_s[i][0,index_column] == -999:
                     xsTrain_s[i] = np.delete(xsTrain_s[i], np.s_[index_column],1)
-                # Validation set:
-                if xsValid_s[i][0,index_column] == -999:
+            #else:
+            #    print ("Something weird happened for train at %i") %index_column
+            #    # Validation set:
+            #if xsValid_s[i].shape[1] > index_column:
+                #if xsValid_s[i][0,index_column] == -999:
                     xsValid_s[i] = np.delete(xsValid_s[i], np.s_[index_column],1)
-                # Test set:
-                if xsTest_s[i][0,index_column] == -999:
+            #else:
+            #    print ("Something weird happened for valid at %i") %index_column
+
+            #if xsTest_s[i].shape[1] > index_column:
+                # Test set:
+                #if xsTest_s[i][0,index_column] == -999:
                     xsTest_s[i] = np.delete(xsTest_s[i], np.s_[index_column],1)
+            #else:
+            #    print ("Something weird happened for test at %i") %index_column
 
         # Deleting the feature identical within each group:
         xsTrain_s[i] = np.delete(xsTrain_s[i], np.s_[22],1)
