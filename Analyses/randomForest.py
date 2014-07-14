@@ -1,5 +1,6 @@
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
 
 """
 Random forest classifier
@@ -88,3 +89,20 @@ def get_test_prediction(predictor_s, xsTest_s):
         test_proba_s = np.max(proba_predicted,axis=1)
 
     return test_prediction_s, test_proba_s
+
+def get_classification_error(y_predicted_s, y_true_s, normalize= True):
+
+    if type(y_predicted_s) == list:
+        prediction_error_s = []
+
+        for n in range(len(y_predicted_s)):
+            prediction_error_s.append(accuracy_score(y_true_s[n],
+                                                     y_predicted_s[n],
+                                                     normalize=normalize))
+    else:
+        prediction_error_s = accuracy_score(y_true_s, y_predicted_s,
+                                            normalize=normalize)
+
+    return prediction_error_s
+
+
