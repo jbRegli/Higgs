@@ -20,6 +20,7 @@ sys.path.append('Analyses/')
 import analyse # Function computing an analyse for any method in the good format
 import naiveBayes
 import randomForest
+import svm
 #import pca # example but empty
 
 
@@ -106,6 +107,35 @@ def main():
                     %(nb_yPredicted_s.shape[0], sum_s, sum_b)
 
     print(" ")
+####### SVM
+    # SVM parameters
+
+    # Prediction on the vaidation set:
+    print("------------------- SVM prediction ---------------------")
+    svm_predictor_s, svm_yPredicted_s, svm_yProba_s = svm.\
+                                                get_yPredicted_s(
+                                                                train_s[1],
+                                                                train_s[2],
+                                                                valid_s[1]
+                                                                )
+    # Get s and b:
+    print("Computing final_s and final_b for RDF...")
+    svm_final_s, svm_final_b = submission.get_s_b_8(svm_yPredicted_s, valid_s[2],
+                                                    valid_s[3])
+
+    # AMS:
+    #AMS = ams.AMS(final_s * 550000 /25000, final_b* 550000 /25000)
+    #print ("The expected score for random forest is %f") %AMS
+    #print(" ")
+
+    # Classification error:
+    svm_classif_succ = randomForest.get_classification_error(svm_yPredicted_s,
+                                                              valid_s[2],
+                                                              normalize= True)
+    for i, ratio in enumerate(svm_classif_succ):
+        print("On the subset %i - correct prediction = %f") %(i, ratio)
+
+    print (" ")
 
 ####### RANDOM FOREST:
     # Random forest parameters:
