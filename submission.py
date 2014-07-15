@@ -7,7 +7,7 @@ import time
 import csv
 
 def print_submission(testIDs, RankOrder, yLabels,
-    name = 'submission_'+'_'+time.strftime("%H:%M:%S")):
+    name = 'submission_'+time.strftime("%H:%M:%S")):
     """
     Creates the csv submission file
     ----------
@@ -31,8 +31,6 @@ def print_submission(testIDs, RankOrder, yLabels,
         Class)
 
     """
-    RankOrder = np.arange(1,550001)
-
     labels = []
     for i in range(len(testIDs)):
         if yLabels[i] == 1:
@@ -51,8 +49,6 @@ def print_submission(testIDs, RankOrder, yLabels,
                             quotechar='|', quoting=csv.QUOTE_MINIMAL)
         for i in range(sub.shape[0]):
             writer.writerow(sub[i])
-
-    #np.savetxt(name + ".csv",sub,fmt='%s',delimiter=',')
 
     return sub
 

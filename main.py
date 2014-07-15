@@ -17,6 +17,7 @@ import HiggsBosonCompetition_AMSMetric_rev1 as ams
 
 import sys
 sys.path.append('Analyses/')
+import analyse # Function computing an analyse for any method in the good format
 import naiveBayes
 import randomForest
 #import pca # example but empty
@@ -51,10 +52,10 @@ def main():
     print("------------------------- Pre-treatment --------------------------")
     ### Average number of signal per subset:
     print("Train subsets signal average:")
-    train_s_average = preTreatment.ratio_sig_per_dataset(train_s[3])
+    train_s_average = preTreatment.ratio_sig_per_dataset(train_s[2])
     print(" ")
     print("Valid subsets signal average:")
-    valid_s_average = preTreatment.ratio_sig_per_dataset(valid_s[3])
+    valid_s_average = preTreatment.ratio_sig_per_dataset(valid_s[2])
 
     print(" ")
     print(" ")
@@ -62,6 +63,11 @@ def main():
     ############
     # ANALYSES #
     ############
+
+    ### Test
+    #analyse.analyse('naiveBayses')
+
+
 ####### NAIVE BAYSE:
     # Prediction on the vaidation set:
     print("------------------- Naive bayse prediction -----------------------")
@@ -91,12 +97,12 @@ def main():
         for i in range(len(nb_yPredicted_s)):
             sum_s, sum_b = submission.get_numerical_score(nb_yPredicted_s[i],
                                                             valid_s[2][i])
-            print "Subset %i: %i elements - sum_s[%i]= %i - sum_b[%i]= %i" \
+            print "Subset %i: %i elements - sum_s[%i] = %i - sum_b[%i] = %i" \
                     %(i, nb_yPredicted_s[i].shape[0], i, sum_s, i, sum_b)
     else:
              sum_s, sum_b = submission.get_numerical_score(nb_yPredicted_s,
                                                             valid_s[2])
-             print "%i elements - sum_s= %i - sum_b= %i" \
+             print "%i elements - sum_s = %i - sum_b = %i" \
                     %(nb_yPredicted_s.shape[0], sum_s, sum_b)
 
     print(" ")
@@ -137,21 +143,19 @@ def main():
         for i in range(len(rdf_yPredicted_s)):
             sum_s, sum_b = submission.get_numerical_score(rdf_yPredicted_s[i],
                                                           valid_s[2][i])
-            print "Subset %i: %i elements - sum_s[%i]= %i - sum_b[%i]= %i" \
+            print "Subset %i: %i elements - sum_s[%i] = %i - sum_b[%i] = %i" \
                     %(i, rdf_yPredicted_s[i].shape[0], i, sum_s, i, sum_b)
     else:
              sum_s, sum_b = submission.get_numerical_score(rdf_yPredicted_s,
                                                             valid_s[2])
-             print "%i elements - sum_s= %i - sum_b= %i" \
+             print "%i elements - sum_s = %i - sum_b = %i" \
                     %(rdf_yPredicted_s.shape[0], sum_s, sum_b)
 
     print(" ")
 
-
-
 ####### RANDOM FOREST 2:
     # Random forest parameters:
-    n_trees = 100
+    n_trees = 10
 
     # Prediction on the vaidation set:
     print("------------------ Random forest prediction 2 --------------------")
@@ -186,46 +190,110 @@ def main():
         for i in range(len(rdf2_yPredicted_s)):
             sum_s, sum_b = submission.get_numerical_score(rdf2_yPredicted_s[i],
                                                           valid_s[2][i])
-            print "Subset %i: %i elements - sum_s[%i]= %i - sum_b[%i]= %i" \
+            print "Subset %i: %i elements - sum_s[%i] = %i - sum_b[%i] = %i" \
                     %(i, rdf2_yPredicted_s[i].shape[0], i, sum_s, i, sum_b)
     else:
              sum_s, sum_b = submission.get_numerical_score(rdf2_yPredicted_s,
                                                             valid_s[2])
-             print "%i elements - sum_s= %i - sum_b= %i" \
+             print "%i elements - sum_s = %i - sum_b = %i" \
                     %(rdf2_yPredicted_s.shape[0], sum_s, sum_b)
 
     print(" ")
 
-    ##################
-    # POST-TREATMENT #
-    ##################
-    print (type(rdf2_yPredicted_s))
-    prediction_list = [(np.concatenate(valid_s[0]), \
-                            np.concatenate(nb_yProba_s), \
-                            np.concatenate(nb_yPredicted_s)), \
-                       (np.concatenate(valid_s[0]), \
-                            np.concatenate(rdf_yProba_s), \
-                            np.concatenate(rdf_yPredicted_s)), \
-                       (np.concatenate(valid_s[0]), \
-                            np.concatenate(rdf2_yProba_s), \
-                            np.concatenate(rdf2_yPredicted_s) )]
+####### RANDOM FOREST 3:
+    # Random forest parameters:
+    n_trees = 10
 
-    final_pred = postTreatment.merge_classifier(prediction_list)
+    # Prediction on the vaidation set:
+    print("------------------ Random forest prediction 3 --------------------")
+    rdf3_predictor_s, rdf3_yPredicted_s, rdf3_yProba_s = randomForest.\
+                                                get_yPredicted_s(
+                                                                train_s[1],
+                                                                train_s[2],
+                                                                valid_s[1],
+                                                                n_trees = n_trees)
+    # Get s and b:
+    print("Computing final_s and final_b for RDF...")
+    rdf3_final_s, rdf3_final_b = submission.get_s_b_8(rdf3_yPredicted_s,
+                                                      valid_s[2],
+                                                      valid_s[3])
+
+    # AMS:
+    #AMS = ams.AMS(final_s * 550000 /25000, final_b* 550000 /25000)
+    #print ("The expected score for random forest is %f") %AMS
+    #print(" ")
 
     # Classification error:
-    merge_classif_succ = accuracy_score(final_pred[2], np.concatenate(valid_s[2]),
-                                                        normalize= True)
-
-    print("Overall merged correct prediction ratio = %f") %(merge_classif_succ)
+    rdf3_classif_succ = randomForest.get_classification_error(rdf3_yPredicted_s,
+                                                              valid_s[2],
+                                                              normalize= True)
+    for i, ratio in enumerate(rdf3_classif_succ):
+        print("On the subset %i - correct prediction = %f") %(i, ratio)
 
     print (" ")
 
+    # Numerical score:
+    if type(rdf3_yPredicted_s) == list:
+        for i in range(len(rdf3_yPredicted_s)):
+            sum_s, sum_b = submission.get_numerical_score(rdf3_yPredicted_s[i],
+                                                          valid_s[2][i])
+            print "Subset %i: %i elements - sum_s[%i] = %i - sum_b[%i] = %i" \
+                    %(i, rdf3_yPredicted_s[i].shape[0], i, sum_s, i, sum_b)
+    else:
+             sum_s, sum_b = submission.get_numerical_score(rdf3_yPredicted_s,
+                                                            valid_s[2])
+             print "%i elements - sum_s = %i - sum_b = %i" \
+                    %(rdf3_yPredicted_s.shape[0], sum_s, sum_b)
+
+    print(" ")
+
+
+
+    ##################
+    # POST-TREATMENT #
+    ##################
+    print("------------------------ Merged predictor -----------------------")
+
+    prediction_list =[(valid_s[0],rdf_yProba_s,rdf_yPredicted_s,\
+                            rdf_classif_succ),\
+                       (valid_s[0],rdf2_yProba_s,rdf2_yPredicted_s,\
+                            rdf2_classif_succ),\
+                       (valid_s[0],rdf3_yProba_s,rdf3_yPredicted_s,\
+                            rdf3_classif_succ)]
+
+    final_pred_s = postTreatment.merge_classifier(prediction_list)
+
+    # Classification error:
+    for i in range(len(final_pred_s)):
+        ratio = accuracy_score(final_pred_s[i][2],valid_s[2][i], normalize= True)
+        print("On the subset %i - correct prediction = %f") %(i, ratio)
+
+    print (" ")
+
+    # Numerical score:
+    if type(final_pred_s) == list:
+        for i in range(len(final_pred_s)):
+            sum_s, sum_b = submission.get_numerical_score(final_pred_s[i][2],
+                                                          valid_s[2][i])
+            print "Subset %i: %i elements - sum_s[%i] = %i - sum_b[%i] = %i" \
+                    %(i, final_pred_s[i][2].shape[0], i, sum_s, i, sum_b)
+    else:
+             sum_s, sum_b = submission.get_numerical_score(final_pred_s[2],
+                                                            valid_s[2])
+             print "%i elements - sum_s = %i - sum_b = %i" \
+                    %(final_pred_s[2].shape[0], sum_s, sum_b)
+
+    print(" ")
+
     # Transform the probabilities in rank:
-    final_pred = postTreatment.rank_signals(final_pred)
+    #final_pred = postTreatment.rank_signals(final_pred)
+
 
     ##############
     # SUBMISSION #
     ##############
+    print("-------------------------- Submission ---------------------------")
+
     # Prediction on the test set:
     test_prediction_s, test_proba_s = randomForest.get_test_prediction(
                                                            rdf_predictor_s,
@@ -234,15 +302,18 @@ def main():
     print("Test subsets signal average:")
     test_s_average = preTreatment.ratio_sig_per_dataset(test_prediction_s)
     print(" ")
+
+    RankOrder = np.arange(1,550001)
+
     if type(test_prediction_s) == list:
         test_prediction_s = np.concatenate(test_prediction_s)
         test_proba_s = np.concatenate(test_proba_s)
         ID = np.concatenate(test_s[0])
-
     else:
         ID = test_s[0]
+
     # Create a submission file:
-    sub = submission.print_submission(ID, test_proba_s , test_prediction_s)
+    sub = submission.print_submission(ID, RankOrder , test_prediction_s)
 
     return sub
 
