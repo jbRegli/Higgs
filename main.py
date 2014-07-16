@@ -21,6 +21,8 @@ import analyse # Function computing an analyse for any method in the good format
 import naiveBayes
 import randomForest
 import svm
+import kNeighbors
+import adaBoost
 #import pca # example but empty
 
 
@@ -108,6 +110,7 @@ def main():
 
     print(" ")
 ####### SVM
+    """
     # SVM parameters
 
     # Prediction on the vaidation set:
@@ -136,7 +139,106 @@ def main():
         print("On the subset %i - correct prediction = %f") %(i, ratio)
 
     print (" ")
+    """
+####### K Neighbors
+    # K neighbors paramaters
+    n_neighbors = 1000 
 
+    # Prediction on the vaidation set:
+    print("------------------- K Neighbors prediction ---------------------")
+    neigh_predictor_s, neigh_yPredicted_s, neigh_yProba_s = kNeighbors.\
+                                                get_yPredicted_s(
+                                                                train_s[1],
+                                                                train_s[2],
+                                                                valid_s[1],
+                                                                n_neighbors = n_neighbors)
+    # Get s and b:
+    print("Computing final_s and final_b for KN...")
+    neigh_final_s, neigh_final_b = submission.get_s_b_8(neigh_yPredicted_s, valid_s[2],
+                                                    valid_s[3])
+
+    # AMS:
+    #AMS = ams.AMS(final_s * 550000 /25000, final_b* 550000 /25000)
+    #print ("The expected score for random forest is %f") %AMS
+    #print(" ")
+
+    # Classification error:
+    neigh_classif_succ = randomForest.get_classification_error(neigh_yPredicted_s,
+                                                              valid_s[2],
+                                                              normalize= True)
+    for i, ratio in enumerate(neigh_classif_succ):
+        print("On the subset %i - correct prediction = %f") %(i, ratio)
+
+    print (" ")
+
+    # Numerical score:
+    if type(neigh_yPredicted_s) == list:
+        for i in range(len(neigh_yPredicted_s)):
+            sum_s, sum_b = submission.get_numerical_score(neigh_yPredicted_s[i],
+                                                          valid_s[2][i])
+            print "Subset %i: %i elements - sum_s[%i] = %i - sum_b[%i] = %i" \
+                    %(i, neigh_yPredicted_s[i].shape[0], i, sum_s, i, sum_b)
+    else:
+             sum_s, sum_b = submission.get_numerical_score(neigh_yPredicted_s,
+                                                            valid_s[2])
+             print "%i elements - sum_s = %i - sum_b = %i" \
+                    %(neigh_yPredicted_s.shape[0], sum_s, sum_b)
+
+    print(" ")
+
+####### Ada
+    # Ada Boost parameters
+    base_estimators = None
+    n_estimators = 50
+    learning_rate = 1.
+    algorithm = 'SAMME.R'
+    random_state = None
+
+    # Prediction on the vaidation set:
+    print("------------------- Ada Boost prediction ---------------------")
+    ada_predictor_s, ada_yPredicted_s, ada_yProba_s = adaBoost.\
+                                                get_yPredicted_s(
+                                                                train_s[1],
+                                                                train_s[2],
+                                                                valid_s[1],
+                                                                base_estimators = base_estimators,
+                                                                n_estimators = n_estimators,
+                                                                learning_rate = learning_rate,
+                                                                algorithm = algorithm,
+                                                                random_state = random_state)
+    # Get s and b:
+    print("Computing final_s and final_b for KN...")
+    ada_final_s, ada_final_b = submission.get_s_b_8(ada_yPredicted_s, valid_s[2],
+                                                    valid_s[3])
+
+    # AMS:
+    #AMS = ams.AMS(final_s * 550000 /25000, final_b* 550000 /25000)
+    #print ("The expected score for random forest is %f") %AMS
+    #print(" ")
+
+    # Classification error:
+    ada_classif_succ = randomForest.get_classification_error(ada_yPredicted_s,
+                                                              valid_s[2],
+                                                              normalize= True)
+    for i, ratio in enumerate(ada_classif_succ):
+        print("On the subset %i - correct prediction = %f") %(i, ratio)
+
+    print (" ")
+
+    # Numerical score:
+    if type(ada_yPredicted_s) == list:
+        for i in range(len(ada_yPredicted_s)):
+            sum_s, sum_b = submission.get_numerical_score(ada_yPredicted_s[i],
+                                                          valid_s[2][i])
+            print "Subset %i: %i elements - sum_s[%i] = %i - sum_b[%i] = %i" \
+                    %(i, ada_yPredicted_s[i].shape[0], i, sum_s, i, sum_b)
+    else:
+             sum_s, sum_b = submission.get_numerical_score(ada_yPredicted_s,
+                                                            valid_s[2])
+             print "%i elements - sum_s = %i - sum_b = %i" \
+                    %(ada_yPredicted_s.shape[0], sum_s, sum_b)
+
+    print(" ")
 ####### RANDOM FOREST:
     # Random forest parameters:
     n_trees = 10

@@ -1,22 +1,23 @@
 import numpy as np
-from sklearn import svm
+from sklearn.neighbors import KNeighborsClassifier
+
 """
-Support Vector Machine
+K Neighbors classifier
 
 Meta-parameters:
-    NONE
+    n_neighbors : int
+    number of neighbors used for the classification
 """
 
-def classifier(xTrain, yTrain):
+def classifier(xTrain, yTrain, n_neighbors):
     """
-    Train a SVM classifier on xTrain and yTrain and return the trained
+    Train a k Neighbors classifier on xTrain and yTrain and return the trained
     classifier
-    The probability attribute must be et to True to be able to return the probability vector
     """
-    svm = svm.SVC(probability = True)
-    svm.fit(xTrain, yTrain)
+    neigh = KNeighborsClassifier(n_neighbors=n_neighbors)
+    neigh.fit(xTrain, yTrain)
 
-    return svm
+    return neigh
 
 
 def prediction(predictor, testset):
@@ -33,7 +34,7 @@ def prediction(predictor, testset):
     return label_predicted, proba_predicted
 
 
-def get_yPredicted_s(xsTrain_s, yTrain_s, xsValidation_s):
+def get_yPredicted_s(xsTrain_s, yTrain_s, xsValidation_s, n_neighbors = 5):
     """
     Perform the training and the prediction on the 8 sub-sets
     """
@@ -45,7 +46,7 @@ def get_yPredicted_s(xsTrain_s, yTrain_s, xsValidation_s):
 
         for n in range(len(xsTrain_s)):
             # Training:
-            clf = classifier(xsTrain_s[n], yTrain_s[n])
+            clf = classifier(xsTrain_s[n], yTrain_s[n], n_neighbors = n_neighbors)
 
             # Prediction:
             label_predicted, proba_predicted = prediction(clf, xsValidation_s[n])

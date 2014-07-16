@@ -1,22 +1,46 @@
+#-*- coding: utf-8 -*-
+
 import numpy as np
-from sklearn import svm
+from sklearn.ensemble import AdaBoostClassifier
+
 """
-Support Vector Machine
+Ada Boost Classifier
 
 Meta-parameters:
-    NONE
+    base_estimator : object, optional (default=DecisionTreeClassifier)
+    The base estimator from which the boosted ensemble is built. 
+    Support for sample weighting is required, as well as proper classes_ and n_classes_ attributes.
+
+    n_estimators : integer, optional (default=50)
+    The maximum number of estimators at which boosting is terminated.
+    In case of perfect fit, the learning procedure is stopped early.
+
+    learning_rate : float, optional (default=1.)
+    Learning rate shrinks the contribution of each classifier by learning_rate.
+    There is a trade-off between learning_rate and n_estimators.
+
+    algorithm : ‘SAMME’, ‘SAMME.R’, optional (default=’SAMME.R’)
+    If ‘SAMME.R’ then use the SAMME.R real boosting algorithm. base_estimator must support calculation of class probabilities.
+    If ‘SAMME’ then use the SAMME discrete boosting algorithm. The SAMME.R algorithm typically converges faster than SAMME,
+    achieving a lower test error with fewer boosting iterations.
+
+    random_state : int, RandomState instance or None, optional (default=None)
+    If int, random_state is the seed used by the random number generator; 
+    If RandomState instance, random_state is the random number generator; 
+    If None, the random number generator is the RandomState instance used by np.random.
+
+    
 """
 
-def classifier(xTrain, yTrain):
+def classifier(xTrain, yTrain, base_estimators, n_estimators, learning_rate, algorithm, random_state):
     """
-    Train a SVM classifier on xTrain and yTrain and return the trained
+    Train a ada classifier on xTrain and yTrain and return the trained
     classifier
-    The probability attribute must be et to True to be able to return the probability vector
     """
-    svm = svm.SVC(probability = True)
-    svm.fit(xTrain, yTrain)
+    ada = AdaBoostClassifier() 
+    ada.fit(xTrain, yTrain)
 
-    return svm
+    return ada
 
 
 def prediction(predictor, testset):
@@ -33,7 +57,8 @@ def prediction(predictor, testset):
     return label_predicted, proba_predicted
 
 
-def get_yPredicted_s(xsTrain_s, yTrain_s, xsValidation_s):
+def get_yPredicted_s(xsTrain_s, yTrain_s, xsValidation_s, base_estimators = None, \
+                    n_estimators = 50, learning_rate = 1., algorithm = 'SAMME.R', random_state = None):
     """
     Perform the training and the prediction on the 8 sub-sets
     """
@@ -45,7 +70,8 @@ def get_yPredicted_s(xsTrain_s, yTrain_s, xsValidation_s):
 
         for n in range(len(xsTrain_s)):
             # Training:
-            clf = classifier(xsTrain_s[n], yTrain_s[n])
+            clf = classifier(xsTrain_s[n], yTrain_s[n], base_estimators = base_estimators, \
+                            n_estimators = n_estimators, learning_rate=learning_rate, algorithm=algorithm, random_state=random_state)
 
             # Prediction:
             label_predicted, proba_predicted = prediction(clf, xsValidation_s[n])
