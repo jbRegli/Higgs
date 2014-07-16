@@ -91,9 +91,13 @@ def get_numerical_score(yPredicted, yValidation):
 def get_s_b_8(yPredicted_s, yValidation_s, weightsValidation_s):
     final_s = 0.
     final_b =0.
+    s_s = []
+    b_s = []
     for n in range(8):
         s, b = get_s_b(yPredicted_s[n], yValidation_s[n], weightsValidation_s[n])
+        s_s.append(s)
+        b_s.append(b)
         final_s +=s
         final_b +=b
 
-    return final_s, final_b
+    return final_s, final_b, s_s, b_s

@@ -38,17 +38,26 @@ def analyse(train_s, valid_s, method_name, kwargs):
                                                                 train_s[2],
                                                                 valid_s[1],
                                                                 **kwargs)
-    # Get s and b:
-    final_s, final_b = submission.get_s_b_8(yPredicted_s, valid_s[2],
+    # Get s and b for each group (s_s, b_s) and the final final_s and
+    # final_b:
+    final_s, final_b, s_s, b_s = submission.get_s_b_8(yPredicted_s, valid_s[2],
                                                   valid_s[3])
 
     # Balance the s and b 
     final_s *= 250000/25000
     final_b *= 250000/25000
-    # AMS:
-
+    # AMS final:
     AMS = hbc.AMS(final_s , final_b)
     print ("Expected AMS score for "+method_name+" : %f") %AMS
+    #AMS by group
+    AMS_s = []
+    for i, (s,b) in enumerate(zip(s_s, b_s)):
+        s *= 250000/yPredicted_s[i].shape[0]
+        b *= 250000/yPredicted_s[i].shape[0]
+        score = hbc.AMS(s,b)
+        AMS_s.append(score)
+        print("Expected AMS score for "+method_name+" :  for group %i is : %f" %(i, score))
+
 
     # Classification error:
     classif_succ = eval(method_name).get_classification_error(yPredicted_s,
@@ -74,7 +83,8 @@ def analyse(train_s, valid_s, method_name, kwargs):
 
     d = {'predictor_s':predictor_s, 'yPredicted_s': yPredicted_s, 'yProba_s': yProba_s,
         'final_s':final_s, 'final_b':final_b,
-        'sum_s':sum_s, 'sum_b': sum_b}
+        'sum_s':sum_s, 'sum_b': sum_b,
+        'AMS':AMS, 'AMS_s': AMS_s}
 
     return d
 

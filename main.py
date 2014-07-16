@@ -76,10 +76,10 @@ def main():
     kwargs_bayes = {}
     dMethods['naiveBayes'] =  analyse.analyse(train_s, valid_s, 'naiveBayes', kwargs_bayes)
     # SVM
-    
+    """
     kwargs_svm ={}
     dMethods['svm'] = analyse.analyse(train_s, valid_s,'svm', kwargs_svm)
-    
+    """
     # K NEIGHBORS
     kwargs_kn = {'n_neighbors':50}
     dMethods['kNeighbors'] = analyse.analyse(train_s, valid_s, 'kNeighbors', kwargs_kn)
