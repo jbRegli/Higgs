@@ -5,9 +5,9 @@ Systeme de vote entre classifier
 import numpy as np
 import scipy.stats as ss
 from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score
 
-
-def merge_classifier(prediction_list, method='weighted_avg'):
+def merge_classifiers(prediction_list, method='weighted_avg'):
     """
     Given a list of predictions [(ID_s, proba_s, label_s, performance_s)] merge them into a single prediction
     """
@@ -62,6 +62,10 @@ def merge_classifier(prediction_list, method='weighted_avg'):
                         label = np.mean(np.multiply(
                                             np.asarray(predic_dic[key][1]),
                                             np.asarray(predic_dic[key][2])))
+                    else:
+                        print("Not implemented averaging method...")
+                        exit()
+
                     if label > 0.5:
                         label = 1
                     else:
@@ -124,18 +128,90 @@ def merge_classifier(prediction_list, method='weighted_avg'):
                     label = 0
 
                 # Proba:
-                proba = 0
-                for i in range(len(predic_dic[key][0])):
-                    if predic_dic[key][1][i] == 1:
-                        proba += predic_dic[key][0][i]
-                    else:
-                        proba -= predic_dic[key][0][i]
+                proba = np.sum(np.asarray(predic_dic[key][0]))
 
                 final_prediction_s[0].append(key)
                 final_prediction_s[1].append(proba)
                 final_prediction_s[2].append(label)
 
     return final_prediction_s
+
+
+def classif_clasifiers_learn(list_pred_train_s, yTrain_s):
+
+    # If we work with the splitted dataset:
+    if type(ylabel_s) == list:
+
+        classif_classifiers_s = []
+
+        for i in range(ylabel_s):
+            clf = LogisticRegression(C=1e5)
+
+            clf.fit(zip(*list_pred_train_s)[i], yTrain_s[i])
+
+            classif_classifiers_s.append(clf)
+
+    else:
+        classif_classifiers_s = LogisticRegression(C=1e5)
+        classif_classifiers_s.fit(list_pred_train_s, yTrain_s)
+
+    return classif_classifiers_s
+
+
+def classif_classifiers_predict(classif_classifiers_s, prediction_list):
+
+
+    # If we work with the splitted dataset:
+    if type(classif_classifiers_s) == list:
+
+        ID_s = zip(*prediction_list)[0]
+        pred_proba_s = zip(*prediction_list)[1]
+        pred_label_s = zip(*prediction_list)[2]
+
+        for i in range(len(classif_classifiers_s)):
+            # Predict the label of a subset:
+            final_label_s = classif_classifiers_s[i].predict(pred_label_s[i])
+            # Predict the proba of being a signal of a subset:
+            final_proba_s = classif_classifiers_s[i].predict_proba(
+                                                            pred_lable_s[i])[1]
+
+            final_prediction_s.append(ID[i], final_proba_s, final_label_s)
+
+    else:
+        ID_s = prediction_list[0]
+        pred_proba_s = prediction_list[1]
+        pred_label_s = prediction_list[2]
+
+
+        final_label_s = classif_classifiers_s.predict(pred_label_s)
+        final_proba_s = classif_classifiers_s[i].predict_proba(pred_lable_s)[1]
+
+        final_prediction_s = [ID, final_proba_s, final_label_s]
+
+    return final_prediction_s
+
+def classif_classifiers_error(final_prediction, y_true_s):
+
+    y_predicted_s = final_prediction[2]
+
+    if type(y_predicted_s) == list:
+        prediction_error_s = []
+
+        for n in range(len(y_predicted_s)):
+            prediction_error_s.append(accuracy_score(y_true_s[n],
+                                                     y_predicted_s[n],
+                                                     normalize=normalize))
+    else:
+        prediction_error_s = accuracy_score(y_true_s, y_predicted_s,
+                                            normalize=normalize)
+
+    return prediction_error_s
+
+
+
+
+
+
 
 def rank_signals(prediction):
     prediction[1] = ss.rankdata(prediction[1],method = 'ordinal')
