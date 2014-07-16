@@ -25,8 +25,6 @@ import kNeighbors
 import adaBoost
 import lda
 import qda
-#import pca # example but empty
-
 
 def main():
     ###############
@@ -69,29 +67,29 @@ def main():
     # ANALYSES #
     ############
 
-    ### Test
-    #analyse.analyse('naiveBayses')
-
     #dictionnary that will contain all the data for each methods. In the end we'll have a dict of dict
+    # keys of the methods : {naiveBayes, svm, kNeighbors, lda, qda, adaBoost,
+    #                       randomForest}
     dMethods ={}
-####### NAIVE BAYES:
+
+    # NAIVE BAYES:
     kwargs_bayes = {}
     dMethods['naiveBayes'] =  analyse.analyse(train_s, valid_s, 'naiveBayes', kwargs_bayes)
-####### SVM
-    """
+    # SVM
+    
     kwargs_svm ={}
     dMethods['svm'] = analyse.analyse(train_s, valid_s,'svm', kwargs_svm)
-    """
-####### K Neighbors
-    kwargs_kn = {'n_neighbors':10}
+    
+    # K NEIGHBORS
+    kwargs_kn = {'n_neighbors':50}
     dMethods['kNeighbors'] = analyse.analyse(train_s, valid_s, 'kNeighbors', kwargs_kn)
-####### LDA
+    # LDA
     kwargs_lda = {}
     dMethods['lda'] = analyse.analyse(train_s, valid_s, 'lda', kwargs_lda)
-####### QDA
+    # QDA
     kwargs_qda= {}
     dMethods['qda'] = analyse.analyse(train_s, valid_s, 'qda', kwargs_qda)
-####### Ada
+    # ADABOOST
     kwargs_ada= {   'base_estimators': None, 
                     'n_estimators': 50,
                     'learning_rate': 1.,
@@ -99,7 +97,7 @@ def main():
                     'random_state':None}
     dMethods['adaBoost'] = analyse.analyse(train_s, valid_s, 'adaBoost', kwargs_ada)
 ####### RANDOM FOREST:
-    kwargs_rdf= {'n_trees': 10}
+    kwargs_rdf= {'n_trees': 100}
     dMethods['randomForest'] = analyse.analyse(train_s, valid_s, 'randomForest', kwargs_rdf)
 
     ##################

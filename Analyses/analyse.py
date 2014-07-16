@@ -12,6 +12,8 @@ import adaBoost
 import lda
 import qda
 
+import HiggsBosonCompetition_AMSMetric_rev1 as hbc
+
 
 def analyse(train_s, valid_s, method_name, kwargs):
     """
@@ -40,9 +42,13 @@ def analyse(train_s, valid_s, method_name, kwargs):
     final_s, final_b = submission.get_s_b_8(yPredicted_s, valid_s[2],
                                                   valid_s[3])
 
+    # Balance the s and b 
+    final_s *= 250000/25000
+    final_b *= 250000/25000
     # AMS:
-    #AMS = ams.AMS(nb_final_s * 550000 /25000, nb_final_b* 550000 /25000)
-    #print ("The expected score for naive bayse is %f") %AMS
+
+    AMS = hbc.AMS(final_s , final_b)
+    print ("Expected AMS score for "+method_name+" : %f") %AMS
 
     # Classification error:
     classif_succ = eval(method_name).get_classification_error(yPredicted_s,
