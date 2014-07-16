@@ -1,23 +1,23 @@
+#-*- coding: utf-8 -*-
+
 import numpy as np
-from sklearn.neighbors import KNeighborsClassifier
+from sklearn.qda import QDA
 from sklearn.metrics import accuracy_score
 """
-K Neighbors classifier
-
+Quadratic Discriminant Analysis
 Meta-parameters:
-    n_neighbors : int
-    number of neighbors used for the classification
+    NONE
 """
 
-def classifier(xTrain, yTrain, n_neighbors):
+def classifier(xTrain, yTrain):
     """
-    Train a k Neighbors classifier on xTrain and yTrain and return the trained
+    Train a QDA classifier on xTrain and yTrain and return the trained
     classifier
     """
-    neigh = KNeighborsClassifier(n_neighbors=n_neighbors)
-    neigh.fit(xTrain, yTrain)
+    qda = QDA()
+    qda.fit(xTrain, yTrain)
 
-    return neigh
+    return qda
 
 
 def prediction(predictor, testset):
@@ -34,7 +34,7 @@ def prediction(predictor, testset):
     return label_predicted, proba_predicted
 
 
-def get_yPredicted_s(xsTrain_s, yTrain_s, xsValidation_s, n_neighbors = 5):
+def get_yPredicted_s(xsTrain_s, yTrain_s, xsValidation_s):
     """
     Perform the training and the prediction on the 8 sub-sets
     """
@@ -46,7 +46,7 @@ def get_yPredicted_s(xsTrain_s, yTrain_s, xsValidation_s, n_neighbors = 5):
 
         for n in range(len(xsTrain_s)):
             # Training:
-            clf = classifier(xsTrain_s[n], yTrain_s[n], n_neighbors = n_neighbors)
+            clf = classifier(xsTrain_s[n], yTrain_s[n])
 
             # Prediction:
             label_predicted, proba_predicted = prediction(clf, xsValidation_s[n])

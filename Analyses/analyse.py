@@ -1,25 +1,41 @@
 import numpy as np
 import submission
 import imp
+import sys
+sys.path.append('Analyses/')
+import analyse # Function computing an analyse for any method in the good format
+import naiveBayes
+import randomForest
+import svm
+import kNeighbors
+import adaBoost
+import lda
+import qda
 
-def analyse(method_script):
 
-####### NAIVE BAYSE:
-    # Prediction on the vaidation set:
+def analyse(train_s, valid_s, method_name, kwargs):
+    """
+    methode name = string, name of the method (eg :"naiveBayes") 
+    kwargs = dictionnary of the paraters of the method
+    """
+
+
+    # Prediction on the validation set:
     print("------------------- Analyse: %s -----------------------") \
-        %(method_script)
+        %(method_name)
 
     #import sys
 
     #sys.path.append('Analyses/')
 
-    method = imp.load_source(method_script,
-                             str("./Analyses/" + method_script + ".py"))
+    #method = imp.load_source(method_script,
+                             #str("./Analyses/" + method_script + ".py"))
 
-    predictor_s, yPredicted_s, yProba_s = method.get_yPredicted_s(
+    predictor_s, yPredicted_s, yProba_s = eval(method_name).get_yPredicted_s(
                                                                 train_s[1],
                                                                 train_s[2],
-                                                                valid_s[1])
+                                                                valid_s[1],
+                                                                **kwargs)
     # Get s and b:
     final_s, final_b = submission.get_s_b_8(yPredicted_s, valid_s[2],
                                                   valid_s[3])
@@ -29,7 +45,7 @@ def analyse(method_script):
     #print ("The expected score for naive bayse is %f") %AMS
 
     # Classification error:
-    classif_succ = method.get_classification_error(yPredicted_s,
+    classif_succ = eval(method_name).get_classification_error(yPredicted_s,
                                                        valid_s[2],
                                                        normalize= True)
 
@@ -49,6 +65,12 @@ def analyse(method_script):
                                                            valid_s[2])
              print "%i elements - sum_s = %i - sum_b = %i" \
                     %(yPredicted_s.shape[0], sum_s, sum_b)
+
+    d = {'predictor_s':predictor_s, 'yPredicted_s': yPredicted_s, 'yProba_s': yProba_s,
+        'final_s':final_s, 'final_b':final_b,
+        'sum_s':sum_s, 'sum_b': sum_b}
+
+    return d
 
     print(" ")
 

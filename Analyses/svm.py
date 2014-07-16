@@ -13,10 +13,10 @@ def classifier(xTrain, yTrain):
     classifier
     The probability attribute must be et to True to be able to return the probability vector
     """
-    svm = svm.SVC(probability = True)
-    svm.fit(xTrain, yTrain)
+    clf = svm.SVC(probability = True)
+    clf.fit(xTrain, yTrain)
 
-    return svm
+    return clf
 
 
 def prediction(predictor, testset):

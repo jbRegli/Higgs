@@ -2,7 +2,7 @@
 
 import numpy as np
 from sklearn.ensemble import AdaBoostClassifier
-
+from sklearn.metrics import accuracy_score
 """
 Ada Boost Classifier
 

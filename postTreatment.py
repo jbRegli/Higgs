@@ -1,3 +1,5 @@
+#-*- coding: utf-8 -*-
+
 """
 Systeme de vote entre classifier
 ...
