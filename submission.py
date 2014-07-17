@@ -63,7 +63,14 @@ def get_s_b(yPredicted, yValidation, weightsValidation):
 
     if yPredicted.shape != yValidation.shape or \
             yValidation.shape != weightsValidation.shape:
+        print "submission.get_s_b: "
         print "Bad inputs shapes. Inputs must be the same size"
+        if yPredicted.shape != yValidation.shape:
+            print "yPredicted.shape= ", yPredicted.shape
+            print "yValidation.shape= ", yValidation.shape
+        else:
+            print "yValidation.shape= ", yValidation.shape
+            print "weightsValidation.shape= ", weightsValidation.shape
         exit()
 
     s = np.dot(yPredicted*yValidation, weightsValidation)
@@ -77,6 +84,7 @@ def get_s_b(yPredicted, yValidation, weightsValidation):
 def get_numerical_score(yPredicted, yValidation):
 
     if yPredicted.shape != yValidation.shape:
+        print "submission.get_numerical_score: "
         print "Bad inputs shapes. Inputs must be the same size"
         exit()
 

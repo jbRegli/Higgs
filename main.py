@@ -14,7 +14,6 @@ import submission
 import HiggsBosonCompetition_AMSMetric_rev1 as ams
 
 
-
 import sys
 sys.path.append('Analyses/')
 import analyse # Function computing an analyse for any method in the good format
@@ -67,14 +66,16 @@ def main():
     # ANALYSES #
     ############
 
-    #dictionnary that will contain all the data for each methods. In the end we'll have a dict of dict
-    # keys of the methods : {naiveBayes, svm, kNeighbors, lda, qda, adaBoost,
+    # Dictionnary that will contain all the data for each methods. In the end
+    # we'll have a dict of dict
+    # Keys of the methods : {naiveBayes, svm, kNeighbors, lda, qda, adaBoost,
     #                       randomForest}
     dMethods ={}
 
     # NAIVE BAYES:
     kwargs_bayes = {}
-    dMethods['naiveBayes'] =  analyse.analyse(train_s, valid_s, 'naiveBayes', kwargs_bayes)
+    dMethods['naiveBayes'] =  analyse.analyse(train_s, valid_s, 'naiveBayes',
+                                              kwargs_bayes)
     # SVM
     """
     kwargs_svm ={}
@@ -82,98 +83,57 @@ def main():
     """
     # K NEIGHBORS
     kwargs_kn = {'n_neighbors':50}
-    dMethods['kNeighbors'] = analyse.analyse(train_s, valid_s, 'kNeighbors', kwargs_kn)
+    dMethods['kNeighbors'] = analyse.analyse(train_s, valid_s, 'kNeighbors',
+                                             kwargs_kn)
+
     # LDA
     kwargs_lda = {}
     dMethods['lda'] = analyse.analyse(train_s, valid_s, 'lda', kwargs_lda)
     # QDA
     kwargs_qda= {}
     dMethods['qda'] = analyse.analyse(train_s, valid_s, 'qda', kwargs_qda)
+
     # ADABOOST
     kwargs_ada= {   'base_estimators': None,
                     'n_estimators': 50,
                     'learning_rate': 1.,
                     'algorithm': 'SAMME.R',
                     'random_state':None}
-    dMethods['adaBoost'] = analyse.analyse(train_s, valid_s, 'adaBoost', kwargs_ada)
-####### RANDOM FOREST:
+    dMethods['adaBoost'] = analyse.analyse(train_s, valid_s, 'adaBoost',
+                                           kwargs_ada)
+
+    # RANDOM FOREST:
+    kwargs_rdf= {'n_trees': 10}
+    dMethods['randomForest'] = analyse.analyse(train_s, valid_s, 'randomForest',
+                                               kwargs_rdf)
+
+    # RANDOM FOREST 2:
     kwargs_rdf= {'n_trees': 100}
-    dMethods['randomForest'] = analyse.analyse(train_s, valid_s, 'randomForest', kwargs_rdf)
+    dMethods['randomForest2'] = analyse.analyse(train_s, valid_s, 'randomForest',
+                                               kwargs_rdf)
+    # ADABOOST2
+    kwargs_ada= {   'base_estimators': None,
+                    'n_estimators': 100,
+                    'learning_rate': .5,
+                    'algorithm': 'SAMME.R',
+                    'random_state':None}
+    dMethods['adaBoost2'] = analyse.analyse(train_s, valid_s, 'adaBoost',
+                                           kwargs_ada)
+
+
+    print(" ")
 
     ##################
     # POST-TREATMENT #
     ##################
     print("------------------------ Merged predictor -----------------------")
 
+    #ignore = ['randomForest2', 'randomForest']
+    ignore = []
 
-    list_pred_s = [dMethods['naiveBayes']['predictor_s'],\
-                   dMethods['kNeighbors']['predictor_s'],\
-                   dMethods['lda']['predictor_s'],\
-                   dMethods['qda']['predictor_s'],\
-                   dMethods['adaBoost']['predictor_s'],\
-                   dMethods['randomForest']['predictor_s']]\
+    final_prediction_s, dSl = postTreatment.SL_classification(dMethods, valid_s,
+                                        train_s, method='svm', ignore = ignore)
 
-
-
-    prediction_list =[(valid_s[0],\
-                            dMethods['naiveBayes']['yProba_s'],\
-                            dMethods['naiveBayes']['yPredicted_s'],\
-                            dMethods['naiveBayes']['classif_succ']),\
-                      (valid_s[0], \
-                            dMethods['kNeighbors']['yProba_s'],\
-                            dMethods['kNeighbors']['yPredicted_s'],\
-                            dMethods['kNeighbors']['classif_succ']),\
-                      (valid_s[0], \
-                            dMethods['lda']['yProba_s'],\
-                            dMethods['lda']['yPredicted_s'],\
-                            dMethods['lda']['classif_succ']),\
-                      (valid_s[0], \
-                            dMethods['qda']['yProba_s'],\
-                            dMethods['qda']['yPredicted_s'],\
-                            dMethods['qda']['classif_succ']),\
-                      (valid_s[0], \
-                            dMethods['adaBoost']['yProba_s'],\
-                            dMethods['adaBoost']['yPredicted_s'],\
-                            dMethods['adaBoost']['classif_succ']),\
-                      (valid_s[0], \
-                            dMethods['randomForest']['yProba_s'],\
-                            dMethods['randomForest']['yPredicted_s'],\
-                            dMethods['randomForest']['classif_succ'])]\
-
-    # Creating the "on-top" classifier list:
-    list_pred_train_s = postTreatment.get_pred_train_s(list_pred_s, train_s[1])
-
-    # Training the "on-top" classifiers:
-    classif_classifiers_s = postTreatment.classif_clasifiers_learn(
-                                                    list_pred_train_s,
-                                                    train_s[2])
-
-    # Prediction on the validation set:
-    final_pred_s = postTreatment.classif_classifiers_predict(
-                                                            classif_classifiers_s,
-                                                            prediction_list)
-
-    # Classification error:
-    for i in range(len(final_pred_s)):
-        ratio = accuracy_score(final_pred_s[i][2],valid_s[2][i], normalize= True)
-        print("On the subset %i - correct prediction = %f") %(i, ratio)
-
-    print (" ")
-
-    # Numerical score:
-    if type(final_pred_s) == list:
-        for i in range(len(final_pred_s)):
-            sum_s, sum_b = submission.get_numerical_score(final_pred_s[i][2],
-                                                          valid_s[2][i])
-            print "Subset %i: %i elements - sum_s[%i] = %i - sum_b[%i] = %i" \
-                    %(i, final_pred_s[i][2].shape[0], i, sum_s, i, sum_b)
-    else:
-             sum_s, sum_b = submission.get_numerical_score(final_pred_s[2],
-                                                            valid_s[2])
-             print "%i elements - sum_s = %i - sum_b = %i" \
-                    %(final_pred_s[2].shape[0], sum_s, sum_b)
-
-    print(" ")
 
     # Transform the probabilities in rank:
     #final_pred = postTreatment.rank_signals(final_pred)
@@ -189,21 +149,27 @@ def main():
     # TODO : Verifier que le nom de la method a bien la bonne forme(
     # creer une liste de noms de methodes)
 
-    method = "randomForest"
+    #method = "randomForest"
 
-    test_prediction_s, test_proba_s = eval(method).get_test_prediction(
-                                                           dMethods[method]['predictor_s'],
-                                                           test_s[1])
+    #test_prediction_s, test_proba_s = eval(method).get_test_prediction(
+    #                                            dMethods[method]['predictor_s'],
+    #                                            test_s[1])
+
+    test_prediction_s, test_proba_s = postTreatment.get_SL_test_prediction(
+                                                dMethods, dSl, test_s[1])
+
 
     print("Test subsets signal average:")
     test_s_average = preTreatment.ratio_sig_per_dataset(test_prediction_s)
     print(" ")
 
-    RankOrder = np.arange(1,550001)
+    #RankOrder = np.arange(1,550001)
 
     if type(test_prediction_s) == list:
         test_prediction_s = np.concatenate(test_prediction_s)
         test_proba_s = np.concatenate(test_proba_s)
+        print test_proba_s.shape
+        RankOrder = postTreatment.rank_signals(test_proba_s)
         ID = np.concatenate(test_s[0])
     else:
         ID = test_s[0]

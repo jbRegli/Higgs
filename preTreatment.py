@@ -253,7 +253,7 @@ def ratio_sig_per_dataset(y_s):
         for i in range(len(y_s)):
             average.append(float(np.sum(y_s[i]))/(y_s[i].shape[0]))
             print ("dataset %i: %i elements - %.2f%% of signal.") \
-                    %(i, y_s[i].shape[0], average[-1])
+                    %(i, y_s[i].shape[0], average[-1]*100)
     else:
         average = float(np.sum(y_s))/(y_s.shape[0])
         print ("dataset: %i elements - %.2f%% of signal.") \

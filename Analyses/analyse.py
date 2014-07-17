@@ -93,3 +93,8 @@ def analyse(train_s, valid_s, method_name, kwargs):
     return d
 
 
+def get_test_prediction(method_name, predictor_s, xsTest_s):
+    return eval(method_name).get_test_prediction(predictor_s, xsTest_s)
+
+
+
