@@ -90,7 +90,7 @@ def main():
     kwargs_qda= {}
     dMethods['qda'] = analyse.analyse(train_s, valid_s, 'qda', kwargs_qda)
     # ADABOOST
-    kwargs_ada= {   'base_estimators': None, 
+    kwargs_ada= {   'base_estimators': None,
                     'n_estimators': 50,
                     'learning_rate': 1.,
                     'algorithm': 'SAMME.R',
@@ -104,15 +104,54 @@ def main():
     # POST-TREATMENT #
     ##################
     print("------------------------ Merged predictor -----------------------")
-    """
-    prediction_list =[(valid_s[0],rdf_yProba_s,rdf_yPredicted_s,\
-                            rdf_classif_succ),\
-                       (valid_s[0],rdf2_yProba_s,rdf2_yPredicted_s,\
-                            rdf2_classif_succ),\
-                       (valid_s[0],rdf3_yProba_s,rdf3_yPredicted_s,\
-                            rdf3_classif_succ)]
 
-    final_pred_s = postTreatment.merge_classifiers(prediction_list)
+
+    list_pred_s = [dMethods['naiveBayes']['predictor_s'],\
+                   dMethods['kNeighbors']['predictor_s'],\
+                   dMethods['lda']['predictor_s'],\
+                   dMethods['qda']['predictor_s'],\
+                   dMethods['adaBoost']['predictor_s'],\
+                   dMethods['randomForest']['predictor_s']]\
+
+
+
+    prediction_list =[(valid_s[0],\
+                            dMethods['naiveBayes']['yProba_s'],\
+                            dMethods['naiveBayes']['yPredicted_s'],\
+                            dMethods['naiveBayes']['classif_succ']),\
+                      (valid_s[0], \
+                            dMethods['kNeighbors']['yProba_s'],\
+                            dMethods['kNeighbors']['yPredicted_s'],\
+                            dMethods['kNeighbors']['classif_succ']),\
+                      (valid_s[0], \
+                            dMethods['lda']['yProba_s'],\
+                            dMethods['lda']['yPredicted_s'],\
+                            dMethods['lda']['classif_succ']),\
+                      (valid_s[0], \
+                            dMethods['qda']['yProba_s'],\
+                            dMethods['qda']['yPredicted_s'],\
+                            dMethods['qda']['classif_succ']),\
+                      (valid_s[0], \
+                            dMethods['adaBoost']['yProba_s'],\
+                            dMethods['adaBoost']['yPredicted_s'],\
+                            dMethods['adaBoost']['classif_succ']),\
+                      (valid_s[0], \
+                            dMethods['randomForest']['yProba_s'],\
+                            dMethods['randomForest']['yPredicted_s'],\
+                            dMethods['randomForest']['classif_succ'])]\
+
+    # Creating the "on-top" classifier list:
+    list_pred_train_s = postTreatment.get_pred_train_s(list_pred_s, train_s[1])
+
+    # Training the "on-top" classifiers:
+    classif_classifiers_s = postTreatment.classif_clasifiers_learn(
+                                                    list_pred_train_s,
+                                                    train_s[2])
+
+    # Prediction on the validation set:
+    final_pred_s = postTreatment.classif_classifiers_predict(
+                                                            classif_classifiers_s,
+                                                            prediction_list)
 
     # Classification error:
     for i in range(len(final_pred_s)):
@@ -138,7 +177,7 @@ def main():
 
     # Transform the probabilities in rank:
     #final_pred = postTreatment.rank_signals(final_pred)
-    """
+
 
     ##############
     # SUBMISSION #
@@ -150,7 +189,7 @@ def main():
     # TODO : Verifier que le nom de la method a bien la bonne forme(
     # creer une liste de noms de methodes)
 
-    method = "randomForest" 
+    method = "randomForest"
 
     test_prediction_s, test_proba_s = eval(method).get_test_prediction(
                                                            dMethods[method]['predictor_s'],

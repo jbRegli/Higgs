@@ -17,7 +17,7 @@ import HiggsBosonCompetition_AMSMetric_rev1 as hbc
 
 def analyse(train_s, valid_s, method_name, kwargs):
     """
-    methode name = string, name of the method (eg :"naiveBayes") 
+    methode name = string, name of the method (eg :"naiveBayes")
     kwargs = dictionnary of the paraters of the method
     """
 
@@ -43,7 +43,7 @@ def analyse(train_s, valid_s, method_name, kwargs):
     final_s, final_b, s_s, b_s = submission.get_s_b_8(yPredicted_s, valid_s[2],
                                                   valid_s[3])
 
-    # Balance the s and b 
+    # Balance the s and b
     final_s *= 250000/25000
     final_b *= 250000/25000
     # AMS final:
@@ -57,7 +57,7 @@ def analyse(train_s, valid_s, method_name, kwargs):
         score = hbc.AMS(s,b)
         AMS_s.append(score)
         print("Expected AMS score for "+method_name+" :  for group %i is : %f" %(i, score))
-
+    print(" ")
 
     # Classification error:
     classif_succ = eval(method_name).get_classification_error(yPredicted_s,
@@ -81,12 +81,15 @@ def analyse(train_s, valid_s, method_name, kwargs):
              print "%i elements - sum_s = %i - sum_b = %i" \
                     %(yPredicted_s.shape[0], sum_s, sum_b)
 
-    d = {'predictor_s':predictor_s, 'yPredicted_s': yPredicted_s, 'yProba_s': yProba_s,
-        'final_s':final_s, 'final_b':final_b,
-        'sum_s':sum_s, 'sum_b': sum_b,
-        'AMS':AMS, 'AMS_s': AMS_s}
+    d = {'predictor_s':predictor_s, 'yPredicted_s': yPredicted_s,
+         'yProba_s': yProba_s,
+         'final_s':final_s, 'final_b':final_b,
+         'sum_s':sum_s, 'sum_b': sum_b,
+         'AMS':AMS, 'AMS_s': AMS_s,
+         'classif_succ': classif_succ}
+
+    print(" ")
 
     return d
 
-    print(" ")
 

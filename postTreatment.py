@@ -139,61 +139,122 @@ def merge_classifiers(prediction_list, method='weighted_avg'):
     return final_prediction_s
 
 
+
+#####################
+### LEARNING FROM ###
+#####################
+
+
+def get_pred_train_s(list_classifier_s, xTrain_s):
+    """
+    Given a list of trained classifier and data, realize the prediction for each
+    classifier
+    Return: List of lenght 'n_subset'
+            Each element of this list is a list of lenght 'n_classifiers'
+    """
+    print("Prediction the train set...")
+    if type(xTrain_s) == list:
+
+        list_pred_train_s = []
+
+        # Prediction for each subset:
+        for i in range(len(xTrain_s)):
+            print("    subset %i") %i
+            pred_s = []
+
+            # Prediction for each classifier on the subset:
+            for j in range(len(list_classifier_s)):
+                pred_s.append(list_classifier_s[j][i].predict(xTrain_s[i]))
+
+            list_pred_train_s.append(pred_s)
+
+        print list_pred_train_s[0][0].shape
+
+    else:
+        pred_train_s = []
+        for elmt in list_classifier_s:
+            pred_s = elmt.predict(xTrain_s)
+            list_pred_train_s.append(pred_s)
+
+    return list_pred_train_s
+
+
 def classif_clasifiers_learn(list_pred_train_s, yTrain_s):
-
+    """
+    Given a list of prediction and a list of label, train a classifier to learn
+    the correct label from the prediction
+    """
     # If we work with the splitted dataset:
-    if type(ylabel_s) == list:
-
+    if type(yTrain_s) == list:
         classif_classifiers_s = []
-
-        for i in range(ylabel_s):
+        print ("Training an 'on-top' classifier...")
+        for i in range(len(yTrain_s)):
             clf = LogisticRegression(C=1e5)
 
-            clf.fit(zip(*list_pred_train_s)[i], yTrain_s[i])
+            # Training the "on-top" classifier for the subset i:
+            print ("    subset %i") %i
+
+            clf.fit(zip(*list_pred_train_s[i]), yTrain_s[i])
 
             classif_classifiers_s.append(clf)
 
     else:
         classif_classifiers_s = LogisticRegression(C=1e5)
+
+        print ("Training an 'on-top' classifier for the dataset...")
+        print type(list_pred_train_s)
+        print type(yTrain_s)
         classif_classifiers_s.fit(list_pred_train_s, yTrain_s)
 
     return classif_classifiers_s
 
 
 def classif_classifiers_predict(classif_classifiers_s, prediction_list):
-
+    """
+    Given a list of trained "on-top" classifiers and a list of prediction, predict
+    the labels and the probabilities
+    """
 
     # If we work with the splitted dataset:
     if type(classif_classifiers_s) == list:
 
-        ID_s = zip(*prediction_list)[0]
-        pred_proba_s = zip(*prediction_list)[1]
+        ID_s = prediction_list[0][0]
+
         pred_label_s = zip(*prediction_list)[2]
 
-        for i in range(len(classif_classifiers_s)):
-            # Predict the label of a subset:
-            final_label_s = classif_classifiers_s[i].predict(pred_label_s[i])
-            # Predict the proba of being a signal of a subset:
-            final_proba_s = classif_classifiers_s[i].predict_proba(
-                                                            pred_lable_s[i])[1]
+        final_prediction_s= []
 
-            final_prediction_s.append(ID[i], final_proba_s, final_label_s)
+        for i in range(len(classif_classifiers_s)):
+
+            feature = []
+            for j in range(len(pred_label_s)):
+                feature.append(pred_label_s[j][i])
+
+            feature = zip(*feature)
+            # Predict the label of a subset:
+            final_label_s = classif_classifiers_s[i].predict(feature)
+            # Predict the proba of being a signal of a subset:
+            final_proba_s = classif_classifiers_s[i].predict_proba(feature)[1]
+
+            final_prediction_s.append([ID_s[i], final_proba_s, final_label_s])
 
     else:
         ID_s = prediction_list[0]
         pred_proba_s = prediction_list[1]
         pred_label_s = prediction_list[2]
 
-
         final_label_s = classif_classifiers_s.predict(pred_label_s)
         final_proba_s = classif_classifiers_s[i].predict_proba(pred_lable_s)[1]
 
-        final_prediction_s = [ID, final_proba_s, final_label_s]
+        final_prediction_s = [ID_s, final_proba_s, final_label_s]
 
     return final_prediction_s
 
-def classif_classifiers_error(final_prediction, y_true_s):
 
+def classif_classifiers_error(final_prediction, y_true_s):
+    """
+    Compute the error made by the "on-top" classifier
+    """
     y_predicted_s = final_prediction[2]
 
     if type(y_predicted_s) == list:
@@ -211,11 +272,9 @@ def classif_classifiers_error(final_prediction, y_true_s):
 
 
 
-
-
-
-
 def rank_signals(prediction):
     prediction[1] = ss.rankdata(prediction[1],method = 'ordinal')
 
     return prediction
+
+
