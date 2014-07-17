@@ -86,7 +86,8 @@ def analyse(train_s, valid_s, method_name, kwargs):
          'final_s':final_s, 'final_b':final_b,
          'sum_s':sum_s, 'sum_b': sum_b,
          'AMS':AMS, 'AMS_s': AMS_s,
-         'classif_succ': classif_succ}
+         'classif_succ': classif_succ,
+         'method': method_name}
 
     print(" ")
 

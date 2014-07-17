@@ -432,7 +432,8 @@ def get_SL_test_prediction(dMethods, dSl, xsTest_s):
     # Compute the output of the various first layer classifier on the testset:
     first_layer_test_predictions = []
     for key in dMethods:
-        test_prediction_s = analyse.get_test_prediction(key,
+        test_prediction_s = analyse.get_test_prediction(
+                                                dMethods[key]['method'],
                                                 dMethods[key]['predictor_s'],
                                                 xsTest_s)[0]
         first_layer_test_predictions.append(test_prediction_s)
@@ -445,9 +446,9 @@ def get_SL_test_prediction(dMethods, dSl, xsTest_s):
         test_proba_s = []
 
         for n in range(len(first_layer_test_predictions)):
-            label_predicted = dSl['predictor_s'][n].predict(
+            label_predicted = dSl['method'][n].predict(
                                     np.asarray(first_layer_test_predictions[n]).T)
-            proba_predicted = dSl['predictor_s'][n].predict_proba(
+            proba_predicted = dSl['method'][n].predict_proba(
                                     np.asarray(first_layer_test_predictions[n]).T)
 
             test_prediction_s.append(label_predicted)

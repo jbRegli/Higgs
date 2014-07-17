@@ -168,7 +168,6 @@ def main():
     if type(test_prediction_s) == list:
         test_prediction_s = np.concatenate(test_prediction_s)
         test_proba_s = np.concatenate(test_proba_s)
-        print test_proba_s.shape
         RankOrder = postTreatment.rank_signals(test_proba_s)
         ID = np.concatenate(test_s[0])
     else:

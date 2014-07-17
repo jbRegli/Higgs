@@ -81,12 +81,12 @@ def get_test_prediction(predictor_s, xsTest_s):
                                                             xsTest_s[n])
 
             test_prediction_s.append(label_predicted)
-            test_proba_s.append(np.max(proba_predicted,axis=1))
+            test_proba_s.append(proba_predicted[:,1])
 
     else:
         test_prediction_s , proba_predicted = prediction(predictor_s, xsTest_s)
 
-        test_proba_s = np.max(proba_predicted,axis=1)
+        test_proba_s = proba_predicted[:,1]
 
     return test_prediction_s, test_proba_s
 

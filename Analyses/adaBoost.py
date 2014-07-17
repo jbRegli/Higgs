@@ -8,7 +8,7 @@ Ada Boost Classifier
 
 Meta-parameters:
     base_estimator : object, optional (default=DecisionTreeClassifier)
-    The base estimator from which the boosted ensemble is built. 
+    The base estimator from which the boosted ensemble is built.
     Support for sample weighting is required, as well as proper classes_ and n_classes_ attributes.
 
     n_estimators : integer, optional (default=50)
@@ -25,11 +25,11 @@ Meta-parameters:
     achieving a lower test error with fewer boosting iterations.
 
     random_state : int, RandomState instance or None, optional (default=None)
-    If int, random_state is the seed used by the random number generator; 
-    If RandomState instance, random_state is the random number generator; 
+    If int, random_state is the seed used by the random number generator;
+    If RandomState instance, random_state is the random number generator;
     If None, the random number generator is the RandomState instance used by np.random.
 
-    
+
 """
 
 def classifier(xTrain, yTrain, base_estimators, n_estimators, learning_rate, algorithm, random_state):
@@ -37,7 +37,7 @@ def classifier(xTrain, yTrain, base_estimators, n_estimators, learning_rate, alg
     Train a ada classifier on xTrain and yTrain and return the trained
     classifier
     """
-    ada = AdaBoostClassifier() 
+    ada = AdaBoostClassifier()
     ada.fit(xTrain, yTrain)
 
     return ada
@@ -105,12 +105,12 @@ def get_test_prediction(predictor_s, xsTest_s):
                                                             xsTest_s[n])
 
             test_prediction_s.append(label_predicted)
-            test_proba_s.append(np.max(proba_predicted,axis=1))
+            test_proba_s.append(proba_predicted[:,1])
 
     else:
         test_prediction_s , proba_predicted = prediction(predictor_s, xsTest_s)
 
-        test_proba_s = proba_predicted[1]
+        test_proba_s = proba_predicted[:,1]
 
     return test_prediction_s, test_proba_s
 
