@@ -9,7 +9,6 @@ from sklearn.metrics import accuracy_score
 
 import tokenizer
 import preTreatment
-import postTreatment
 import submission
 import HiggsBosonCompetition_AMSMetric_rev1 as ams
 
