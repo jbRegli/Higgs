@@ -25,6 +25,11 @@ import adaBoost
 import lda
 import qda
 
+sys.path.append('PostTreatment')
+import onTopClassifier
+import mergeClassifiers
+
+
 def main():
     ###############
     ### IMPORT ####
@@ -131,7 +136,7 @@ def main():
     #ignore = ['randomForest2', 'randomForest']
     ignore = []
 
-    final_prediction_s, dSl = postTreatment.SL_classification(dMethods, valid_s,
+    final_prediction_s, dSl = onTopClassifier.SL_classification(dMethods, valid_s,
                                         train_s, method='svm', ignore = ignore)
 
 
@@ -155,7 +160,7 @@ def main():
     #                                            dMethods[method]['predictor_s'],
     #                                            test_s[1])
 
-    test_prediction_s, test_proba_s = postTreatment.get_SL_test_prediction(
+    test_prediction_s, test_proba_s = onTopClassifier.get_SL_test_prediction(
                                                 dMethods, dSl, test_s[1])
 
 
