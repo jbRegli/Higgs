@@ -2,8 +2,8 @@ import numpy as np
 import submission
 import imp
 import sys
+
 sys.path.append('Analyses/')
-import analyse # Function computing an analyse for any method in the good format
 import naiveBayes
 import randomForest
 import svm
@@ -12,6 +12,7 @@ import adaBoost
 import lda
 import qda
 
+sys.path.append('../')
 import HiggsBosonCompetition_AMSMetric_rev1 as hbc
 
 
@@ -70,24 +71,34 @@ def analyse(train_s, valid_s, method_name, kwargs):
     print (" ")
     # Numerical score:
     if type(yPredicted_s) == list:
+        sum_s_s = []
+        sum_b_s = []
         for i in range(len(yPredicted_s)):
             sum_s, sum_b = submission.get_numerical_score(yPredicted_s[i],
                                                           valid_s[2][i])
+            sum_s_s.append(sum_s)
+            sum_b_s.append(sum_b)
+
             print "Subset %i: %i elements - sum_s[%i] = %i - sum_b[%i] = %i" \
                     %(i, yPredicted_s[i].shape[0], i, sum_s, i, sum_b)
+
     else:
-             sum_s, sum_b = submission.get_numerical_score(yPredicted_s,
+             sum_s_s, sum_b_s = submission.get_numerical_score(yPredicted_s,
                                                            valid_s[2])
+
              print "%i elements - sum_s = %i - sum_b = %i" \
-                    %(yPredicted_s.shape[0], sum_s, sum_b)
+                    %(yPredicted_s.shape[0], sum_s_s, sum_b_s)
+
+
 
     d = {'predictor_s':predictor_s, 'yPredicted_s': yPredicted_s,
          'yProba_s': yProba_s,
          'final_s':final_s, 'final_b':final_b,
-         'sum_s':sum_s, 'sum_b': sum_b,
+         'sum_s':sum_s_s, 'sum_b': sum_b_s,
          'AMS':AMS, 'AMS_s': AMS_s,
          'classif_succ': classif_succ,
-         'method': method_name}
+         'method': method_name,
+         'parameters': kwargs}
 
     print(" ")
 

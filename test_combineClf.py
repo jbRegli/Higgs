@@ -10,8 +10,7 @@ from sklearn.metrics import accuracy_score
 import tokenizer
 import preTreatment
 import submission
-import HiggsBosonCompetition_AMSMetric_rev1 as ams
-
+import HiggsBosonCompetition_AMSMetric_rev1 as hbc
 
 import sys
 sys.path.append('Analyses/')
@@ -28,6 +27,7 @@ import qda
 sys.path.append('PostTreatment')
 import onTopClassifier
 import mergeClassifiers
+import combineClassifiers
 
 
 def main():
@@ -78,18 +78,23 @@ def main():
     dMethods ={}
 
     # NAIVE BAYES:
+
     kwargs_bayes = {}
     dMethods['naiveBayes'] =  analyse.analyse(train_s, valid_s, 'naiveBayes',
                                               kwargs_bayes)
+
     # SVM
     """
     kwargs_svm ={}
     dMethods['svm'] = analyse.analyse(train_s, valid_s,'svm', kwargs_svm)
     """
+
     # K NEIGHBORS
-    kwargs_kn = {'n_neighbors':50}
-    dMethods['kNeighbors'] = analyse.analyse(train_s, valid_s, 'kNeighbors',
-                                             kwargs_kn)
+    kwargs_tuning_kn = {'n_neighbors': [10,20]}
+    dTuning = tuningModel.parameters_grid_search(train_s, valid_s, 'kNeighbors',
+                                             kwargs_tuning_kn)
+
+    dMethods['kNeighbors'] = combineClassifiers.select_best_classifiers(dTuning, valid_s)
 
     # LDA
     kwargs_lda = {}
@@ -97,6 +102,7 @@ def main():
     # QDA
     kwargs_qda= {}
     dMethods['qda'] = analyse.analyse(train_s, valid_s, 'qda', kwargs_qda)
+
 
     # ADABOOST
     kwargs_ada= {   'base_estimators': None,
@@ -106,24 +112,17 @@ def main():
                     'random_state':None}
     dMethods['adaBoost'] = analyse.analyse(train_s, valid_s, 'adaBoost',
                                            kwargs_ada)
+    print dMethods['adaBoost']['parameters']
+
 
     # RANDOM FOREST:
-    kwargs_rdf= {'n_trees': 10}
-    dMethods['randomForest'] = analyse.analyse(train_s, valid_s, 'randomForest',
-                                               kwargs_rdf)
+    kwargs_tuning_rdf = {'n_trees': [10,20,50,100]}
 
-    # RANDOM FOREST 2:
-    kwargs_rdf= {'n_trees': 100}
-    dMethods['randomForest2'] = analyse.analyse(train_s, valid_s, 'randomForest',
-                                               kwargs_rdf)
-    # ADABOOST2
-    kwargs_ada= {   'base_estimators': None,
-                    'n_estimators': 100,
-                    'learning_rate': .5,
-                    'algorithm': 'SAMME.R',
-                    'random_state':None}
-    dMethods['adaBoost2'] = analyse.analyse(train_s, valid_s, 'adaBoost',
-                                           kwargs_ada)
+    dTuning = tuningModel.parameters_grid_search(train_s, valid_s, 'randomForest',
+                                             kwargs_tuning_rdf)
+
+    dMethods['randomForest'] = combineClassifiers.select_best_classifiers(dTuning,
+                                                                valid_s)
 
 
     print(" ")
@@ -131,19 +130,13 @@ def main():
     ##################
     # POST-TREATMENT #
     ##################
-    print("------------------------ Merged predictor -----------------------")
+    print("------------------------ Post Treatment -----------------------")
 
-    #ignore = ['randomForest2', 'randomForest']
-    ignore = []
+    d = combineClassifiers.select_best_classifiers(dMethods, valid_s)
 
-    final_prediction_s, dSl = onTopClassifier.SL_classification(dMethods, valid_s,
-                                        train_s, method='svm', ignore = ignore)
+    print "d['parameters']= ", d['parameters']
 
-
-    # Transform the probabilities in rank:
-    #final_pred = postTreatment.rank_signals(final_pred)
-
-
+    """
     ##############
     # SUBMISSION #
     ##############
@@ -180,11 +173,9 @@ def main():
 
     # Create a submission file:
     sub = submission.print_submission(ID, RankOrder , test_prediction_s)
-
-    return sub
+    """
+    return 0
 
 if __name__ == '__main__':
     main()
-
-
 
