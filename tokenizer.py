@@ -71,7 +71,7 @@ def get_all_data(normalize = True, noise_variance = 0., ratio_train = 0.9):
     sumBWeights = np.sum(weights[bSelector])
 
     randomPermutation = random.sample(range(len(xs)), len(xs))
-    numPointsTrain = int(numPoints*0.9)
+    numPointsTrain = int(numPoints*ratio_train)
     numPointsValidation = numPoints - numPointsTrain
 
     # Spliting trainset and validation set:
