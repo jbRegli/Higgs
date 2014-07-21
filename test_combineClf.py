@@ -174,7 +174,7 @@ def main():
     # Create a submission file:
     sub = submission.print_submission(ID, RankOrder , test_prediction_s)
     """
-    return 0
+    return d
 
 if __name__ == '__main__':
     main()
