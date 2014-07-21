@@ -84,11 +84,11 @@ def main():
                                               kwargs_bayes)
 
     # SVM
-    #kwargs_tuning_svm ={'kernel': ["rbf", "poly"], 'C' : [0.025],
-    #                    'probability': [True]}
+    kwargs_tuning_svm ={'kernel': ["rbf", "poly"], 'C' : [0.025],
+                        'probability': [True]}
 
-    #dTuning = tuningModel.parameters_grid_search(train_s, valid_s, 'svm',
-    #                                         kwargs_tuning_svm)
+    dTuning = tuningModel.parameters_grid_search(train_s, valid_s, 'svm',
+                                             kwargs_tuning_svm)
 
     #dMethods['svm'] = combineClassifiers.select_best_classifiers(dTuning,
     #                                                                valid_s)
@@ -117,7 +117,23 @@ def main():
     #kwargs_ada = {}
 
     dMethods['adaBoost'] = analyse.analyse(train_s, valid_s, 'adaBoost',
-                                           kwargs_ada)
+                                            kwargs_ada)
+
+    # GRADIENT BOOSTING:
+    kwargs_tuning_gradB = {'loss': 'deviance', 'learning_rate': 0.1,
+                    'n_estimators': [100,200], 'subsample': 1.0,
+                    'min_samples_split': 2, 'min_samples_leaf': 1,
+                    'max_depth': [3,5,7], 'init': None, 'random_state': None,
+                    'max_features': None, 'verbose': 0}
+
+    dTuning = tuningModel.parameters_grid_search(train_s, valid_s,
+                                                'gradientBoosting',
+                                                kwargs_tuning_gradB)
+
+
+    dMethods['gradientBoosting'] = analyse.analyse(train_s, valid_s,
+                                                   'gradientBoosting',
+                                                    kwargs_gradB)
 
     # RANDOM FOREST:
     kwargs_tuning_rdf = {'n_estimators': [10,20,50,100]}
@@ -141,7 +157,10 @@ def main():
     print (" ")
     for i in range(len(d['parameters'])):
         print "Best classifier for subset %i : " %i
-        print d['method'][i], ": ", d['parameters'][i]
+        if type(d['method'][i]) == list:
+            print d['method'][i][i], ": ", d['parameters'][i]
+        else:
+            print d['method'][i], ": ", d['parameters'][i]
 
     """
     ##############
