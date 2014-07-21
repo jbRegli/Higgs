@@ -54,6 +54,8 @@ def select_best_classifiers(dTuning, valid_s, criteria= 'ams'):
             # Best experience for this subset:
             exp = best_parameters[i]['experience']
 
+            print type(dTuning[exp]['predictor_s'])
+
             # Fill the parameters:
             predictor_s[i] = dTuning[exp]['predictor_s'][i]
             yPredicted_s[i] = dTuning[exp]['yPredicted_s'][i]
