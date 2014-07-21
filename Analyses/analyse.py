@@ -11,6 +11,7 @@ import kNeighbors
 import adaBoost
 import lda
 import qda
+import gradientBoosting
 
 sys.path.append('../')
 import HiggsBosonCompetition_AMSMetric_rev1 as hbc
