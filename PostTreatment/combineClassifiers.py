@@ -38,6 +38,18 @@ def select_best_classifiers(dTuning, valid_s, criteria= 'ams'):
                     if dTuning[exp]['AMS_s'][i] > best_parameters[i]['score']:
                         best_parameters[i]['experience'] = exp
                         best_parameters[i]['score'] = dTuning[exp]['AMS_s'][i]
+                elif criteria == 'sum_s':
+                    if dTuning[exp]['sum_s'][i] > best_parameters[i]['score']:
+                        best_parameters[i]['experience'] = exp
+                        best_parameters[i]['score'] = dTuning[exp]['sum_s'][i]
+                elif criteria == 'sum_b':
+                    if dTuning[exp]['sum_b'][i] > best_parameters[i]['score']:
+                        best_parameters[i]['experience'] = exp
+                        best_parameters[i]['score'] = dTuning[exp]['sum_b'][i]
+                else:
+                    print "tuningModel.select_best_parameters: not implemented criteria"
+                exit()
+
 
         # Build the new dictionnary of methods:
         predictor_s = [None] * len(best_parameters)

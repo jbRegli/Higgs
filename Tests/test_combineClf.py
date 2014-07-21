@@ -10,8 +10,7 @@ from sklearn.metrics import accuracy_score
 import tokenizer
 import preTreatment
 import submission
-import HiggsBosonCompetition_AMSMetric_rev1 as ams
-
+import HiggsBosonCompetition_AMSMetric_rev1 as hbc
 
 import sys
 sys.path.append('Analyses/')
@@ -28,6 +27,7 @@ import qda
 sys.path.append('PostTreatment')
 import onTopClassifier
 import mergeClassifiers
+import combineClassifiers
 
 
 def main():
@@ -49,8 +49,6 @@ def main():
                                                       ratio_train= ratio_train)
     stop = time.clock()
     print ("Extraction time: %i s") %(stop-start)
-
-    print train_s[4]
 
     print(" ")
     print(" ")
@@ -80,18 +78,29 @@ def main():
     dMethods ={}
 
     # NAIVE BAYES:
+
     kwargs_bayes = {}
     dMethods['naiveBayes'] =  analyse.analyse(train_s, valid_s, 'naiveBayes',
                                               kwargs_bayes)
+
     # SVM
-    """
-    kwargs_svm ={}
-    dMethods['svm'] = analyse.analyse(train_s, valid_s,'svm', kwargs_svm)
-    """
+    kwargs_tuning_svm ={'kernel': ["rbf", "poly"], 'C' : [0.025],
+                        'probability': [True]}
+
+    dTuning = tuningModel.parameters_grid_search(train_s, valid_s, 'svm',
+                                             kwargs_tuning_svm)
+
+    #dMethods['svm'] = combineClassifiers.select_best_classifiers(dTuning,
+    #                                                                valid_s)
+
+
     # K NEIGHBORS
-    kwargs_kn = {'n_neighbors':50}
-    dMethods['kNeighbors'] = analyse.analyse(train_s, valid_s, 'kNeighbors',
-                                             kwargs_kn)
+    kwargs_tuning_kn = {'n_neighbors': [10,20]}
+    dTuning = tuningModel.parameters_grid_search(train_s, valid_s, 'kNeighbors',
+                                             kwargs_tuning_kn)
+
+    dMethods['kNeighbors'] = combineClassifiers.select_best_classifiers(dTuning,
+                                                                        valid_s)
 
     # LDA
     kwargs_lda = {}
@@ -100,32 +109,40 @@ def main():
     kwargs_qda= {}
     dMethods['qda'] = analyse.analyse(train_s, valid_s, 'qda', kwargs_qda)
 
+
     # ADABOOST
-    kwargs_ada= {   'base_estimators': None,
-                    'n_estimators': 50,
-                    'learning_rate': 1.,
-                    'algorithm': 'SAMME.R',
-                    'random_state':None}
+    kwargs_ada= {'n_estimators': 50,
+                 'learning_rate': 1.0, 'algorithm': 'SAMME.R',
+                 'random_state': None}
+    #kwargs_ada = {}
+
     dMethods['adaBoost'] = analyse.analyse(train_s, valid_s, 'adaBoost',
-                                           kwargs_ada)
+                                            kwargs_ada)
+
+    # GRADIENT BOOSTING:
+    kwargs_tuning_gradB = {'loss': 'deviance', 'learning_rate': 0.1,
+                    'n_estimators': [100,200], 'subsample': 1.0,
+                    'min_samples_split': 2, 'min_samples_leaf': 1,
+                    'max_depth': [3,5,7], 'init': None, 'random_state': None,
+                    'max_features': None, 'verbose': 0}
+
+    dTuning = tuningModel.parameters_grid_search(train_s, valid_s,
+                                                'gradientBoosting',
+                                                kwargs_tuning_gradB)
+
+
+    dMethods['gradientBoosting'] = analyse.analyse(train_s, valid_s,
+                                                   'gradientBoosting',
+                                                    kwargs_gradB)
 
     # RANDOM FOREST:
-    kwargs_rdf= {'n_trees': 10}
-    dMethods['randomForest'] = analyse.analyse(train_s, valid_s, 'randomForest',
-                                               kwargs_rdf)
+    kwargs_tuning_rdf = {'n_estimators': [10,20,50,100]}
 
-    # RANDOM FOREST 2:
-    kwargs_rdf= {'n_trees': 100}
-    dMethods['randomForest2'] = analyse.analyse(train_s, valid_s, 'randomForest',
-                                               kwargs_rdf)
-    # ADABOOST2
-    kwargs_ada= {   'base_estimators': None,
-                    'n_estimators': 100,
-                    'learning_rate': .5,
-                    'algorithm': 'SAMME.R',
-                    'random_state':None}
-    dMethods['adaBoost2'] = analyse.analyse(train_s, valid_s, 'adaBoost',
-                                           kwargs_ada)
+    dTuning = tuningModel.parameters_grid_search(train_s, valid_s, 'randomForest',
+                                             kwargs_tuning_rdf)
+
+    dMethods['randomForest'] = combineClassifiers.select_best_classifiers(dTuning,
+                                                                          valid_s)
 
 
     print(" ")
@@ -133,56 +150,19 @@ def main():
     ##################
     # POST-TREATMENT #
     ##################
-    print("------------------------ Merged predictor -----------------------")
+    print("------------------------ Post Treatment -----------------------")
 
-    #ignore = ['randomForest2', 'randomForest']
-    ignore = []
+    d = combineClassifiers.select_best_classifiers(dMethods, valid_s)
 
-    final_prediction_s, dSl = onTopClassifier.SL_classification(dMethods, valid_s,
-                                        train_s, method='svm', ignore = ignore)
+    print (" ")
+    for i in range(len(d['parameters'])):
+        print "Best classifier for subset %i : " %i
+        if type(d['method'][i]) == list:
+            print d['method'][i][i], ": ", d['parameters'][i]
+        else:
+            print d['method'][i], ": ", d['parameters'][i]
 
-
-    # Transform the probabilities in rank:
-    #final_pred = postTreatment.rank_signals(final_pred)
-
-    # Trunk the vectors
-
-    for method in dMethods:
-        yProba_s = dMethods[str(method)]['yProba_s']
-        yPredicted_s = dMethods[str(method)]['yPredicted_s']
-
-        yPredicted_treshold_s = postTreatment.proba_treshold(yPredicted_s, yProba_s, 0.5)
-
-            # Numerical score:
-        if type(yPredicted_s) == list:
-            for i in range(len(yPredicted_s)):
-                sum_s, sum_b = submission.get_numerical_score(yPredicted_s[i],
-                                                          valid_s[2][i])
-                print "Subset %i: %i elements - sum_s[%i] = %i - sum_b[%i] = %i" \
-                        %(i, yPredicted_s[i].shape[0], i, sum_s, i, sum_b)
-
-        # Get s and b for each group (s_s, b_s) and the final final_s and
-        # final_b:
-        final_s, final_b, s_s, b_s = submission.get_s_b_8(yPredicted_s, valid_s[2],
-                                                  valid_s[3])
-
-        # Balance the s and b
-        final_s *= 250000/25000
-        final_b *= 250000/25000
-        # AMS final:
-        AMS = hbc.AMS(final_s , final_b)
-        print ("Expected AMS score for randomforest : %f") %AMS
-        #AMS by group
-        AMS_s = []
-        for i, (s,b) in enumerate(zip(s_s, b_s)):
-            s *= 250000/yPredicted_s[i].shape[0]
-            b *= 250000/yPredicted_s[i].shape[0]
-            score = hbc.AMS(s,b)
-            AMS_s.append(score)
-            print("Expected AMS score for randomforest :  for group %i is : %f" %(i, score))
-        print(" ")
-
-
+    """
     ##############
     # SUBMISSION #
     ##############
@@ -219,11 +199,9 @@ def main():
 
     # Create a submission file:
     sub = submission.print_submission(ID, RankOrder , test_prediction_s)
-
-    return sub
+    """
+    return 0
 
 if __name__ == '__main__':
     main()
-
-
 
