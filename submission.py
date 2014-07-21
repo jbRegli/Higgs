@@ -109,3 +109,8 @@ def get_s_b_8(yPredicted_s, yValidation_s, weightsValidation_s):
         final_b +=b
 
     return final_s, final_b, s_s, b_s
+
+def rank_signals(proba_prediction):
+    rank_prediction = ss.rankdata(proba_prediction,method = 'ordinal')
+
+    return rank_prediction

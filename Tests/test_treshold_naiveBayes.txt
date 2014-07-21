@@ -1,248 +1,248 @@
 -----naiveBayes-----
 -----ratio = 0.05-----
 
-AMS total = 0.559472391741
-AMS for group 0 is 0.834800
-AMS for group 1 is 0.524867
-AMS for group 2 is 3.504108
-AMS for group 3 is 0.438562
-AMS for group 4 is 0.078559
-AMS for group 5 is 0.051319
-AMS for group 6 is 0.204450
-AMS for group 7 is 0.686926
+AMS total = 0.564267527961
+AMS for group 0 is 0.952243
+AMS for group 1 is 0.551578
+AMS for group 2 is 1.200839
+AMS for group 3 is 1.156640
+AMS for group 4 is 0.072536
+AMS for group 5 is 0.046668
+AMS for group 6 is 0.245733
+AMS for group 7 is 0.000000
 
 
 -----ratio = 0.1-----
 
-AMS total = 0.826843859584
-AMS for group 0 is 1.421568
-AMS for group 1 is 0.641586
-AMS for group 2 is 3.053530
-AMS for group 3 is 0.546282
-AMS for group 4 is 0.073843
-AMS for group 5 is 0.046373
-AMS for group 6 is 0.426100
-AMS for group 7 is 0.812555
+AMS total = 0.954476874465
+AMS for group 0 is 1.785118
+AMS for group 1 is 0.775139
+AMS for group 2 is 1.570727
+AMS for group 3 is 1.338545
+AMS for group 4 is 0.099918
+AMS for group 5 is 0.078726
+AMS for group 6 is 0.294833
+AMS for group 7 is 0.000000
 
 
 -----ratio = 0.15-----
 
-AMS total = 1.11177947231
-AMS for group 0 is 2.230482
-AMS for group 1 is 0.653521
-AMS for group 2 is 2.737875
-AMS for group 3 is 0.545891
-AMS for group 4 is 0.074836
-AMS for group 5 is 0.062224
-AMS for group 6 is 0.409783
-AMS for group 7 is 0.168589
+AMS total = 1.18993783077
+AMS for group 0 is 2.299147
+AMS for group 1 is 0.867262
+AMS for group 2 is 1.926767
+AMS for group 3 is 1.856733
+AMS for group 4 is 0.084779
+AMS for group 5 is 0.089411
+AMS for group 6 is 0.343903
+AMS for group 7 is 0.000000
 
 
 -----ratio = 0.2-----
 
-AMS total = 1.30124669004
-AMS for group 0 is 2.659048
-AMS for group 1 is 0.675978
-AMS for group 2 is 2.770615
-AMS for group 3 is 0.817331
-AMS for group 4 is 0.071573
-AMS for group 5 is 0.058513
-AMS for group 6 is 0.446207
-AMS for group 7 is 0.141722
+AMS total = 1.3659372612
+AMS for group 0 is 2.700333
+AMS for group 1 is 0.886011
+AMS for group 2 is 2.114577
+AMS for group 3 is 1.486818
+AMS for group 4 is 0.077897
+AMS for group 5 is 0.076130
+AMS for group 6 is 0.280963
+AMS for group 7 is 0.085050
 
 
 -----ratio = 0.25-----
 
-AMS total = 1.48298052223
-AMS for group 0 is 3.035579
-AMS for group 1 is 0.733106
-AMS for group 2 is 2.758026
-AMS for group 3 is 0.896339
-AMS for group 4 is 0.074854
-AMS for group 5 is 0.066668
-AMS for group 6 is 0.446207
-AMS for group 7 is 0.108210
+AMS total = 1.54278571246
+AMS for group 0 is 3.151036
+AMS for group 1 is 0.895240
+AMS for group 2 is 2.160937
+AMS for group 3 is 1.661060
+AMS for group 4 is 0.074493
+AMS for group 5 is 0.078360
+AMS for group 6 is 0.285902
+AMS for group 7 is 0.085050
 
 
 -----ratio = 0.3-----
 
-AMS total = 1.64190312402
-AMS for group 0 is 3.405600
-AMS for group 1 is 0.761815
-AMS for group 2 is 2.643297
-AMS for group 3 is 0.961570
-AMS for group 4 is 0.076581
-AMS for group 5 is 0.065427
-AMS for group 6 is 0.446207
-AMS for group 7 is 0.102548
+AMS total = 1.68961492208
+AMS for group 0 is 3.405501
+AMS for group 1 is 0.920912
+AMS for group 2 is 2.284071
+AMS for group 3 is 1.625531
+AMS for group 4 is 0.073349
+AMS for group 5 is 0.077355
+AMS for group 6 is 0.644254
+AMS for group 7 is 0.085050
 
 
 -----ratio = 0.35-----
 
-AMS total = 1.77704497473
-AMS for group 0 is 3.634049
-AMS for group 1 is 0.820553
-AMS for group 2 is 2.635091
-AMS for group 3 is 0.985719
-AMS for group 4 is 0.075712
-AMS for group 5 is 0.064832
-AMS for group 6 is 0.588345
-AMS for group 7 is 0.102548
+AMS total = 1.7989385741
+AMS for group 0 is 3.487092
+AMS for group 1 is 0.986456
+AMS for group 2 is 2.388120
+AMS for group 3 is 1.574535
+AMS for group 4 is 0.075045
+AMS for group 5 is 0.077355
+AMS for group 6 is 0.644254
+AMS for group 7 is 0.085050
 
 
 -----ratio = 0.4-----
 
-AMS total = 1.89227027128
-AMS for group 0 is 3.737612
-AMS for group 1 is 0.909343
-AMS for group 2 is 2.600395
-AMS for group 3 is 1.271557
-AMS for group 4 is 0.076819
-AMS for group 5 is 0.073307
-AMS for group 6 is 0.600967
-AMS for group 7 is 0.097690
+AMS total = 1.93227146135
+AMS for group 0 is 3.720064
+AMS for group 1 is 1.095641
+AMS for group 2 is 2.413484
+AMS for group 3 is 1.494288
+AMS for group 4 is 0.074382
+AMS for group 5 is 0.073793
+AMS for group 6 is 0.658692
+AMS for group 7 is 0.085050
 
 
 -----ratio = 0.45-----
 
-AMS total = 2.00678770803
-AMS for group 0 is 3.822875
-AMS for group 1 is 1.064043
-AMS for group 2 is 2.653644
-AMS for group 3 is 1.360669
-AMS for group 4 is 0.078276
-AMS for group 5 is 0.071393
-AMS for group 6 is 0.549630
-AMS for group 7 is 0.097690
+AMS total = 1.99695648216
+AMS for group 0 is 3.714154
+AMS for group 1 is 1.213444
+AMS for group 2 is 2.406327
+AMS for group 3 is 1.290662
+AMS for group 4 is 0.072957
+AMS for group 5 is 0.077228
+AMS for group 6 is 0.658692
+AMS for group 7 is 0.078312
 
 
 -----ratio = 0.5-----
 
-AMS total = 2.07659001237
-AMS for group 0 is 3.768382
-AMS for group 1 is 1.237048
-AMS for group 2 is 2.611814
-AMS for group 3 is 1.586557
-AMS for group 4 is 0.076684
-AMS for group 5 is 0.068460
-AMS for group 6 is 0.675058
-AMS for group 7 is 0.091055
+AMS total = 2.09569307501
+AMS for group 0 is 3.810802
+AMS for group 1 is 1.320865
+AMS for group 2 is 2.469799
+AMS for group 3 is 1.535720
+AMS for group 4 is 0.071504
+AMS for group 5 is 0.081648
+AMS for group 6 is 0.658692
+AMS for group 7 is 0.070547
 
 
 -----ratio = 0.55-----
 
-AMS total = 2.1410983284
-AMS for group 0 is 3.758904
-AMS for group 1 is 1.451424
-AMS for group 2 is 2.543402
-AMS for group 3 is 1.600412
-AMS for group 4 is 0.075333
-AMS for group 5 is 0.074118
-AMS for group 6 is 0.715623
-AMS for group 7 is 0.082403
+AMS total = 2.14411843417
+AMS for group 0 is 3.718031
+AMS for group 1 is 1.509913
+AMS for group 2 is 2.414534
+AMS for group 3 is 1.676065
+AMS for group 4 is 0.071622
+AMS for group 5 is 0.080438
+AMS for group 6 is 0.661981
+AMS for group 7 is 0.070547
 
 
 -----ratio = 0.6-----
 
-AMS total = 2.18303871973
-AMS for group 0 is 3.719599
-AMS for group 1 is 1.551590
-AMS for group 2 is 2.580273
-AMS for group 3 is 1.665194
-AMS for group 4 is 0.074393
-AMS for group 5 is 0.073560
-AMS for group 6 is 0.702435
-AMS for group 7 is 0.077463
+AMS total = 2.18444519037
+AMS for group 0 is 3.638540
+AMS for group 1 is 1.665683
+AMS for group 2 is 2.516425
+AMS for group 3 is 1.918447
+AMS for group 4 is 0.069094
+AMS for group 5 is 0.080301
+AMS for group 6 is 0.676178
+AMS for group 7 is 0.060081
 
 
 -----ratio = 0.65-----
 
-AMS total = 2.23113230047
-AMS for group 0 is 3.682849
-AMS for group 1 is 1.724224
-AMS for group 2 is 2.553777
-AMS for group 3 is 1.749667
-AMS for group 4 is 0.074847
-AMS for group 5 is 0.077574
-AMS for group 6 is 0.702435
-AMS for group 7 is 0.077248
+AMS total = 2.22320790725
+AMS for group 0 is 3.622093
+AMS for group 1 is 1.788052
+AMS for group 2 is 2.453312
+AMS for group 3 is 1.963455
+AMS for group 4 is 0.078749
+AMS for group 5 is 0.076926
+AMS for group 6 is 0.676178
+AMS for group 7 is 0.057634
 
 
 -----ratio = 0.7-----
 
-AMS total = 2.22368268339
-AMS for group 0 is 3.571752
-AMS for group 1 is 1.789138
-AMS for group 2 is 2.642100
-AMS for group 3 is 1.641414
-AMS for group 4 is 0.074042
-AMS for group 5 is 0.076512
-AMS for group 6 is 0.702435
-AMS for group 7 is 0.072818
+AMS total = 2.24354403099
+AMS for group 0 is 3.570586
+AMS for group 1 is 1.889436
+AMS for group 2 is 2.469944
+AMS for group 3 is 1.893659
+AMS for group 4 is 0.076445
+AMS for group 5 is 0.075875
+AMS for group 6 is 0.676178
+AMS for group 7 is 0.057634
 
 
 -----ratio = 0.75-----
 
-AMS total = 2.18540071767
-AMS for group 0 is 3.390028
-AMS for group 1 is 1.867260
-AMS for group 2 is 2.638176
-AMS for group 3 is 1.606600
-AMS for group 4 is 0.073967
-AMS for group 5 is 0.074883
-AMS for group 6 is 0.702435
-AMS for group 7 is 0.072818
+AMS total = 2.25205446746
+AMS for group 0 is 3.494090
+AMS for group 1 is 1.985789
+AMS for group 2 is 2.427693
+AMS for group 3 is 1.929817
+AMS for group 4 is 0.075020
+AMS for group 5 is 0.074272
+AMS for group 6 is 0.650988
+AMS for group 7 is 0.057634
 
 
 -----ratio = 0.8-----
 
-AMS total = 2.19379217747
-AMS for group 0 is 3.320465
-AMS for group 1 is 1.959386
-AMS for group 2 is 2.592923
-AMS for group 3 is 1.604958
-AMS for group 4 is 0.073316
-AMS for group 5 is 0.074883
-AMS for group 6 is 0.702435
-AMS for group 7 is 0.072818
+AMS total = 2.2603354357
+AMS for group 0 is 3.451423
+AMS for group 1 is 2.020932
+AMS for group 2 is 2.445100
+AMS for group 3 is 1.945164
+AMS for group 4 is 0.078349
+AMS for group 5 is 0.075871
+AMS for group 6 is 0.544005
+AMS for group 7 is 0.057634
 
 
 -----ratio = 0.85-----
 
-AMS total = 2.1917420738
-AMS for group 0 is 3.250058
-AMS for group 1 is 2.037843
-AMS for group 2 is 2.470451
-AMS for group 3 is 1.700933
-AMS for group 4 is 0.072815
-AMS for group 5 is 0.078478
-AMS for group 6 is 0.712000
-AMS for group 7 is 0.099795
+AMS total = 2.22725496572
+AMS for group 0 is 3.322647
+AMS for group 1 is 2.040382
+AMS for group 2 is 2.441613
+AMS for group 3 is 2.002485
+AMS for group 4 is 0.077099
+AMS for group 5 is 0.075038
+AMS for group 6 is 0.555431
+AMS for group 7 is 0.057634
 
 
 -----ratio = 0.9-----
 
-AMS total = 2.18283288647
-AMS for group 0 is 3.184274
-AMS for group 1 is 2.090847
-AMS for group 2 is 2.456952
-AMS for group 3 is 1.657387
-AMS for group 4 is 0.073869
-AMS for group 5 is 0.076884
-AMS for group 6 is 0.712000
-AMS for group 7 is 0.097060
+AMS total = 2.1913729012
+AMS for group 0 is 3.210329
+AMS for group 1 is 2.070648
+AMS for group 2 is 2.330209
+AMS for group 3 is 1.925526
+AMS for group 4 is 0.076888
+AMS for group 5 is 0.075038
+AMS for group 6 is 0.555431
+AMS for group 7 is 0.057634
 
 
 -----ratio = 0.95-----
 
-AMS total = 2.15733866221
-AMS for group 0 is 3.097074
-AMS for group 1 is 2.131620
-AMS for group 2 is 2.382346
-AMS for group 3 is 1.659478
-AMS for group 4 is 0.073882
-AMS for group 5 is 0.078342
-AMS for group 6 is 0.728888
-AMS for group 7 is 0.094784
+AMS total = 2.1742408958
+AMS for group 0 is 3.140293
+AMS for group 1 is 2.092456
+AMS for group 2 is 2.324630
+AMS for group 3 is 1.868771
+AMS for group 4 is 0.075965
+AMS for group 5 is 0.072903
+AMS for group 6 is 0.566858
+AMS for group 7 is 0.055464
 
 

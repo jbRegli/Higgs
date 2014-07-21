@@ -19,13 +19,13 @@ def select_best_classifiers(dTuning, valid_s, criteria= 'ams'):
         # Initialize best_parameters:
         for i in range(len(best_parameters)):
             if criteria == 'ams':
-                best_parameters[i] = {'experience': 0,
+                best_parameters[i] = {'experience': first_key,
                                       'score': dTuning[first_key]['AMS_s'][i]}
             elif criteria == 'sum_s':
-                best_parameters[i] = {'experience': 0,
+                best_parameters[i] = {'experience': first_key,
                                       'score': dTuning[first_key]['sum_s'][i]}
             elif criteria == 'sum_b':
-                best_parameters[i] = {'experience': 0,
+                best_parameters[i] = {'experience': first_key,
                                       'score': dTuning[first_key]['sum_b'][i]}
             else:
                 print "tuningModel.select_best_parameters: not implemented criteria"
