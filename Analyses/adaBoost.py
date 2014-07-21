@@ -32,12 +32,12 @@ Meta-parameters:
 
 """
 
-def classifier(xTrain, yTrain, base_estimators, n_estimators, learning_rate, algorithm, random_state):
+def classifier(xTrain, yTrain, **kwargs):
     """
     Train a ada classifier on xTrain and yTrain and return the trained
     classifier
     """
-    ada = AdaBoostClassifier()
+    ada = AdaBoostClassifier(**kwargs)
     ada.fit(xTrain, yTrain)
 
     return ada
@@ -57,8 +57,7 @@ def prediction(predictor, testset):
     return label_predicted, proba_predicted
 
 
-def get_yPredicted_s(xsTrain_s, yTrain_s, xsValidation_s, base_estimators = None, \
-                    n_estimators = 50, learning_rate = 1., algorithm = 'SAMME.R', random_state = None):
+def get_yPredicted_s(xsTrain_s, yTrain_s, xsValidation_s, **kwargs):
     """
     Perform the training and the prediction on the 8 sub-sets
     """
@@ -70,8 +69,7 @@ def get_yPredicted_s(xsTrain_s, yTrain_s, xsValidation_s, base_estimators = None
 
         for n in range(len(xsTrain_s)):
             # Training:
-            clf = classifier(xsTrain_s[n], yTrain_s[n], base_estimators = base_estimators, \
-                            n_estimators = n_estimators, learning_rate=learning_rate, algorithm=algorithm, random_state=random_state)
+            clf = classifier(xsTrain_s[n], yTrain_s[n], **kwargs)
 
             # Prediction:
             label_predicted, proba_predicted = prediction(clf, xsValidation_s[n])
@@ -82,7 +80,7 @@ def get_yPredicted_s(xsTrain_s, yTrain_s, xsValidation_s, base_estimators = None
 
     else:
         # Training:
-        predictor_s = classifier(xsTrain_s, yTrain_s)
+        predictor_s = classifier(xsTrain_s, yTrain_s, **kwargs)
 
         #Prediction:
         yPredicted_s, yProba_s = prediction(predictor_s, xsValidation_s)

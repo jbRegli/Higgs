@@ -86,13 +86,13 @@ def select_best_classifiers(dTuning, valid_s, criteria= 'ams'):
 
 
         d = {'predictor_s': predictor_s, 'yPredicted_s': yPredicted_s,
-         'yProba_s': yProba_s,
-         'final_s':final_s, 'final_b':final_b,
-         'sum_s':sum_s_s, 'sum_b': sum_b_s,
-         'AMS':AMS, 'AMS_s': AMS_s,
-         'classif_succ': classif_succ_s,
-         'method': method_s,
-         'parameters': parameters_s}
+             'yProba_s': yProba_s,
+             'final_s':final_s, 'final_b':final_b,
+             'sum_s':sum_s_s, 'sum_b': sum_b_s,
+             'AMS':AMS, 'AMS_s': AMS_s,
+             'classif_succ': classif_succ_s,
+             'method': method_s,
+             'parameters': parameters_s}
 
     return d
 

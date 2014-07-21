@@ -84,17 +84,23 @@ def main():
                                               kwargs_bayes)
 
     # SVM
-    """
-    kwargs_svm ={}
-    dMethods['svm'] = analyse.analyse(train_s, valid_s,'svm', kwargs_svm)
-    """
+    #kwargs_tuning_svm ={'kernel': ["rbf", "poly"], 'C' : [0.025],
+    #                    'probability': [True]}
+
+    #dTuning = tuningModel.parameters_grid_search(train_s, valid_s, 'svm',
+    #                                         kwargs_tuning_svm)
+
+    #dMethods['svm'] = combineClassifiers.select_best_classifiers(dTuning,
+    #                                                                valid_s)
+
 
     # K NEIGHBORS
     kwargs_tuning_kn = {'n_neighbors': [10,20]}
     dTuning = tuningModel.parameters_grid_search(train_s, valid_s, 'kNeighbors',
                                              kwargs_tuning_kn)
 
-    dMethods['kNeighbors'] = combineClassifiers.select_best_classifiers(dTuning, valid_s)
+    dMethods['kNeighbors'] = combineClassifiers.select_best_classifiers(dTuning,
+                                                                        valid_s)
 
     # LDA
     kwargs_lda = {}
@@ -105,24 +111,22 @@ def main():
 
 
     # ADABOOST
-    kwargs_ada= {   'base_estimators': None,
-                    'n_estimators': 50,
-                    'learning_rate': 1.,
-                    'algorithm': 'SAMME.R',
-                    'random_state':None}
+    kwargs_ada= {'n_estimators': 50,
+                 'learning_rate': 1.0, 'algorithm': 'SAMME.R',
+                 'random_state': None}
+    #kwargs_ada = {}
+
     dMethods['adaBoost'] = analyse.analyse(train_s, valid_s, 'adaBoost',
                                            kwargs_ada)
-    print dMethods['adaBoost']['parameters']
-
 
     # RANDOM FOREST:
-    kwargs_tuning_rdf = {'n_trees': [10,20,50,100]}
+    kwargs_tuning_rdf = {'n_estimators': [10,20,50,100]}
 
     dTuning = tuningModel.parameters_grid_search(train_s, valid_s, 'randomForest',
                                              kwargs_tuning_rdf)
 
     dMethods['randomForest'] = combineClassifiers.select_best_classifiers(dTuning,
-                                                                valid_s)
+                                                                          valid_s)
 
 
     print(" ")
@@ -134,7 +138,10 @@ def main():
 
     d = combineClassifiers.select_best_classifiers(dMethods, valid_s)
 
-    print "d['parameters']= ", d['parameters']
+    print (" ")
+    for i in range(len(d['parameters'])):
+        print "Best classifier for subset %i : " %i
+        print d['method'][i], ": ", d['parameters'][i]
 
     """
     ##############
