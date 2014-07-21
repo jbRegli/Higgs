@@ -7,13 +7,13 @@ Meta-parameters:
     NONE
 """
 
-def classifier(xTrain, yTrain):
+def classifier(xTrain, yTrain, **kwargs):
     """
     Train a SVM classifier on xTrain and yTrain and return the trained
     classifier
     The probability attribute must be et to True to be able to return the probability vector
     """
-    clf = svm.SVC(probability = True)
+    clf = svm.SVC(**kwargs)
     clf.fit(xTrain, yTrain)
 
     return clf
@@ -33,7 +33,7 @@ def prediction(predictor, testset):
     return label_predicted, proba_predicted
 
 
-def get_yPredicted_s(xsTrain_s, yTrain_s, xsValidation_s):
+def get_yPredicted_s(xsTrain_s, yTrain_s, xsValidation_s, **kwargs):
     """
     Perform the training and the prediction on the 8 sub-sets
     """
@@ -45,7 +45,7 @@ def get_yPredicted_s(xsTrain_s, yTrain_s, xsValidation_s):
 
         for n in range(len(xsTrain_s)):
             # Training:
-            clf = classifier(xsTrain_s[n], yTrain_s[n])
+            clf = classifier(xsTrain_s[n], yTrain_s[n], **kwargs)
 
             # Prediction:
             label_predicted, proba_predicted = prediction(clf, xsValidation_s[n])
@@ -56,7 +56,7 @@ def get_yPredicted_s(xsTrain_s, yTrain_s, xsValidation_s):
 
     else:
         # Training:
-        predictor_s = classifier(xsTrain_s, yTrain_s)
+        predictor_s = classifier(xsTrain_s, yTrain_s, **kwargs)
 
         #Prediction:
         yPredicted_s, yProba_s = prediction(predictor_s, xsValidation_s)

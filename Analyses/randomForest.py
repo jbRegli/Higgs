@@ -11,12 +11,12 @@ Meta-parameters:
 
 """
 
-def classifier(xTrain, yTrain, n_trees=10):
+def classifier(xTrain, yTrain, **kwargs):
     """
     Train a naive baise classifier on xTrain and yTrain and return the trained
     classifier
     """
-    rdf = RandomForestClassifier(n_estimators= n_trees)
+    rdf = RandomForestClassifier(**kwargs)
     rdf.fit(xTrain, yTrain)
 
     return rdf
@@ -36,7 +36,7 @@ def prediction(predictor, testset):
     return label_predicted, proba_predicted
 
 
-def get_yPredicted_s(xsTrain_s, yTrain_s, xsValidation_s, n_trees= 10):
+def get_yPredicted_s(xsTrain_s, yTrain_s, xsValidation_s, **kwargs):
     """
     Perform the training and the prediction on the 8 sub-sets
     """
@@ -48,7 +48,7 @@ def get_yPredicted_s(xsTrain_s, yTrain_s, xsValidation_s, n_trees= 10):
 
         for n in range(len(xsTrain_s)):
             # Training:
-            rdf = classifier(xsTrain_s[n], yTrain_s[n], n_trees= n_trees)
+            rdf = classifier(xsTrain_s[n], yTrain_s[n], **kwargs)
 
             # Prediction:
             label_predicted, proba_predicted = prediction(rdf, xsValidation_s[n])
@@ -58,7 +58,7 @@ def get_yPredicted_s(xsTrain_s, yTrain_s, xsValidation_s, n_trees= 10):
             yProba_s.append(proba_predicted)
     else:
         # Training:
-        predictor_s = classifier(xsTrain_s, yTrain_s, n_trees= n_trees)
+        predictor_s = classifier(xsTrain_s, yTrain_s, **kwargs)
 
         #Prediction:
         yPredicted_s, yProba_s = prediction(predictor_s, xsValidation_s)
