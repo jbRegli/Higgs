@@ -19,13 +19,13 @@ def select_best_classifiers(dTuning, valid_s, criteria= 'ams'):
         # Initialize best_parameters:
         for i in range(len(best_parameters)):
             if criteria == 'ams':
-                best_parameters[i] = {'experience': 0,
+                best_parameters[i] = {'experience': first_key,
                                       'score': dTuning[first_key]['AMS_s'][i]}
             elif criteria == 'sum_s':
-                best_parameters[i] = {'experience': 0,
+                best_parameters[i] = {'experience': first_key,
                                       'score': dTuning[first_key]['sum_s'][i]}
             elif criteria == 'sum_b':
-                best_parameters[i] = {'experience': 0,
+                best_parameters[i] = {'experience': first_key,
                                       'score': dTuning[first_key]['sum_b'][i]}
             else:
                 print "tuningModel.select_best_parameters: not implemented criteria"
@@ -38,6 +38,18 @@ def select_best_classifiers(dTuning, valid_s, criteria= 'ams'):
                     if dTuning[exp]['AMS_s'][i] > best_parameters[i]['score']:
                         best_parameters[i]['experience'] = exp
                         best_parameters[i]['score'] = dTuning[exp]['AMS_s'][i]
+                elif criteria == 'sum_s':
+                    if dTuning[exp]['sum_s'][i] > best_parameters[i]['score']:
+                        best_parameters[i]['experience'] = exp
+                        best_parameters[i]['score'] = dTuning[exp]['sum_s'][i]
+                elif criteria == 'sum_b':
+                    if dTuning[exp]['sum_b'][i] > best_parameters[i]['score']:
+                        best_parameters[i]['experience'] = exp
+                        best_parameters[i]['score'] = dTuning[exp]['sum_b'][i]
+                else:
+                    print "tuningModel.select_best_parameters: not implemented criteria"
+                exit()
+
 
         # Build the new dictionnary of methods:
         predictor_s = [None] * len(best_parameters)

@@ -229,10 +229,12 @@ def split_8_matrix(ID, x, y= None, weights= None):
         weights_s[6] = weights[np.logical_and(x[:,0]==-999, x[:,22]==2)]
         weights_s[7] = weights[np.logical_and(x[:,0]==-999, x[:,22]==3)]
 
+
     if y != None:
         if weights != None:
             return ID_s, xs_s, y_s, weights_s
         else:
+            print
             print ("Not a normal splitting case...")
             exit()
     else:
