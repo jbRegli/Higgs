@@ -19,7 +19,7 @@ def main():
     ###############
     # Importation parameters:
     split= True
-    normalize = True
+    normalize = False
     noise_var = 0.
     ratio_train = 0.9
 
@@ -40,18 +40,27 @@ def main():
     ################
     ### PLOTING ####
     ################
+
+    # Parameters:
+    sys.argv
+
     xValid_s = valid_s[1]
     yValid_s = valid_s[2]
     nameValid_s = valid_s[4]
 
-    for j in range(len(valid_s[1])):
-        print "subset %i" %j
-        for i in range(valid_s[1][j].shape[1]):
-            plt.scatter(xValid_s[j][:,0],xValid_s[j][:,i], c= yValid_s[j][:])
-            plt.xlabel(nameValid_s[j][0])
-            plt.ylabel(nameValid_s[j][i])
+    for subset in range(len(valid_s[1])):
+        print "subset %i" %subset
+        # Plot each dimension versus another:
+        for i in range(valid_s[1][subset].shape[1]):
+            for j in range(i):
+                plt.scatter(xValid_s[subset][:,i], xValid_s[subset][:,j],
+                        c= yValid_s[subset][:])
 
-            plt.show()
+                plt.xlabel(nameValid_s[subset][i])
+                plt.ylabel(nameValid_s[subset][j])
+                plt.title("subset %i" %subset)
+
+                plt.show()
 
     return 0
 

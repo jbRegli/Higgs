@@ -221,7 +221,7 @@ def main():
                 best_yPredicted_s[i] = yPredicted_treshold_s[i]
                 best_yProba_s[i] = yProba_s[i]
                 best_AMS_s[i] = score
-                best_method_s[i] = "combined"
+                best_method_s[i] = dCombine['method'][i]
                 best_ratio_s[i] = ratio
             AMS_s.append(score)
             f.write("AMS for group %i is %f" %(i, score))
