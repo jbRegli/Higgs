@@ -39,6 +39,7 @@ import qda
 
 
 def main():
+
     ###############
     ### IMPORT ####
     ###############
@@ -94,26 +95,27 @@ def main():
     # Keys of the methods : {naiveBayes, svm, kNeighbors, lda, qda, adaBoost,
     #                       randomForest, gradientBoosting}
     dMethods ={}
-
+    
     # NAIVE BAYES:
-    """
+    
     kwargs_bayes = {}
     dMethods['naiveBayes'] =  analyse.analyse(train_s, valid_s, 'naiveBayes',
                                               kwargs_bayes)
-
+    
     # SVM
-
+    """
     kwargs_svm ={}
     dMethods['svm'] = analyse.analyse(train_s, valid_s,'svm', kwargs_svm)
     """
-
+    
     # K NEIGHBORS
     kwargs_tuning_kn = {'n_neighbors': [10,20]}
     dTuning = tuningModel.parameters_grid_search(train_s, valid_s, 'kNeighbors',
                                              kwargs_tuning_kn)
+    print "prout"
 
     dMethods['kNeighbors'] = combineClassifiers.select_best_classifiers(dTuning, valid_s)
-    """
+    
     # LDA
     kwargs_lda = {}
     dMethods['lda'] = analyse.analyse(train_s, valid_s, 'lda', kwargs_lda)
@@ -145,8 +147,7 @@ def main():
     kwargs_gradB = {}
 
     dMethods['gradientBoosting'] = analyse.analyse(train_s, valid_s, 'gradientBoosting', kwargs_gradB)
-    
-    """
+
     print(" ")
 
     ##################
@@ -222,19 +223,16 @@ def main():
         f.write("\n")
         f.write("\n")
 
-    # Trunk the vectors 
-    #
-    
+    # Trunk the vectors
+
     for method in dMethods:
 
         f = open("Tests/test_treshold_"+str(method)+".txt","w")
 
-
         yProba_s = dMethods[str(method)]['yProba_s']
         yPredicted_s = dMethods[str(method)]['yPredicted_s']
 
-
-        ratio_s = np.arange(0.01,1.0,0.01)
+        ratio_s = np.arange(0.05,1.0,0.05)
 
         f.write("-----"+str(method)+"-----\n")
 
@@ -251,7 +249,7 @@ def main():
                                                           valid_s[2][i])
                     print "Subset %i: %i elements - sum_s[%i] = %i - sum_b[%i] = %i" \
                             %(i, yPredicted_treshold_s[i].shape[0], i, sum_s, i, sum_b)
-    
+
             # Get s and b for each group (s_s, b_s) and the final final_s and
             # final_b:
             final_s, final_b, s_s, b_s = submission.get_s_b_8(yPredicted_treshold_s, valid_s[2],
