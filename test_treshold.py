@@ -181,16 +181,16 @@ def main():
         # Numerical score:
         if type(yPredicted_treshold_s) == list:
             for i in range(len(yPredicted_treshold_s)):
-                print "valid_s[2][%i] shape = %i" %(i, valid_s[2][i].shape[0])
-                print "yPredictedtreshold_s[%i] shape = %i" \
-                        %(i, yPredicted_treshold_s[i].shape[0])
+                #print "valid_s[2][%i] shape = %i" %(i, valid_s[2][i].shape[0])
+                #print "yPredictedtreshold_s[%i] shape = %i" \
+                #        %(i, yPredicted_treshold_s[i].shape[0])
 
                 sum_s, sum_b = submission.get_numerical_score(
                                                         yPredicted_treshold_s[i],
                                                         valid_s[2][i])
 
-                print "Subset %i: %i elements - sum_s[%i] = %i - sum_b[%i] = %i" \
-                    %(i, yPredicted_treshold_s[i].shape[0], i, sum_s, i, sum_b)
+               # print "Subset %i: %i elements - sum_s[%i] = %i - sum_b[%i] = %i" \
+               #     %(i, yPredicted_treshold_s[i].shape[0], i, sum_s, i, sum_b)
 
         # Get s and b for each group (s_s, b_s) and the final final_s and
         # final_b:

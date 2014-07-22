@@ -138,8 +138,6 @@ def normalize(x_train, x_test):
             x_test[i][x_test[i]!=-999.] -= mean
             x_test[i][x_test[i]!=-999.] /= variance
 
-        #print (x[i][x[i]==-999.].shape)
-
     # Transpose back to return the same shape
     x_train= x_train.T
     x_test = x_test.T
@@ -234,7 +232,6 @@ def split_8_matrix(ID, x, y= None, weights= None):
         if weights != None:
             return ID_s, xs_s, y_s, weights_s
         else:
-            print
             print ("Not a normal splitting case...")
             exit()
     else:
