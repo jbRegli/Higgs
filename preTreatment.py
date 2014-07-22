@@ -244,6 +244,13 @@ def split_8_matrix(ID, x, y= None, weights= None):
             print ("Not a normal splitting case...")
             exit()
 
+def concatenate_matrix(vector_s):
+    """
+    concatenate the vectors in vector_s and returns the concatenated vector
+    """
+    concatenated_vector = np.empty(0)
+    for vector in vector_s:
+        concatenated_vector = np.concatenate((concatenated_vector, vector), axis = 1)
 
 def ratio_sig_per_dataset(y_s):
     """
