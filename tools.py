@@ -17,7 +17,7 @@ def ratio_event(y):
     """
     return 100*sum(y)/y.shape[0]
 
-def print_AMS(y = None, weights = None, n_sample = 5, plot_type = "all", variable_type = "absolute", max_AMS = 4 ):
+def print_AMS(y = None, weights = None, n_sample = 5, plot_type = "all", variable_type = "absolute", max_AMS = 10. ):
     """
     plot AMS = f(s,b), where s and b are the percentage of  true and fase positive
     y is the vector of label
@@ -96,8 +96,8 @@ def print_AMS(y = None, weights = None, n_sample = 5, plot_type = "all", variabl
                     Z[i,j] = max_AMS
     
     if variable_type == "absolute":
-        s = arange(0., 10, 0.1)
-        b = arange(0., 10, 0.1)
+        s = arange(0., 100, 1.)
+        b = arange(0., 100, 1.)
         X, Y = meshgrid(s, b)
         Z = np.zeros((100, 100))
         for i in range(100):
@@ -109,7 +109,7 @@ def print_AMS(y = None, weights = None, n_sample = 5, plot_type = "all", variabl
     if plot_type == "2D" or plot_type == "all":
         im = imshow(Z,cmap=cm.RdBu, origin = "lower" ) # drawing the function
         # adding the Contour lines with labels
-        cset = contour(Z, arange(-1,1.5,0.2),linewidths=2,cmap=cm.Set2)
+        cset = contour(Z, arange(0.,10,0.5),linewidths=2,cmap=cm.Set2)
         clabel(cset,inline=True,fmt='%1.1f',fontsize=10)
         colorbar(im) # adding the colobar on the right
         # latex fashion title
