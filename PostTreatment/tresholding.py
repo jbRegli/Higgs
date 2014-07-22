@@ -71,6 +71,46 @@ def proba_treshold(yPredicted_s, yProba_s, ratio):
 
         return yPredicted_thd
 
+def get_yPredicted_treshold(yProba, treshold):
+    """
+    return vector of predicted label with a confidence treshold of treshold
+    yProba : vectors of the probabilities computed with a classifier
+    yValid : vectors of the true label of the data
+    yWeights : vectors of the weights
+    pas : size of the interval between two probabilities tested
+    """
+    yPredicted = np.zeros_like(yProba)
+    for i in range(yPredicted.shape[0]):
+        if yProba[i] > treshold:
+            yPredicted[i] = 1.
+    return yPredicted
+
+def best_treshold(yProba, yValidation, weightsValidation, pas = 0.01):
+    """
+    Returns the treshold that maximises the AMS for the vectors of proba given
+    yProba : vectors of the probabilities computed with a classifier
+    yValid : vectors of the true label of the data
+    yWeights : vectors of the weights
+    pas : size of the interval between two probabilities tested
+    """
+    treshold_s = np.arange(0., 1.0, pas)
+    best_ams = 0.
+
+    for treshold in treshold_s:
+        yPredicted = get_yPredicted_treshold(yProba, treshold)
+        s, b = submission.get_s_b(yPredicted, yValidation, weightsValidation)
+        s *= 250000/yPredicted.shape[0]
+        b *= 250000/yPredicted.shape[0]
+        ams = hbc.AMS(s,b)
+        if ams > best_ams:
+            best_treshold = treshold
+            best_ams = ams
+
+    return best_treshold
+
+
+
+
 
 
 

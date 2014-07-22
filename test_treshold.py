@@ -39,6 +39,7 @@ import qda
 
 
 def main():
+
     ###############
     ### IMPORT ####
     ###############
@@ -63,7 +64,7 @@ def main():
 
     # Create the elected vectors for each group (best AMS score)
     best_yPredicted_s = [np.zeros(valid_s[2][i].shape[0]) for i in range(8)]
-    best_yProba_s = [ np.zeros(valid_s[2][i].shape[0]) for i in range(8)]
+    best_yProba_s = [np.zeros(valid_s[2][i].shape[0]) for i in range(8)]
     best_AMS_s = [0. for i in range(8)]
     best_method_s = [0 for i in range(8)]
     best_ratio_s = [0 for i in range(8)]
@@ -94,23 +95,30 @@ def main():
     # Keys of the methods : {naiveBayes, svm, kNeighbors, lda, qda, adaBoost,
     #                       randomForest, gradientBoosting}
     dMethods ={}
-
+    
     # NAIVE BAYES:
+
+    kwargs_bayes = {}
+    dMethods['naiveBayes'] =  analyse.analyse(train_s, valid_s, 'naiveBayes',
+                                              kwargs_bayes)
+    
+
     kwargs_bayes = {}
     dMethods['naiveBayes'] =  analyse.analyse(train_s, valid_s, 'naiveBayes',
                                               kwargs_bayes)
 
-    """
-    # SVM
 
+    # SVM
+    """
     kwargs_svm ={}
     dMethods['svm'] = analyse.analyse(train_s, valid_s,'svm', kwargs_svm)
     """
-
+    
     # K NEIGHBORS
     kwargs_tuning_kn = {'n_neighbors': [10,20]}
     dTuning = tuningModel.parameters_grid_search(train_s, valid_s, 'kNeighbors',
                                              kwargs_tuning_kn)
+    print "prout"
 
     dMethods['kNeighbors'] = combineClassifiers.select_best_classifiers(dTuning, valid_s)
 
@@ -137,8 +145,14 @@ def main():
 
     dMethods['randomForest'] = combineClassifiers.select_best_classifiers(dTuning,
                                                                 valid_s)
-    """
+    
     # GRADIENT BOOSTING
+    """
+    kwargs_gradB = {}
+
+    dMethods['gradientBoosting'] = analyse.analyse(train_s, valid_s, 'gradientBoosting', kwargs_gradB)
+
+
     kwargs_tuning_gradB = {'loss': ['deviance'], 'learning_rate': [0.1],
                     'n_estimators': [100,200], 'subsample': [1.0],
                     'min_samples_split': [2], 'min_samples_leaf': [1],
@@ -153,6 +167,7 @@ def main():
                                                                 dTuning,
                                                                 valid_s)
     """
+
     print(" ")
 
     ##################
@@ -204,25 +219,32 @@ def main():
 
         # AMS final:
         AMS = hbc.AMS(final_s , final_b)
+        
         if AMS > best_AMS_1_method:
             best_AMS_1_method = AMS
             best_method = "combined"
             best_ratio = ratio
+        
         f.write("AMS total = " + str(AMS )+ "\n")
         print ("Expected AMS score for combined methods : %f") %AMS
 
         #AMS by group
         AMS_s = []
         for i, (s,b) in enumerate(zip(s_s, b_s)):
+            """
             s *= 250000/yPredicted_treshold_s[i].shape[0]
             b *= 250000/yPredicted_treshold_s[i].shape[0]
+            """
             score = hbc.AMS(s,b)
+            # Condition sur l'AMS
+            
             if score > best_AMS_s[i]:
                 best_yPredicted_s[i] = yPredicted_treshold_s[i]
                 best_yProba_s[i] = yProba_s[i]
                 best_AMS_s[i] = score
                 best_method_s[i] = dCombine['method'][i]
                 best_ratio_s[i] = ratio
+            
             AMS_s.append(score)
             f.write("AMS for group %i is %f" %(i, score))
             f.write("\n")
@@ -234,17 +256,22 @@ def main():
         f.write("\n")
 
 
-    """
+    # Trunk the vectors
+
     # FOR EACH METHOD:
     for method in dMethods:
         print method
         f = open("Tests/test_treshold_"+str(method)+".txt","w")
 
+
+        yProba_s = dMethods[str(method)]['yProba_s']
+        yPredicted_s = dMethods[str(method)]['yPredicted_s']
+
         yProba_s = dMethods[method]['yProba_s']
         yPredicted_s = dMethods[method]['yPredicted_s']
 
 
-        ratio_s = np.arange(0.01,1.0,0.01)
+        ratio_s = np.arange(0.05,1.0,0.05)
 
         f.write("-----"+str(method)+"-----\n")
 
@@ -285,9 +312,13 @@ def main():
             #AMS by group
             AMS_s = []
             for i, (s,b) in enumerate(zip(s_s, b_s)):
+                """
                 s *= 250000/yPredicted_treshold_s[i].shape[0]
                 b *= 250000/yPredicted_treshold_s[i].shape[0]
+                """
                 score = hbc.AMS(s,b)
+                #condition sur AMS
+
                 if score > best_AMS_s[i]:
                     best_yPredicted_s[i] = yPredicted_treshold_s[i]
                     best_yProba_s[i] = yProba_s[i]
@@ -320,7 +351,9 @@ def main():
 
     for n in range(8):
         print "Best AMS for group %i is: %f and is  obtained with method %s and ratio %f" %(n, best_AMS_s[n], best_method_s[n], best_ratio_s[n])
-"""
+
+    return best_yPredicted_s, valid_s
+
 if __name__ == '__main__':
     main()
 
