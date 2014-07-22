@@ -130,10 +130,9 @@ def main():
                                                 'gradientBoosting',
                                                 kwargs_tuning_gradB)
 
-
-    dMethods['gradientBoosting'] = analyse.analyse(train_s, valid_s,
-                                                   'gradientBoosting',
-                                                    kwargs_gradB)
+    dMethods['gradientBoosting'] = combineClassifiers.select_best_classifiers(
+                                                                dTuning,
+                                                                valid_s)
 
     # RANDOM FOREST:
     kwargs_tuning_rdf = {'n_estimators': [10,20,50,100]}

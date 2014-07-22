@@ -66,8 +66,6 @@ def select_best_classifiers(dTuning, valid_s, criteria= 'ams'):
             # Best experience for this subset:
             exp = best_parameters[i]['experience']
 
-            print type(dTuning[exp]['predictor_s'])
-
             # Fill the parameters:
             predictor_s[i] = dTuning[exp]['predictor_s'][i]
             yPredicted_s[i] = dTuning[exp]['yPredicted_s'][i]
@@ -97,7 +95,6 @@ def select_best_classifiers(dTuning, valid_s, criteria= 'ams'):
         for i in range(len(AMS_s)):
         # AMS by group
             print("Expected AMS score for  : for group %i is : %f" %(i, AMS_s[i]))
-
 
         d = {'predictor_s': predictor_s, 'yPredicted_s': yPredicted_s,
              'yProba_s': yProba_s,

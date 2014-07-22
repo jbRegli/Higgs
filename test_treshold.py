@@ -97,11 +97,19 @@ def main():
     dMethods ={}
     
     # NAIVE BAYES:
+<<<<<<< HEAD
     
     kwargs_bayes = {}
     dMethods['naiveBayes'] =  analyse.analyse(train_s, valid_s, 'naiveBayes',
                                               kwargs_bayes)
     
+=======
+    kwargs_bayes = {}
+    dMethods['naiveBayes'] =  analyse.analyse(train_s, valid_s, 'naiveBayes',
+                                              kwargs_bayes)
+
+    """
+>>>>>>> d09f6d93048ed5d4fa5d4e38111dca0e58e606e6
     # SVM
     """
     kwargs_svm ={}
@@ -115,14 +123,17 @@ def main():
     print "prout"
 
     dMethods['kNeighbors'] = combineClassifiers.select_best_classifiers(dTuning, valid_s)
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> d09f6d93048ed5d4fa5d4e38111dca0e58e606e6
     # LDA
     kwargs_lda = {}
     dMethods['lda'] = analyse.analyse(train_s, valid_s, 'lda', kwargs_lda)
     # QDA
     kwargs_qda= {}
     dMethods['qda'] = analyse.analyse(train_s, valid_s, 'qda', kwargs_qda)
-
 
     # ADABOOST
     kwargs_ada= {   'n_estimators': 50,
@@ -131,8 +142,6 @@ def main():
                     'random_state':None}
     dMethods['adaBoost'] = analyse.analyse(train_s, valid_s, 'adaBoost',
                                            kwargs_ada)
-    print dMethods['adaBoost']['parameters']
-
 
     # RANDOM FOREST:
     kwargs_tuning_rdf = {'n_estimators': [10,50,100]}
@@ -142,66 +151,87 @@ def main():
 
     dMethods['randomForest'] = combineClassifiers.select_best_classifiers(dTuning,
                                                                 valid_s)
-
+    """
     # GRADIENT BOOSTING
+<<<<<<< HEAD
     kwargs_gradB = {}
 
     dMethods['gradientBoosting'] = analyse.analyse(train_s, valid_s, 'gradientBoosting', kwargs_gradB)
 
+=======
+    kwargs_tuning_gradB = {'loss': ['deviance'], 'learning_rate': [0.1],
+                    'n_estimators': [100,200], 'subsample': [1.0],
+                    'min_samples_split': [2], 'min_samples_leaf': [1],
+                    'max_depth': [3,5,7], 'init': [None], 'random_state': [None],
+                    'max_features': [None], 'verbose': [0]}
+
+    dTuning = tuningModel.parameters_grid_search(train_s, valid_s,
+                                                'gradientBoosting',
+                                                kwargs_tuning_gradB)
+
+    dMethods['gradientBoosting'] = combineClassifiers.select_best_classifiers(
+                                                                dTuning,
+                                                                valid_s)
+    """
+>>>>>>> d09f6d93048ed5d4fa5d4e38111dca0e58e606e6
     print(" ")
 
     ##################
     # POST-TREATMENT #
     ##################
-    print("------------------------ Post Treatment -----------------------")
+    print("-------------------- Best overall combination --------------------")
 
-    d = combineClassifiers.select_best_classifiers(dMethods, valid_s)
+    dCombine = combineClassifiers.select_best_classifiers(dMethods, valid_s)
 
-    ##################
-    # POST-TREATMENT #
-    ##################
+    print("-------------------------- Thresholding --------------------------")
 
-    # pour le combiné de méthode
+     # COMBINED CLASSIFIERS:
     f = open("Tests/test_treshold_combined.txt","w")
 
-    yProba_s = d['yProba_s']
-    yPredicted_s = d['yPredicted_s']
-    
-    ratio_s = np.arange(0.05,1.0,0.05)
+    yProba_s = dCombine['yProba_s']
+    yPredicted_s = dCombine['yPredicted_s']
 
+    ratio_s = np.arange(0.05,1.0,0.05)
 
     for ratio in ratio_s:
         f.write("-----ratio = "+str(ratio)+"-----\n")
         f.write("\n")
 
-        yPredicted_treshold_s = tresholding.proba_treshold(yPredicted_s, yProba_s, ratio)
-
+        yPredicted_treshold_s = tresholding.proba_treshold(yPredicted_s,
+                                                           yProba_s, ratio)
         # Numerical score:
         if type(yPredicted_treshold_s) == list:
             for i in range(len(yPredicted_treshold_s)):
                 print "valid_s[2][%i] shape = %i" %(i, valid_s[2][i].shape[0])
-                print "yPredictedtreshold_s[%i] shape = %i" %(i, yPredicted_treshold_s[i].shape[0])
-                sum_s, sum_b = submission.get_numerical_score(yPredicted_treshold_s[i],
-                                                          valid_s[2][i])
+                print "yPredictedtreshold_s[%i] shape = %i" \
+                        %(i, yPredicted_treshold_s[i].shape[0])
+
+                sum_s, sum_b = submission.get_numerical_score(
+                                                        yPredicted_treshold_s[i],
+                                                        valid_s[2][i])
+
                 print "Subset %i: %i elements - sum_s[%i] = %i - sum_b[%i] = %i" \
-                            %(i, yPredicted_treshold_s[i].shape[0], i, sum_s, i, sum_b)
-    
+                    %(i, yPredicted_treshold_s[i].shape[0], i, sum_s, i, sum_b)
+
         # Get s and b for each group (s_s, b_s) and the final final_s and
         # final_b:
-        final_s, final_b, s_s, b_s = submission.get_s_b_8(yPredicted_treshold_s, valid_s[2],
-                                                  valid_s[3])
+        final_s, final_b, s_s, b_s = submission.get_s_b_8(yPredicted_treshold_s,
+                                                          valid_s[2],
+                                                          valid_s[3])
 
         # Balance the s and b
         final_s *= 250000/25000
         final_b *= 250000/25000
+
         # AMS final:
         AMS = hbc.AMS(final_s , final_b)
         if AMS > best_AMS_1_method:
             best_AMS_1_method = AMS
             best_method = "combined"
             best_ratio = ratio
-        f.write("AMS total = "+str(AMS)+"\n")
+        f.write("AMS total = " + str(AMS )+ "\n")
         print ("Expected AMS score for combined methods : %f") %AMS
+
         #AMS by group
         AMS_s = []
         for i, (s,b) in enumerate(zip(s_s, b_s)):
@@ -217,20 +247,33 @@ def main():
             AMS_s.append(score)
             f.write("AMS for group %i is %f" %(i, score))
             f.write("\n")
-            print("Expected AMS score for randomforest :  for group %i is : %f" %(i, score))
+            print("Expected AMS score for randomforest :  for group %i is : %f"\
+                    %(i, score))
         print(" ")
 
         f.write("\n")
         f.write("\n")
 
+<<<<<<< HEAD
     # Trunk the vectors
 
     for method in dMethods:
+=======
+>>>>>>> d09f6d93048ed5d4fa5d4e38111dca0e58e606e6
 
+    """
+    # FOR EACH METHOD:
+    for method in dMethods:
+        print method
         f = open("Tests/test_treshold_"+str(method)+".txt","w")
 
+<<<<<<< HEAD
         yProba_s = dMethods[str(method)]['yProba_s']
         yPredicted_s = dMethods[str(method)]['yPredicted_s']
+=======
+        yProba_s = dMethods[method]['yProba_s']
+        yPredicted_s = dMethods[method]['yPredicted_s']
+>>>>>>> d09f6d93048ed5d4fa5d4e38111dca0e58e606e6
 
         ratio_s = np.arange(0.05,1.0,0.05)
 
@@ -245,19 +288,22 @@ def main():
             # Numerical score:
             if type(yPredicted_treshold_s) == list:
                 for i in range(len(yPredicted_treshold_s)):
-                    sum_s, sum_b = submission.get_numerical_score(yPredicted_treshold_s[i],
-                                                          valid_s[2][i])
+                    sum_s, sum_b = submission.get_numerical_score(
+                                                        yPredicted_treshold_s[i],
+                                                        valid_s[2][i])
                     print "Subset %i: %i elements - sum_s[%i] = %i - sum_b[%i] = %i" \
                             %(i, yPredicted_treshold_s[i].shape[0], i, sum_s, i, sum_b)
 
             # Get s and b for each group (s_s, b_s) and the final final_s and
             # final_b:
-            final_s, final_b, s_s, b_s = submission.get_s_b_8(yPredicted_treshold_s, valid_s[2],
-                                                  valid_s[3])
+            final_s, final_b, s_s, b_s = submission.get_s_b_8(
+                                                yPredicted_treshold_s, valid_s[2],
+                                                valid_s[3])
 
             # Balance the s and b
             final_s *= 250000/25000
             final_b *= 250000/25000
+
             # AMS final:
             AMS = hbc.AMS(final_s , final_b)
             if AMS > best_AMS_1_method:
@@ -266,7 +312,8 @@ def main():
                 best_ratio = ratio
             f.write("AMS total = "+str(AMS)+"\n")
             print "Expected AMS score for %s : %f" %(str(method),AMS)
-             #AMS by group
+
+            #AMS by group
             AMS_s = []
             for i, (s,b) in enumerate(zip(s_s, b_s)):
                 s *= 250000/yPredicted_treshold_s[i].shape[0]
@@ -293,7 +340,7 @@ def main():
     best_final_s *= 250000/25000
     best_final_b  *= 250000/25000
     best_AMS = hbc.AMS(best_final_s, best_final_b)
-    
+
 
     print "Best AMS using one of the methods : %f" %best_AMS_1_method
     print "method : %s" %(str(method))
@@ -304,7 +351,7 @@ def main():
 
     for n in range(8):
         print "Best AMS for group %i is: %f and is  obtained with method %s and ratio %f" %(n, best_AMS_s[n], best_method_s[n], best_ratio_s[n])
-
+"""
 if __name__ == '__main__':
     main()
 
