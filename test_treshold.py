@@ -112,19 +112,18 @@ def main():
                                               kwargs_bayes)
 
     # SVM
-    """
+    
     kwargs_svm ={}
     dMethods['svm'] = analyse.analyse(train_s, valid_s,'svm', kwargs_svm)
-    """
+    
 
     # K NEIGHBORS
     kwargs_tuning_kn = {'n_neighbors': [20,50]}
     dTuning = tuningModel.parameters_grid_search(train_s, valid_s, 'kNeighbors',
                                              kwargs_tuning_kn)
-    print "prout"
 
     dMethods['kNeighbors'] = combineClassifiers.select_best_classifiers(dTuning, valid_s)
-
+    
     # LDA
     kwargs_lda = {}
     dMethods['lda'] = analyse.analyse(train_s, valid_s, 'lda', kwargs_lda)
@@ -156,10 +155,10 @@ def main():
     dMethods['gradientBoosting'] = analyse.analyse(train_s, valid_s, 'gradientBoosting', kwargs_gradB)
 
 
-    kwargs_tuning_gradB = {'loss': ['deviance'], 'learning_rate': [0.1, 0.5],
-                    'n_estimators': [200], 'subsample': [1.0],
+    kwargs_tuning_gradB = {'loss': ['deviance'], 'learning_rate': [0.1],
+                    'n_estimators': [100], 'subsample': [1.0],
                     'min_samples_split': [2], 'min_samples_leaf': [1],
-                    'max_depth': [10,20], 'init': [None], 'random_state': [None],
+                    'max_depth': [10], 'init': [None], 'random_state': [None],
                     'max_features': [None], 'verbose': [0]}
 
     dTuning = tuningModel.parameters_grid_search(train_s, valid_s,
@@ -168,8 +167,8 @@ def main():
 
     dMethods['gradientBoosting'] = combineClassifiers.select_best_classifiers(
                                                                 dTuning,
-                                                                valid_s)
-
+                                                         valid_s)
+    
     print(" ")
 
     ##################
@@ -186,77 +185,6 @@ def main():
 
     yProba_s = dCombine['yProba_s']
     yPredicted_s = dCombine['yPredicted_s']
-
-    """
-    ratio_s = np.arange(0.05,1.0,0.05)
-
-    for ratio in ratio_s:
-        f.write("-----ratio = "+str(ratio)+"-----\n")
-        f.write("\n")
-
-        yPredicted_treshold_s = tresholding.proba_treshold(yPredicted_s,
-                                                           yProba_s, ratio)
-        # Numerical score:
-        if type(yPredicted_treshold_s) == list:
-            for i in range(len(yPredicted_treshold_s)):
-                #print "valid_s[2][%i] shape = %i" %(i, valid_s[2][i].shape[0])
-                #print "yPredictedtreshold_s[%i] shape = %i" \
-                #        %(i, yPredicted_treshold_s[i].shape[0])
-
-                sum_s, sum_b = submission.get_numerical_score(
-                                                        yPredicted_treshold_s[i],
-                                                        valid_s[2][i])
-
-               # print "Subset %i: %i elements - sum_s[%i] = %i - sum_b[%i] = %i" \
-               #     %(i, yPredicted_treshold_s[i].shape[0], i, sum_s, i, sum_b)
-
-        # Get s and b for each group (s_s, b_s) and the final final_s and
-        # final_b:
-        final_s, final_b, s_s, b_s = submission.get_s_b_8(yPredicted_treshold_s,
-                                                          valid_s[2],
-                                                          valid_s[3])
-
-        # Balance the s and b
-        final_s *= 250000/25000
-        final_b *= 250000/25000
-
-        # AMS final:
-        AMS = hbc.AMS(final_s , final_b)
-
-        if AMS > best_AMS_1_method:
-            best_AMS_1_method = AMS
-            best_method = "combined"
-            best_ratio = ratio
-
-        f.write("AMS total = " + str(AMS )+ "\n")
-        print ("Expected AMS score for combined methods : %f") %AMS
-
-        #AMS by group
-        AMS_s = []
-        for i, (s,b) in enumerate(zip(s_s, b_s)):
-            s *= 250000/yPredicted_treshold_s[i].shape[0]
-            b *= 250000/yPredicted_treshold_s[i].shape[0]
-            score = hbc.AMS(s,b)
-            # Condition sur l'AMS
-
-            if score > best_AMS_s[i]:
-                best_yPredicted_s[i] = yPredicted_treshold_s[i]
-                best_yProba_s[i] = yProba_s[i]
-                best_AMS_s[i] = score
-                best_method_s[i] = dCombine['method'][i]
-                best_ratio_s[i] = ratio
-
-            AMS_s.append(score)
-            f.write("AMS for group %i is %f" %(i, score))
-            f.write("\n")
-            print("Expected AMS score for randomforest :  for group %i is : %f"\
-                    %(i, score))
-        print(" ")
-
-        f.write("\n")
-        f.write("\n")
-    """
-
     #Let's concatenate the vectors
     yProba_conca = preTreatment.concatenate_vectors(yProba_s)
     yPredicted_conca = preTreatment.concatenate_vectors(yPredicted_s)
@@ -331,13 +259,21 @@ def main():
                 best_method_s[i] = str(method)
                 best_ratio_s[i] = best_treshold
 
+    # Let's concatenate the 8 vectors which performs the best on each on
+    # each of the sub group and tresholding it 
+    best_yPredicted_conca = preTreatment.concatenate_vectors(best_yPredicted_s)
+    best_treshold_conca = tresholding.best_treshold(best_yPredicted_conca, yValid_conca, weights_conca)
+    best_yPredicted_conca_treshold = tresholding.get_yPredicted_treshold(best_yPredicted_conca, best_treshold_conca)
 
-    best_final_s, best_final_b, best_s_s, best_b_s = submission.get_s_b_8(
-                                        best_yPredicted_s, valid_s[2], valid_s[3])
+    best_final_s, best_final_b, best_s_s, best_b_s = submission.get_s_b_8(best_yPredicted_s, valid_s[2], valid_s[3])
+    best_s_treshold, best_b_treshold = submission.get_s_b(best_yPredicted_conca_treshold, yValid_conca, weights_conca)
 
     best_final_s *= 10
     best_final_b *= 10
+    best_s_treshold *= 10
+    best_b_treshold *= 10
     best_AMS = hbc.AMS(best_final_s, best_final_b)
+    best_AMS_treshold = hbc.AMS(best_s_treshold, best_b_treshold)
 
 
     print "Best AMS using one of the methods : %f" %best_AMS_1_method
@@ -345,6 +281,8 @@ def main():
     print "    ratio : %f" %(best_ratio)
     print " "
     print "Best AMS final : %f" %best_AMS
+    print "Best AMS final after final tresholding : %f" %best_AMS_treshold
+    print "best ratio on the concatenated vector : %f" %best_treshold_conca
     print " "
 
     for n in range(8):
