@@ -44,3 +44,6 @@ coverage.xml
 
 #TXT:
 *.txt
+
+#SWP
+*.swp
