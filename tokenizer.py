@@ -134,8 +134,6 @@ def get_8_bins(normalize = True, noise_variance = 0., ratio_train= 0.9):
 
     ID_test, xsTest, nameTest = Test[0], Test[1], Test[2]
 
-    print nameTest.shape
-
     # Splitting the data into sub-groups:
     print("    Splitting the train set")
     ID_train_s, xsTrain_s, yTrain_s, weightsTrain_s = \

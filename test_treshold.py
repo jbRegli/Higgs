@@ -99,13 +99,13 @@ def main():
     # Keys of the methods : {naiveBayes, svm, kNeighbors, lda, qda, adaBoost,
     #                       randomForest, gradientBoosting}
     dMethods ={}
-    
+
     # NAIVE BAYES:
 
     kwargs_bayes = {}
     dMethods['naiveBayes'] =  analyse.analyse(train_s, valid_s, 'naiveBayes',
                                               kwargs_bayes)
-    
+
 
     kwargs_bayes = {}
     dMethods['naiveBayes'] =  analyse.analyse(train_s, valid_s, 'naiveBayes',
@@ -116,9 +116,9 @@ def main():
     kwargs_svm ={}
     dMethods['svm'] = analyse.analyse(train_s, valid_s,'svm', kwargs_svm)
     """
-    
+
     # K NEIGHBORS
-    kwargs_tuning_kn = {'n_neighbors': [10,20]}
+    kwargs_tuning_kn = {'n_neighbors': [20,50]}
     dTuning = tuningModel.parameters_grid_search(train_s, valid_s, 'kNeighbors',
                                              kwargs_tuning_kn)
     print "prout"
@@ -148,18 +148,18 @@ def main():
 
     dMethods['randomForest'] = combineClassifiers.select_best_classifiers(dTuning,
                                                                 valid_s)
-    """
+
     # GRADIENT BOOSTING
-    
+
     kwargs_gradB = {}
 
     dMethods['gradientBoosting'] = analyse.analyse(train_s, valid_s, 'gradientBoosting', kwargs_gradB)
 
 
-    kwargs_tuning_gradB = {'loss': ['deviance'], 'learning_rate': [0.1],
-                    'n_estimators': [100,200], 'subsample': [1.0],
+    kwargs_tuning_gradB = {'loss': ['deviance'], 'learning_rate': [0.1, 0.5],
+                    'n_estimators': [200], 'subsample': [1.0],
                     'min_samples_split': [2], 'min_samples_leaf': [1],
-                    'max_depth': [3,5,7], 'init': [None], 'random_state': [None],
+                    'max_depth': [10,20], 'init': [None], 'random_state': [None],
                     'max_features': [None], 'verbose': [0]}
 
     dTuning = tuningModel.parameters_grid_search(train_s, valid_s,
@@ -169,8 +169,6 @@ def main():
     dMethods['gradientBoosting'] = combineClassifiers.select_best_classifiers(
                                                                 dTuning,
                                                                 valid_s)
-    
-    """
 
     print(" ")
 
@@ -187,11 +185,9 @@ def main():
     f = open("Tests/test_treshold_combined.txt","w")
 
     yProba_s = dCombine['yProba_s']
-    #on ne garde que la proba s
-    yProba_s= [yProba_s[i][:,1] for i in range(8)]
     yPredicted_s = dCombine['yPredicted_s']
 
-<<<<<<< HEAD
+    """
     ratio_s = np.arange(0.05,1.0,0.05)
 
     for ratio in ratio_s:
@@ -226,32 +222,30 @@ def main():
 
         # AMS final:
         AMS = hbc.AMS(final_s , final_b)
-        
+
         if AMS > best_AMS_1_method:
             best_AMS_1_method = AMS
             best_method = "combined"
             best_ratio = ratio
-        
+
         f.write("AMS total = " + str(AMS )+ "\n")
         print ("Expected AMS score for combined methods : %f") %AMS
 
         #AMS by group
         AMS_s = []
         for i, (s,b) in enumerate(zip(s_s, b_s)):
-            """
             s *= 250000/yPredicted_treshold_s[i].shape[0]
             b *= 250000/yPredicted_treshold_s[i].shape[0]
-            """
             score = hbc.AMS(s,b)
             # Condition sur l'AMS
-            
+
             if score > best_AMS_s[i]:
                 best_yPredicted_s[i] = yPredicted_treshold_s[i]
                 best_yProba_s[i] = yProba_s[i]
                 best_AMS_s[i] = score
                 best_method_s[i] = dCombine['method'][i]
                 best_ratio_s[i] = ratio
-            
+
             AMS_s.append(score)
             f.write("AMS for group %i is %f" %(i, score))
             f.write("\n")
@@ -261,8 +255,8 @@ def main():
 
         f.write("\n")
         f.write("\n")
+    """
 
-=======
     #Let's concatenate the vectors
     yProba_conca = preTreatment.concatenate_vectors(yProba_s)
     yPredicted_conca = preTreatment.concatenate_vectors(yPredicted_s)
@@ -277,7 +271,7 @@ def main():
     ams = hbc.AMS(s,b)
     if ams > best_AMS_1_method:
         best_AMS_1_method = ams
-        best_method = "combined"
+        best_method = dCombine['method'][i]
         best_ratio = best_treshold
 
     # Best treshold group by group
@@ -292,16 +286,14 @@ def main():
             best_yPredicted_s[i] = yPredicted_s[i]
             best_yProba_s[i] = yProba_s[i]
             best_AMS_s[i] = ams
-            best_method_s[i] = "combined"
+            best_method_s[i] = dCombine['method'][i]
             best_ratio_s[i] = best_treshold
->>>>>>> ca12a76bc5d0dd9b474130ba1c31fa36433adeee
 
 
     # FOR EACH METHOD:
     for method in dMethods:
 
         yProba_s = dMethods[method]['yProba_s']
-        yProba_s = [yProba_s[i][:,1] for i in range(8)]
         yPredicted_s = dMethods[method]['yPredicted_s']
 
         #Let's concatenate the vectors
@@ -323,9 +315,12 @@ def main():
 
         # Best treshold group by group
         for i in range(8):
-            best_treshold = tresholding.best_treshold(yProba_s[i], valid_s[2][i], valid_s[3][i])
-            yPredicted_s[i] = tresholding.get_yPredicted_treshold(yProba_s[i], best_treshold)
-            s, b = submission.get_s_b(yPredicted_s[i], valid_s[2][i], valid_s[3][i])
+            best_treshold = tresholding.best_treshold(yProba_s[i], valid_s[2][i],
+                                                      valid_s[3][i])
+            yPredicted_s[i] = tresholding.get_yPredicted_treshold(yProba_s[i],
+                                                                  best_treshold)
+            s, b = submission.get_s_b(yPredicted_s[i], valid_s[2][i],
+                                      valid_s[3][i])
             s *= 250000/yPredicted_s[i].shape[0]
             b *= 250000/yPredicted_s[i].shape[0]
             ams = hbc.AMS(s,b)
@@ -337,8 +332,8 @@ def main():
                 best_ratio_s[i] = best_treshold
 
 
-  
-    best_final_s, best_final_b, best_s_s, best_b_s = submission.get_s_b_8(best_yPredicted_s, valid_s[2], valid_s[3])
+    best_final_s, best_final_b, best_s_s, best_b_s = submission.get_s_b_8(
+                                        best_yPredicted_s, valid_s[2], valid_s[3])
 
     best_final_s *= 10
     best_final_b *= 10
@@ -346,14 +341,15 @@ def main():
 
 
     print "Best AMS using one of the methods : %f" %best_AMS_1_method
-    print "method : %s" %(str(method))
-    print " ratio : %f" %(best_ratio)
+    print "    method : %s" %(str(method))
+    print "    ratio : %f" %(best_ratio)
     print " "
     print "Best AMS final : %f" %best_AMS
     print " "
 
     for n in range(8):
-        print "Best AMS for group %i is: %f and is  obtained with method %s and ratio %f" %(n, best_AMS_s[n], best_method_s[n], best_ratio_s[n])
+        print "Best AMS group %i: %f - method %s - ratio %f" \
+                %(n, best_AMS_s[n], best_method_s[n], best_ratio_s[n])
 
     return best_yPredicted_s, valid_s
 

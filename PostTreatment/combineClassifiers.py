@@ -74,7 +74,11 @@ def select_best_classifiers(dTuning, valid_s, criteria= 'ams'):
             sum_b_s[i] = dTuning[exp]['sum_b'][i]
             AMS_s[i] = dTuning[exp]['AMS_s'][i]
             classif_succ_s[i] = dTuning[exp]['classif_succ'][i]
-            method_s[i] = dTuning[exp]['method']
+
+            if type(dTuning[exp]['method']) == list:
+                method_s[i] = dTuning[exp]['method'][i]
+            else:
+                method_s[i] = dTuning[exp]['method']
             if type(dTuning[exp]['parameters']) == list:
                 parameters_s[i] = dTuning[exp]['parameters'][i]
             else:
