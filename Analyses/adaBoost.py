@@ -52,7 +52,7 @@ def prediction(predictor, testset):
     # Label prediction:
     label_predicted = predictor.predict(testset)
     # Probability of being in each label
-    proba_predicted = predictor.predict_proba(testset)
+    proba_predicted = predictor.predict_proba(testset)[:,1]
 
     return label_predicted, proba_predicted
 
@@ -103,12 +103,10 @@ def get_test_prediction(predictor_s, xsTest_s):
                                                             xsTest_s[n])
 
             test_prediction_s.append(label_predicted)
-            test_proba_s.append(proba_predicted[:,1])
+            test_proba_s.append(proba_predicted)
 
     else:
-        test_prediction_s , proba_predicted = prediction(predictor_s, xsTest_s)
-
-        test_proba_s = proba_predicted[:,1]
+        test_prediction_s , test_proba_s = prediction(predictor_s, xsTest_s)
 
     return test_prediction_s, test_proba_s
 
