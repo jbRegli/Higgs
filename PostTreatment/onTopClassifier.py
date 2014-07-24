@@ -49,6 +49,12 @@ def create_inputs(dMethods, valid_s, ignore= []):
     return first_layer_predictors, first_layer_data
 
 
+def plot_first_layer_data(first_layer_data, valid_s):
+    """
+    Plo
+    """
+    return 0
+
 def get_prediction_FL(first_layer_predictors, xTrain_s):
     """
     Given a list of trained first level classifiers and data, realize the
@@ -85,7 +91,7 @@ def get_prediction_FL(first_layer_predictors, xTrain_s):
     return first_layer_predictions
 
 
-def train_SL(first_layer_predictions, yTrain_s, method= 'tree'):
+def train_SL(first_layer_predictions, yTrain_s, method= 'tree', parameters={}):
     """
     Given a list of prediction from the first layer and a list of effective
     labels, train a second layer classifier to learn the correct label from the
@@ -100,11 +106,11 @@ def train_SL(first_layer_predictions, yTrain_s, method= 'tree'):
         print ("Training an 'on-top' classifier...")
         for i in range(len(yTrain_s)):
             if method == 'tree':
-                clf = DecisionTreeClassifier()
+                clf = DecisionTreeClassifier(*parameters)
             elif method == 'logisticReg':
-                clf = LogisticRegression(C=1e3)
+                clf = LogisticRegression(*parameters)
             elif method == 'svm':
-                clf = svm.SVC(probability = True)
+                clf = svm.SVC(*parameters)
             else:
                 raise NotImplementedError("The classifier %s is not implemented"\
                         %(method))
@@ -116,9 +122,11 @@ def train_SL(first_layer_predictions, yTrain_s, method= 'tree'):
 
     else:
         if method == 'tree':
-            second_layer_predictors = DecisionTreeClassifier()
+            second_layer_predictors = DecisionTreeClassifier()#parameters)
         elif method == 'logisticReg':
-            second_layer_predictors = LogisticRegression(C=1e3)
+            second_layer_predictors = LogisticRegression()#parameters)
+        elif method == 'svm':
+            clf = svm.SVC()#parameters)
         else:
             raise NotImplementedError("The classifier %s is not implemented"\
                         %(method))
@@ -238,7 +246,8 @@ def evaluate_AMS(final_prediction, valid_s):
     return final_s, final_b, AMS, AMS_s
 
 
-def SL_classification(dMethods, valid_s, train_s, method='tree', ignore= []):
+def SL_classification(dMethods, valid_s, train_s, ignore= [], method='tree',
+                      parameters = {}):
 
     # Create the necessary inputs from the dictionnary of methods:
     first_layer_predictors, first_layer_data = create_inputs(dMethods, valid_s,
@@ -249,7 +258,7 @@ def SL_classification(dMethods, valid_s, train_s, method='tree', ignore= []):
                                                 train_s[1])
     # Train the 'on-top' predictors:
     second_layer_predictors = train_SL(first_layer_predictions, train_s[2],
-                                       method= method)
+                                       method= method, parameters= parameters)
 
     # Get the prediction done by the second layer on the valid set:
     final_prediction_s = predict_SL(second_layer_predictors, first_layer_data)

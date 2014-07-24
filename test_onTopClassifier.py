@@ -97,7 +97,7 @@ def main():
     # QDA
     kwargs_qda= {}
     dMethods['qda'] = analyse.analyse(train_s, valid_s, 'qda', kwargs_qda)
-
+    """
     # ADABOOST
     kwargs_ada= {   'n_estimators': 50,
                     'learning_rate': 1.,
@@ -137,7 +137,7 @@ def main():
     kwargs_rdf= {'n_estimators': 100}
     dMethods['randomForest5'] = analyse.analyse(train_s, valid_s, 'randomForest',
                                                kwargs_rdf)
-
+    """
     print(" ")
 
     ##################
@@ -149,13 +149,18 @@ def main():
     #ignore = ['randomForest2', 'randomForest']
     ignore = []
     clf_onTop = 'svm'
+    parameters = {'C': 1.0, 'kernel': 'rbf', 'degree': 3, 'gamma': 0.0,
+                  'coef0': 0.0, 'shrinking':True, 'probability':True,
+                  'tol': 0.001, 'cache_size':200, 'class_weight': None}
+
 
     print ("We will use an 'on-top' predictor on %i classifiers using a %s.") \
             %(len(dMethods.keys())-len(ignore), clf_onTop)
 
     final_prediction_s, dOnTop = onTopClassifier.SL_classification(dMethods,
                                         valid_s, train_s,
-                                        method=clf_onTop, ignore = ignore)
+                                        ignore = ignore,
+                                        method= clf_onTop, parameters= parameters)
 
     print("-------------------------- Tresholding -------------------------")
     ### ON THE 'ON-TOP' CLASSIFIER:
@@ -190,7 +195,7 @@ def main():
 
 
     # COMPARISON BEST TRESHOLD IN DMETHOD
-# FOR EACH METHOD:
+    # FOR EACH METHOD:
     best_yPredicted_s = [np.zeros(valid_s[2][i].shape[0]) for i in range(8)]
     best_yProba_s = [np.zeros(valid_s[2][i].shape[0]) for i in range(8)]
     best_AMS_s = [0. for i in range(8)]
@@ -223,23 +228,6 @@ def main():
             best_method = str(method)
             best_ratio = best_treshold
 
-        # Best treshold group by group
-        for i in range(8):
-            best_treshold = tresholding.best_treshold(yProba_s[i], valid_s[2][i],
-                                                      valid_s[3][i])
-            yPredicted_s[i] = tresholding.get_yPredicted_treshold(yProba_s[i],
-                                                                  best_treshold)
-            s, b = submission.get_s_b(yPredicted_s[i], valid_s[2][i],
-                                      valid_s[3][i])
-            s *= 250000/yPredicted_s[i].shape[0]
-            b *= 250000/yPredicted_s[i].shape[0]
-            ams = hbc.AMS(s,b)
-            if ams > best_AMS_s[i]:
-                best_yPredicted_s[i] = yPredicted_s[i]
-                best_yProba_s[i] = yProba_s[i]
-                best_AMS_s[i] = ams
-                best_method_s[i] = str(method)
-                best_ratio_s[i] = best_treshold
 
     # Let's concatenate the 8 vectors which performs the best on each on
     # each of the sub group and tresholding it
@@ -262,8 +250,8 @@ def main():
     print "    method : %s" %(str(method))
     print "    ratio : %f" %(best_ratio)
     print " "
-    print "Best AMS final : %f" %best_AMS
-    print "Best AMS final after final tresholding : %f" %best_AMS_treshold
+    print "Best AMS concatenate: %f" %best_AMS
+    print "Best AMS concatenate  after final tresholding : %f" %best_AMS_treshold
     print "best ratio on the concatenated vector : %f" %best_treshold_conca
     print " "
     print "Best AMS on-top : %f" %OT_best_AMS
