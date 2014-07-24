@@ -15,6 +15,7 @@ import gradientBoosting
 
 sys.path.append('../')
 import HiggsBosonCompetition_AMSMetric_rev1 as hbc
+import preTreatment
 
 
 def analyse(train_s, valid_s, method_name, kwargs):
@@ -46,8 +47,9 @@ def analyse(train_s, valid_s, method_name, kwargs):
                                                   valid_s[3])
 
     # Balance the s and b
-    final_s *= 250000/25000
-    final_b *= 250000/25000
+    yValid_conca = preTreatment.concatenate_vectors(valid_s[2])
+    final_s *= 250000/yValid_conca.shape[0]
+    final_b *= 250000/yValid_conca.shape[0]
     # AMS final:
     AMS = hbc.AMS(final_s , final_b)
     print ("Expected AMS score for "+method_name+" : %f") %AMS
