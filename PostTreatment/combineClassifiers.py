@@ -6,6 +6,7 @@ import sys
 sys.path.append('../')
 import submission
 import HiggsBosonCompetition_AMSMetric_rev1 as hbc
+import preTreatment
 
 
 def select_best_classifiers(dTuning, valid_s, criteria= 'ams'):
