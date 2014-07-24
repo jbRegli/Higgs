@@ -12,7 +12,7 @@ import random,string,math,csv
 import preTreatment
 
 
-def get_all_data(normalize = True, noise_variance = 0., ratio_train = 0.9):
+def get_all_data(normalize = True, noise_variance = 0., ratio_train = 0.9, n_classes = "binary"):
     """
     normalize : binary
     if True normalize all the data
@@ -23,6 +23,10 @@ def get_all_data(normalize = True, noise_variance = 0., ratio_train = 0.9):
 
     ratio_train = float
     percentage of the data base used for training
+
+    n_classes = string in {"binary", multiclass"}
+    if multiclasses 4 classes for the events {1,2,3,4}, and 1 for the non event : {0}
+    default = "binary"
 
     Outputs :
 
@@ -105,6 +109,10 @@ def get_all_data(normalize = True, noise_variance = 0., ratio_train = 0.9):
     weightsTrain = weights[randomPermutation[:numPointsTrain]]
     weightsValidation = weights[randomPermutation[numPointsTrain:]]
 
+    if n_classes == "multiclass":
+        yTrain = preTreatment.binary2multiclass(yTrain, weightsTrain)
+        yValidation = preTreatment.binary2multiclass(yValidation, weightsValidation)
+
     sumWeightsTrain = np.sum(weightsTrain)
     sumSWeightsTrain = np.sum(weightsTrain[sSelectorTrain])
     sumBWeightsTrain = np.sum(weightsTrain[bSelectorTrain])
@@ -115,7 +123,7 @@ def get_all_data(normalize = True, noise_variance = 0., ratio_train = 0.9):
            (eventID_test, xsTest, names_train))
 
 
-def get_8_bins(normalize = True, noise_variance = 0., ratio_train= 0.9):
+def get_8_bins(normalize = True, noise_variance = 0., ratio_train= 0.9, n_classes = "binary"):
     """
     returns (xsTrain_s, yTrain_s, weightsTrain_s), (xsValidation_s, yValidation_s, weightsValidation_s)
     list of the data containing the eight different groups
@@ -124,7 +132,8 @@ def get_8_bins(normalize = True, noise_variance = 0., ratio_train= 0.9):
     # Extracting the train set, the validation set and the test set:
     Train, Validation, Test = get_all_data(normalize = normalize,
                                      noise_variance = noise_variance,
-                                     ratio_train= ratio_train)
+                                     ratio_train= ratio_train,
+                                     n_classes = n_classes)
 
     ID_train, xsTrain, yTrain, weightsTrain, nameTrain  = Train[0], Train[1], \
                                                 Train[2], Train[3], Train[4]
@@ -184,17 +193,17 @@ def get_8_bins(normalize = True, noise_variance = 0., ratio_train= 0.9):
 
 
 def extract_data(split= True, normalize= True, noise_variance= 0.,
-                 ratio_train= 0.9):
+                 ratio_train= 0.9, n_classes = "binary"):
     """
     Function wrapping the extraction of the data for any of the possible cases.
     """
     if split == True:
         # Split the data into 8 sub-datasets:
         return get_8_bins(normalize= normalize, noise_variance= noise_variance,
-                          ratio_train= ratio_train)
+                          ratio_train= ratio_train, n_classes = n_classes)
     else:
         # Extract the data as a unique dataset:
         return get_all_data(normalize= normalize, noise_variance= noise_variance,
-                            ratio_train = ratio_train)
+                            ratio_train = ratio_train, n_classes = n_classes)
 
 
