@@ -13,24 +13,6 @@ import preTreatment
 import submission
 import HiggsBosonCompetition_AMSMetric_rev1 as hbc
 
-
-import sys
-sys.path.append('Analyses/')
-import analyse # Function computing an analyse for any method in the good format
-import tuningModel
-import naiveBayes
-import randomForest
-import svm
-import kNeighbors
-import adaBoost
-import lda
-import qda
-
-sys.path.append('PostTreatment')
-import onTopClassifier
-import mergeClassifiers
-
-
 # add path of xgboost python module (NICO DOIT AJOUTER LE CHEMIN VERS SON BOOST)
 code_path_jb = '/home/regli/Applications/Python/xgboost/python'
 sys.path.append(code_path_jb)
@@ -64,8 +46,8 @@ def classifier(xTrain, yTrain, wTrain, test_size= 550000, **kwargs):
     param['objective'] = 'binary:logitraw'
     # scale weight of positive examples
     param['scale_pos_weight'] = sum_wneg/sum_wpos
-    param['bst:eta'] = 0.1
-    param['bst:max_depth'] = 6
+    param['bst:eta'] = 0.5 #0.1
+    param['bst:max_depth'] = 10
     param['eval_metric'] = 'auc'
     param['silent'] = 1
     param['nthread'] = 16
@@ -77,7 +59,7 @@ def classifier(xTrain, yTrain, wTrain, test_size= 550000, **kwargs):
 
     watchlist = [ (xgmat,'train') ]
     # boost 120 tres
-    num_round = 120
+    num_round = 200
 
     bst = xgb.train( plst, xgmat, num_round, watchlist );
 

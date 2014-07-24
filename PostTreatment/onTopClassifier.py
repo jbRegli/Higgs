@@ -105,8 +105,6 @@ def train_SL(first_layer_predictions, yTrain_s, method= 'tree'):
                 clf = LogisticRegression(C=1e3)
             elif method == 'svm':
                 clf = svm.SVC(probability = True)
-
-
             else:
                 raise NotImplementedError("The classifier %s is not implemented"\
                         %(method))
@@ -138,6 +136,7 @@ def predict_SL(second_layer_predictors, first_layer_data):
     """
 
     # If we work with the splitted dataset:
+
     if type(second_layer_predictors) == list:
 
         ID_s = first_layer_data[0][0]
@@ -151,16 +150,16 @@ def predict_SL(second_layer_predictors, first_layer_data):
                 predictions.append(clfier[2][j])
             first_layer_predicted_label.append(zip(*predictions))
 
-        final_prediction_s= []
-
         # Predictions:
+        final_prediction_s= []
         for i in range(len(second_layer_predictors)):
             # Predict the label of a subset:
-            final_label_s = second_layer_predictors[i].predict(first_layer_predicted_label[i])
+            final_label_s = second_layer_predictors[i].predict(
+                                                        first_layer_predicted_label[i])
 
             # Predict the proba of being a signal of a subset:
             final_proba_s = second_layer_predictors[i].predict_proba(
-                                                first_layer_predicted_label[i])[1]
+                                                first_layer_predicted_label[i])[:,1]
 
             final_prediction_s.append([ID_s[i], final_proba_s, final_label_s])
 
@@ -181,7 +180,7 @@ def predict_SL(second_layer_predictors, first_layer_data):
         final_label_s = second_layer_predictors.predict(
                                                       first_layer_predicted_label)
         final_proba_s = second_layer_predictors[i].predict_proba(
-                                                   first_layer_predicted_label)[1]
+                                                    first_layer_predicted_label)[:,1]
 
         final_prediction_s = [ID_s, final_proba_s, final_label_s]
 
@@ -192,7 +191,7 @@ def classif_classifiers_error(final_prediction, y_true_s):
     """
     Compute the error made by the "on-top" classifier
     """
-    y_predicted_s = final_prediction[2]
+    y_predicted_s = zip(*final_prediction)[2]
 
     if type(y_predicted_s) == list:
         prediction_error_s = []
@@ -285,12 +284,13 @@ def SL_classification(dMethods, valid_s, train_s, method='tree', ignore= []):
     print(" ")
 
     d = {'predictor_s': second_layer_predictors,
-         'y_predicted_s': final_prediction_s[2],
-         'yProba_s': final_prediction_s[1],
+         'yPredicted_s': np.asarray(zip(*final_prediction_s)[2]),
+         'yProba_s': np.asarray(zip(*final_prediction_s)[1]),
          'final_s': final_s, 'final_b': final_b,
          'sum_s': sum_s, 'sum_b': sum_b,
          'AMS': AMS, 'AMS_s': AMS_s,
-         'classif_succ': classif_succ}
+         'classif_succ': classif_succ,
+         'method': method}
 
     return final_prediction_s, d
 
