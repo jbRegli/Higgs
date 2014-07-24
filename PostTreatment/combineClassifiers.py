@@ -90,8 +90,9 @@ def select_best_classifiers(dTuning, valid_s, criteria= 'ams'):
                                                           valid_s[2],
                                                           valid_s[3])
         # Balance the s and b
-        final_s *= 250000/25000
-        final_b *= 250000/25000
+        yValid_conca = preTreatment.concatenate_vectors(valid_s[2])
+        final_s *= 250000/yValid_conca.shape[0]
+        final_b *= 250000/yValid_conca.shape[0]
         # AMS final:
         AMS = hbc.AMS(final_s , final_b)
         print ("Expected AMS score for the combined classifiers : %f") %AMS
