@@ -202,8 +202,6 @@ def predict_SL(second_layer_predictors, first_layer_data):
 
         final_prediction_s = [ID_s, final_proba_s, final_label_s]
 
-        print "+++", len(final_proba_s)
-
     return final_prediction_s
 
 
@@ -211,9 +209,8 @@ def classif_classifiers_error(final_prediction, y_true_s):
     """
     Compute the error made by the "on-top" classifier
     """
-    y_predicted_s = zip(*final_prediction)[2]
-
-    if type(y_predicted_s) == list:
+    if type(final_prediction[2]) == list:
+        y_predicted_s = zip(*final_prediction)[2]
         prediction_error_s = []
 
         for n in range(len(y_predicted_s)):
@@ -221,6 +218,7 @@ def classif_classifiers_error(final_prediction, y_true_s):
                                                      y_predicted_s[n],
                                                      normalize=normalize))
     else:
+        y_predicted_s = final_prediction[2]
         prediction_error_s = accuracy_score(y_true_s, y_predicted_s,
                                             normalize=normalize)
 
@@ -231,21 +229,14 @@ def evaluate_AMS(final_prediction, valid_s):
     # Get s and b for each group (s_s, b_s) and the final final_s and
     # final_b:
 
-    y_predicted_s = list(zip(*final_prediction)[2])
-
-
-    print ("+++ juste avant submission.get_s_b_8")
-    print ("+++ type(valid_s[2])= ", type(valid_s[2]))
-    print ("+++ valid_s[2].shape= ", np.asarray(valid_s[2]).shape)
-    print ("+++ y_predicted_s.shape= ", np.asarray(y_predicted_s).shape)
-
-    if type(y_predicted_s) == list:
+    if type(final_prediction[2]) == list:
+        y_predicted_s = list(zip(*final_prediction)[2])
         final_s, final_b, s_s, b_s = submission.get_s_b(y_predicted_s, valid_s[2],
                                                                     valid_s[3])
     else:
+        y_predicted_s = final_prediction[2]
         final_s, final_b = submission.get_s_b(y_predicted_s, valid_s[2],
                                                             valid_s[3])
-
 
     # Balance the s and b
     final_s *= 250000/25000
@@ -296,28 +287,33 @@ def SL_classification(dMethods, valid_s, train_s, ignore= [], method='tree',
     final_s, final_b, AMS, AMS_s =evaluate_AMS (final_prediction_s, valid_s)
 
     # Classification error:
-    classif_succ = []
-    for i in range(len(final_prediction_s)):
-        ratio = accuracy_score(final_prediction_s[i][2],valid_s[2][i],
-                               normalize= True)
-        print("On the subset %i - correct prediction = %f") %(i, ratio)
-        classif_succ.append(ratio)
+    if type(final_prediction_s[0]) == list:
+        classif_succ = []
+        for i in range(len(final_prediction_s)):
+            ratio = accuracy_score(final_prediction_s[i][2],valid_s[2][i],
+                                        normalize= True)
+            print("On the subset %i - correct prediction = %f") %(i, ratio)
+            classif_succ.append(ratio)
+
+    else:
+        classif_succ = accuracy_score(final_prediction_s[2],valid_s[2],
+                                        normalize= True)
+        print("On the validation set - correct prediction= %f") %(classif_succ)
 
     print (" ")
     # Numerical score:
-    if type(final_prediction_s) == list:
+    if type(final_prediction_s[0]) == list:
         for i in range(len(final_prediction_s)):
-
             sum_s, sum_b = submission.get_numerical_score(
                                                         final_prediction_s[i][2],
                                                         valid_s[2][i])
             print "Subset %i: %i elements - sum_s[%i] = %i - sum_b[%i] = %i" \
                     %(i, final_prediction_s[i][2].shape[0], i, sum_s, i, sum_b)
     else:
-             sum_s, sum_b = submission.get_numerical_score(final_prediction_s[2],
+        sum_s, sum_b = submission.get_numerical_score(final_prediction_s[2],
                                                             valid_s[2])
-             print "%i elements - sum_s = %i - sum_b = %i" \
-                    %(final_prediction_s[2].shape[0], sum_s, sum_b)
+        print "%i elements - sum_s = %i - sum_b = %i" \
+                %(final_prediction_s[2].shape[0], sum_s, sum_b)
 
     print(" ")
 

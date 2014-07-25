@@ -62,7 +62,6 @@ def get_s_b(yPredicted, yValidation, weightsValidation):
     weighted sum of the real negative (b)
     """
     if type(yPredicted) != list:
-        print("+++ yPredicted != list")
         if yPredicted.shape[0] != yValidation.shape[0] or \
                 yValidation.shape[0] != weightsValidation.shape[0]:
             print "submission.get_s_b: "
