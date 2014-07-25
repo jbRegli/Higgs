@@ -1,5 +1,4 @@
 import numpy as np
-import submission
 import imp
 import sys
 
@@ -16,6 +15,7 @@ import gradientBoosting
 sys.path.append('../')
 import HiggsBosonCompetition_AMSMetric_rev1 as hbc
 import preTreatment
+import submission
 
 
 def analyse(train_s, valid_s, method_name, kwargs):
@@ -29,18 +29,17 @@ def analyse(train_s, valid_s, method_name, kwargs):
     print("------------------- Analyse: %s -----------------------") \
         %(method_name)
 
-    #import sys
-
-    #sys.path.append('Analyses/')
-
-    #method = imp.load_source(method_script,
-                             #str("./Analyses/" + method_script + ".py"))
-
     predictor_s, yPredicted_s, yProba_s = eval(method_name).get_yPredicted_s(
                                                                 train_s[1],
                                                                 train_s[2],
                                                                 valid_s[1],
                                                                 **kwargs)
+    # Let's convert the four 's' classes in s
+    for i in range(8):
+        for j in range(yPredicted_s[i].shape[0]):
+            if yPredicted_s[i][j] >=1:
+                yPredicted_s[i][j] =1
+
     # Get s and b for each group (s_s, b_s) and the final final_s and
     # final_b:
     final_s, final_b, s_s, b_s = submission.get_s_b_8(yPredicted_s, valid_s[2],
@@ -56,7 +55,6 @@ def analyse(train_s, valid_s, method_name, kwargs):
     final_b *= 250000/yValid_conca.shape[0]
     # AMS final:
     AMS = hbc.AMS(final_s , final_b)
-    print ("Expected AMS score for "+method_name+" : %f") %AMS
     #AMS by group
     AMS_s = []
     for i, (s,b) in enumerate(zip(s_s, b_s)):
@@ -64,18 +62,12 @@ def analyse(train_s, valid_s, method_name, kwargs):
         b *= 250000/yPredicted_s[i].shape[0]
         score = hbc.AMS(s,b)
         AMS_s.append(score)
-        print("Expected AMS score for "+method_name+" :  for group %i is : %f" %(i, score))
-    print(" ")
 
     # Classification error:
     classif_succ = eval(method_name).get_classification_error(yPredicted_s,
                                                        valid_s[2],
                                                        normalize= True)
 
-    for i, ratio in enumerate(classif_succ):
-        print("On the subset %i - correct prediction = %f") %(i, ratio)
-
-    print (" ")
     # Numerical score:
     if type(yPredicted_s) == list:
         sum_s_s = []
@@ -86,17 +78,9 @@ def analyse(train_s, valid_s, method_name, kwargs):
             sum_s_s.append(sum_s)
             sum_b_s.append(sum_b)
 
-            print "Subset %i: %i elements - sum_s[%i] = %i - sum_b[%i] = %i" \
-                    %(i, yPredicted_s[i].shape[0], i, sum_s, i, sum_b)
-
     else:
              sum_s_s, sum_b_s = submission.get_numerical_score(yPredicted_s,
                                                            valid_s[2])
-
-             print "%i elements - sum_s = %i - sum_b = %i" \
-                    %(yPredicted_s.shape[0], sum_s_s, sum_b_s)
-
-
 
     d = {'predictor_s':predictor_s, 'yPredicted_s': yPredicted_s,
          'yProba_s': yProba_s,
@@ -107,7 +91,6 @@ def analyse(train_s, valid_s, method_name, kwargs):
          'method': method_name,
          'parameters': kwargs}
 
-    print(" ")
 
     return d
 

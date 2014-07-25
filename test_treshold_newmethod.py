@@ -16,6 +16,7 @@ import tokenizer
 import preTreatment
 
 sys.path.append('PostTreatment/')
+import preTreatment
 import tresholding
 import combineClassifiers
 import mergeClassifiers
@@ -47,7 +48,7 @@ def main():
     split= True
     normalize = True
     noise_var = 0.
-    ratio_train = 0.8
+    ratio_train = 0.5
 
     # Import the training data:
     print("Extracting the data sets...")
@@ -63,8 +64,8 @@ def main():
         L11 = []
         L22 = []
         for i in range(8):
-            L11.append(valid_s[j][i][:int(valid_s[j][i].shape[0]/2)])
-            L22.append(valid_s[j][i][int(valid_s[j][i].shape[0]/2):])
+            L11.append(valid_s[j][i][:int(0.8*valid_s[j][i].shape[0])])
+            L22.append(valid_s[j][i][int(0.8*valid_s[j][i].shape[0]):])
         L1.append(L11)
         L2.append(L22)
     valid1_s = (L1[0], L1[1], L1[2], L1[3])
@@ -134,7 +135,7 @@ def main():
     kwargs_tuning_kn = {'n_neighbors': [20,50]}
     dTuning = tuningModel.parameters_grid_search(train_s, valid1_s, 'kNeighbors',
                                              kwargs_tuning_kn)
-
+    
     dMethods['kNeighbors'] = combineClassifiers.select_best_classifiers(dTuning, valid1_s)
     
     # LDA
@@ -160,9 +161,9 @@ def main():
 
     dMethods['randomForest'] = combineClassifiers.select_best_classifiers(dTuning,
                                                                 valid1_s)
-
-    # GRADIENT BOOSTING
     """
+    # GRADIENT BOOSTING
+    
     kwargs_gradB = {}
 
     dMethods['gradientBoosting'] = analyse.analyse(train_s, valid1_s, 'gradientBoosting', kwargs_gradB)
@@ -222,59 +223,64 @@ def main():
 
 
     # MARKOV CHAIN AMS GLOBAL OBJECTIVE
-    for n in range(100):
-        for i in range(8):
-            for method in dMethods:
+    ams_markov_s = []
+    n_steps_s = np.arange(10,100,10)
+    for n_steps in range(10):
+        print "best AMS : %f" %best_AMS
+        for n in range(10):
+            for i in range(8):
+                for method in dMethods:
 
-                yProba_s = dMethods[method]['yProba_s']
-                yPredicted_s = dMethods[method]['yPredicted_s']
+                    yProba_s = dMethods[method]['yProba_s']
+                    yPredicted_s = dMethods[method]['yPredicted_s']
 
-                treshold_s = np.arange(0., 1., 0.1)
+                    treshold_s = np.arange(0., 1., 0.1)
 
-                for treshold in treshold_s:
-                    yPredicted_s[i] = tresholding.get_yPredicted_treshold(yProba_s[i],
+                    for treshold in treshold_s:
+                        yPredicted_s[i] = tresholding.get_yPredicted_treshold(yProba_s[i],
                                                                   treshold)
-                    s, b = submission.get_s_b(yPredicted_s[i], valid1_s[2][i],
+                        s, b = submission.get_s_b(yPredicted_s[i], valid1_s[2][i],
                                       valid1_s[3][i])
-                    total_s = sum(Es_s) - Es_s[i] +s #somme des s avec la nouvelle valeur de s pour le groupe i et les espérances pour les autres groupes
-                    total_b = sum(Eb_s) - Eb_s[i] +b
-                    total_s *= 250000/25000
-                    total_b *= 250000/25000
-                    ams = hbc.AMS(total_s,total_b)
-                    if ams > best_AMS:
-                        best_yPredicted_s[i] = yPredicted_s[i]
-                        best_yProba_s[i] = yProba_s[i]
-                        best_AMS = ams
-                        best_method_s[i] = str(method)
-                        best_ratio_s[i] = best_treshold
-                        Es_s[i] = s
-                        Eb_s[i] = b
+                        total_s = sum(Es_s) - Es_s[i] +s #somme des s avec la nouvelle valeur de s pour le groupe i et les espérances pour les autres groupes
+                        total_b = sum(Eb_s) - Eb_s[i] +b
+                        yValid_conca = preTreatment.concatenate_vectors(valid1_s[2])
+                        total_s *= 250000/yValid_conca.shape[0]
+                        total_b *= 250000/yValid_conca.shape[0]
+                        ams = hbc.AMS(total_s,total_b)
+                        ams_markov_s.append(ams)
+                        if ams > best_AMS:
+                            best_yPredicted_s[i] = yPredicted_s[i]
+                            best_yProba_s[i] = yProba_s[i]
+                            best_AMS = ams
+                            best_method_s[i] = str(method)
+                            best_ratio_s[i] = best_treshold
+                            Es_s[i] = s
+                            Eb_s[i] = b
+                            best_n = n
 
-    # Let's concatenate the 8 vectors which performs the best on each on
-    # each of the sub group and tresholding it
+        yPredicted2_s = []
+        for i in range(8):
+            yPredicted, yProba = eval(best_method_s[i]).prediction(dMethods[best_method_s[i]]['predictor_s'][i], valid2_s[1][i])
+            yPredicted = tresholding.get_yPredicted_treshold(yProba, best_ratio_s[i])
+            yPredicted2_s.append(yPredicted)
 
+        finals, finalb ,s_s, b_s = submission.get_s_b_8(yPredicted2_s, valid2_s[2], valid2_s[3])
+        yValid_conca = preTreatment.concatenate_vectors(valid2_s[2])
+        finals *= 250000/yValid_conca.shape[0]
+        finalb *= 250000/yValid_conca.shape[0]
+
+        AMS2 = hbc.AMS(finals, finalb)
+        print "AMS après %i samples : %f" %(n_steps*10, AMS2)
     
-    print "Best AMS final : %f" %best_AMS
     print " "
+    print "Best AMS final sur le second test d'entrainement  : %f" %best_AMS
+    print "----parametres pour obtenir le meilleur score--------------"
 
     for n in range(8):
         print "group %i:  -method %s - ratio %f" \
                 %(n, best_method_s[n], best_ratio_s[n])
 
-    yPredicted2_s = [] 
-    for i in range(8):
-        yPredicted, yProba = eval(best_method_s[i]).prediction(dMethods[best_method_s[i]]['predictor_s'][i], valid2_s[1][i])
-        yPredicted = tresholding.get_yPredicted_treshold(yProba, best_ratio_s[i])
-        yPredicted2_s.append(yPredicted)
 
-    finals, finalb ,s_s, b_s = submission.get_s_b_8(yPredicted2_s, valid2_s[2], valid2_s[3])
-
-    finals *= 10
-    finalb *= 10
-
-    AMS2 = hbc.AMS(finals, finalb)
-
-    print "wouhou AMS 2 : %f" %AMS2
 
 
 if __name__ == '__main__':

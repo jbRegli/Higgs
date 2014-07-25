@@ -269,3 +269,33 @@ def ratio_sig_per_dataset(y_s):
 
     return average
 
+def binary2multiclass(yBinary, weights):
+    """
+    function that gives a multiclass label vector
+    yBinary = vector of the binary labels
+    weights = vector of the weights
+    returns a vector with 5 classes : {0,1,2,3} = different events signal, 4 = non event signals
+    """
+    if yBinary.shape != weights.shape:
+        print "Vector of labels and Vector of weights must be the same size"
+        exit()
+
+    yMultiClass = np.zeros_like(yBinary)
+
+    for i, (y, weight) in enumerate(zip(yBinary, weights)):
+        if y ==1:
+            if weight ==0.018636116671999998:
+                yMultiClass[i] = 1
+            elif weight ==0.0015027048310100001:
+                yMultiClass[i] = 2
+            elif weight ==0.0026533113373300001:
+                yMultiClass[i] = 3
+            elif weight ==0.00150187015894:
+                yMultiClass[i] = 4
+        else:
+            yMultiClass[i] = 0
+
+    return yMultiClass
+
+
+
