@@ -29,7 +29,7 @@ def main():
     ### IMPORT ####
     ###############
     # Importation parameters:
-    split= True
+    split= False
     normalize = True
     noise_var = 0.
     ratio_train = 0.9

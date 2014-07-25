@@ -35,10 +35,16 @@ def analyse(train_s, valid_s, method_name, kwargs):
                                                                 valid_s[1],
                                                                 **kwargs)
     # Let's convert the four 's' classes in s
-    for i in range(8):
-        for j in range(yPredicted_s[i].shape[0]):
-            if yPredicted_s[i][j] >=1:
-                yPredicted_s[i][j] =1
+    # TODO: Option 4 's' scenario?
+    if type(yPredicted_s) == list:
+        for i in range(len(yPredicted_s)):
+            for j in range(yPredicted_s[i].shape[0]):
+                if yPredicted_s[i][j] >=1:
+                    yPredicted_s[i][j] =1
+    else:
+        for j in range(yPredicted_s.shape[0]):
+                if yPredicted_s[j] >=1:
+                    yPredicted_s[j] =1
 
     # Get s and b for each group (s_s, b_s) and the final final_s and
     # final_b:
@@ -55,13 +61,17 @@ def analyse(train_s, valid_s, method_name, kwargs):
     final_b *= 250000/yValid_conca.shape[0]
     # AMS final:
     AMS = hbc.AMS(final_s , final_b)
-    #AMS by group
-    AMS_s = []
-    for i, (s,b) in enumerate(zip(s_s, b_s)):
-        s *= 250000/yPredicted_s[i].shape[0]
-        b *= 250000/yPredicted_s[i].shape[0]
-        score = hbc.AMS(s,b)
-        AMS_s.append(score)
+
+    #AMS by group:
+    if type(valid_s[2]) == list:
+        AMS_s = []
+        for i, (s,b) in enumerate(zip(s_s, b_s)):
+            s *= 250000/yPredicted_s[i].shape[0]
+            b *= 250000/yPredicted_s[i].shape[0]
+            score = hbc.AMS(s,b)
+            AMS_s.append(score)
+    else:
+        AMS_s = AMS
 
     # Classification error:
     classif_succ = eval(method_name).get_classification_error(yPredicted_s,
@@ -79,7 +89,7 @@ def analyse(train_s, valid_s, method_name, kwargs):
             sum_b_s.append(sum_b)
 
     else:
-             sum_s_s, sum_b_s = submission.get_numerical_score(yPredicted_s,
+        sum_s_s, sum_b_s = submission.get_numerical_score(yPredicted_s,
                                                            valid_s[2])
 
     d = {'predictor_s':predictor_s, 'yPredicted_s': yPredicted_s,
