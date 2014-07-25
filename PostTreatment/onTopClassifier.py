@@ -9,6 +9,7 @@ import numpy as np
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
 from sklearn import svm
 
 import submission
@@ -82,10 +83,22 @@ def get_prediction_FL(first_layer_predictors, xTrain_s):
             first_layer_predictions.append(zip(*pred_s))
 
     else:
-        pred_train_s = []
+        pred_s= []
+        print "+++  len(first_layer_predictors)= ", len(first_layer_predictors)
         for elmt in first_layer_predictors:
-            pred_s = elmt.predict(xTrain_s)
-            first_layer_predictions.append(pred_s)
+            print ("+++ elmt= ", elmt)
+            prediction = elmt.predict(xTrain_s)
+            pred_s.append(prediction)
+
+        print ("+++ pred_s.shape= ", \
+                np.asarray(pred_s).shape)
+
+
+        first_layer_predictions = zip(*pred_s)
+
+        print ("+++ first_layer_predictions.shape= ", \
+                np.asarray(first_layer_predictions).shape)
+
 
     return first_layer_predictions
 
@@ -97,7 +110,7 @@ def train_SL(first_layer_predictions, yTrain_s, method= 'tree', parameters= {}):
     predictions.
     """
 
-    assert method in set(['tree', 'logisticReg', 'svm'])
+    assert method in set(['tree', 'logisticReg', 'svm', 'randomForest'])
 
     # If we work with the splitted dataset:
     if type(yTrain_s) == list:
@@ -110,27 +123,38 @@ def train_SL(first_layer_predictions, yTrain_s, method= 'tree', parameters= {}):
                 clf = LogisticRegression(**parameters)
             elif method == 'svm':
                 clf = svm.SVC(**parameters)
+            elif method == 'randomForest':
+                clf = RandomForestClassifier(**parameters)
             else:
                 raise NotImplementedError("The classifier %s is not implemented"\
                         %(method))
 
             # Training the "on-top" classifier for the subset i:
+
+            print ("+++ first_layer_predictions.shape= ", \
+                np.asarray(first_layer_predictions[i]).shape)
+
             clf.fit(first_layer_predictions[i], yTrain_s[i])
 
             second_layer_predictors.append(clf)
 
     else:
         if method == 'tree':
-            second_layer_predictors = DecisionTreeClassifier()#parameters)
+            second_layer_predictors = DecisionTreeClassifier(**parameters)
         elif method == 'logisticReg':
-            second_layer_predictors = LogisticRegression()#parameters)
+            second_layer_predictors = LogisticRegression(**parameters)
         elif method == 'svm':
-            clf = svm.SVC()#parameters)
+            second_layer_predictors = svm.SVC(**parameters)
+        elif method == 'randomForest':
+            second_layer_predictors = RandomForestClassifier(**parameters)
+
         else:
             raise NotImplementedError("The classifier %s is not implemented"\
                         %(method))
 
         print ("Training an 'on-top' classifier for the dataset...")
+        print ("+++ first_layer_predictions.shape= ", \
+                np.asarray(first_layer_predictions).shape)
         second_layer_predictors.fit(first_layer_predictions, yTrain_s)
 
     return second_layer_predictors
@@ -177,17 +201,29 @@ def predict_SL(second_layer_predictors, first_layer_data):
 
         # Creation of a list: n_ex/subset x n_classifer
         predictions = []
+
         for clfier in first_layer_data:
             first_layer_predicted_label.append(clfier[2])
-        first_layer_predicted_label = zip(*first_layer_predicted_label)
+
+        print "+++len(first_layer_predicted_label)= ", len(first_layer_predicted_label)
+
+        first_layer_predicted_label = np.asarray(first_layer_predicted_label).T
+
+        print("+++ pas encore de bug 1")
 
         # Predictions:
         final_prediction_s= []
 
+        print "+++len(first_layer_predicted_label)= ",first_layer_predicted_label.shape
+
+
         final_label_s = second_layer_predictors.predict(
                                                       first_layer_predicted_label)
-        final_proba_s = second_layer_predictors[i].predict_proba(
-                                                    first_layer_predicted_label)[:,1]
+        print("+++ pas encore de bug 2")
+
+        final_proba_s = second_layer_predictors.predict_proba(
+                                            first_layer_predicted_label)[:,1]
+        print("+++ pas encore de bug 3")
 
         final_prediction_s = [ID_s, final_proba_s, final_label_s]
 
@@ -247,6 +283,7 @@ def evaluate_AMS(final_prediction, valid_s):
 
 def SL_classification(dMethods, valid_s, train_s, ignore= [], method='tree',
                       parameters = {}):
+
 
     # Create the necessary inputs from the dictionnary of methods:
     first_layer_predictors, first_layer_data = create_inputs(dMethods, valid_s,

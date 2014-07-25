@@ -87,19 +87,19 @@ def main():
     kwargs_svm ={}
     dMethods['svm'] = analyse.analyse(train_s, valid_s,'svm', kwargs_svm)
     """
-
+    """
     # K NEIGHBORS
     kwargs_kn = {'n_neighbors':50}
     dMethods['kNeighbors'] = analyse.analyse(train_s, valid_s, 'kNeighbors',
                                              kwargs_kn)
-
+    """
     # LDA
     kwargs_lda = {}
     dMethods['lda'] = analyse.analyse(train_s, valid_s, 'lda', kwargs_lda)
     # QDA
     kwargs_qda= {}
     dMethods['qda'] = analyse.analyse(train_s, valid_s, 'qda', kwargs_qda)
-
+    """
     # ADABOOST
     kwargs_ada= {   'n_estimators': 50,
                     'learning_rate': 1.,
@@ -149,7 +149,7 @@ def main():
 
     dMethods['gradientBoosting'] = analyse.analyse(train_s, valid_s,
                                                 'gradientBoosting', kwargs_gradB)
-
+    """
     print(" ")
 
     ##################
@@ -160,10 +160,10 @@ def main():
     # Classifiers to be ignored:
     #ignore = ['randomForest2', 'randomForest']
     ignore = []
-    clf_onTop = 'svm'
-    parameters = {'C': 0.5, 'kernel': 'rbf', 'degree': 3, 'gamma': 0.0,
-                  'coef0': 0.0, 'shrinking':True, 'probability':True,
-                  'tol': 0.001, 'cache_size': 200, 'class_weight': None}
+    clf_onTop = 'randomForest'
+    parameters = {}#{'C': 0.5, 'kernel': 'rbf', 'degree': 3, 'gamma': 0.0,
+                 # 'coef0': 0.0, 'shrinking':True, 'probability':True,
+                 # 'tol': 0.001, 'cache_size': 200, 'class_weight': None}
 
 
     print ("We will use an 'on-top' predictor on %i classifiers using a %s.") \
