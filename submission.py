@@ -62,11 +62,12 @@ def get_s_b(yPredicted, yValidation, weightsValidation):
     weighted sum of the real negative (b)
     """
     if type(yPredicted) != list:
-        if yPredicted.shape != yValidation.shape or \
-                yValidation.shape != weightsValidation.shape:
+        print("+++ yPredicted != list")
+        if yPredicted.shape[0] != yValidation.shape[0] or \
+                yValidation.shape[0] != weightsValidation.shape[0]:
             print "submission.get_s_b: "
             print "Bad inputs shapes. Inputs must be the same size"
-            if yPredicted.shape != yValidation.shape:
+            if yPredicted.shape[0] != yValidation.shape[0]:
                 print "yPredicted.shape= ", yPredicted.shape
                 print "yValidation.shape= ", yValidation.shape
             else:
@@ -74,17 +75,17 @@ def get_s_b(yPredicted, yValidation, weightsValidation):
                 print "weightsValidation.shape= ", weightsValidation.shape
             exit()
 
-    
+
         s = np.dot(yPredicted*yValidation, weightsValidation)
         #yPredictedComp = np.ones(yPredicted.shape) - yPredicted #vector with label 0 for event and label 1 for non event
         yValidationComp = np.ones(yValidation.shape) - yValidation #vector with label 0 for event and label 1 for non event
         b = np.dot(yPredicted*yValidationComp, weightsValidation)
-        
+
         return s, b
 
     if type(yPredicted) == list:
         final_s, final_b, s_s, b_s = get_s_b_8(yPredicted, yValidation, weightsValidation)
-        
+
         return final_s, final_b, s_s, b_s
 
 

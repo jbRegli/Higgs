@@ -2,6 +2,8 @@ import numpy as np
 import imp
 import sys
 
+
+
 sys.path.append('Analyses/')
 import naiveBayes
 import randomForest
@@ -12,10 +14,12 @@ import lda
 import qda
 import gradientBoosting
 
-sys.path.append('../')
 import HiggsBosonCompetition_AMSMetric_rev1 as hbc
 import preTreatment
 import submission
+
+sys.path.append('PostTreatment')
+import tresholding
 
 
 def analyse(train_s, valid_s, method_name, kwargs):
@@ -39,7 +43,7 @@ def analyse(train_s, valid_s, method_name, kwargs):
     # TODO: Option 4 's' scenario?
     if type(yPredicted_s) == list:
         for i in range(len(yPredicted_s)):
-            for j in range(yPredicted_s[i].shape[0])
+            for j in range(yPredicted_s[i].shape[0]):
                 if yPredicted_s[i][j] >=1:
                     yPredicted_s[i][j] =1
     else:
@@ -51,7 +55,7 @@ def analyse(train_s, valid_s, method_name, kwargs):
     if type(yProba_s) == list:
         yProbaBinary_s = []
         for i in range(8):
-            yProbaBinary_s.append(np.zeros(yPredicted_s[i].shape[0])
+            yProbaBinary_s.append(np.zeros(yPredicted_s[i].shape[0]))
         for i in range(8):
             for j in range(yPredicted_s[i].shape[0]):
                 yProbaBinary_s[i][j] = 1 - yProba_s[i][j][0]
@@ -86,17 +90,23 @@ def analyse(train_s, valid_s, method_name, kwargs):
         yPredicted_conca = preTreament.concatenate_vectors(yPredicted_s)
     else:
         yPredicted_conca = yPredicted_s
-    
+
     # Get s and b for each group (s_s, b_s) and the final final_s and
     # final_b:
+    if type(yPredicted_s) == list:
+        final_s, final_b, s_s, b_s = submission.get_s_b(yPredicted_s, valid_s[2],
+                                                          valid_s[3])
+    else:
+        final_s, final_b = submission.get_s_b(yPredicted_s, valid_s[2], valid_s[3])
 
-    final_s, final_b, s_s, b_s = submission.get_s_b_8(yPredicted_s, valid_s[2],
-                                                  valid_s[3])
     # Let's get the best global treshold
-    best_treshold_global = postTreatment.best_treshold(yProbaBinary_conca, yValid_conca, weights_conca)
-    yPredicted_conca_treshold = preTreatment.get_yPredicted_treshold(yProbaBinary_conca)
+    best_treshold_global = tresholding.best_treshold(yProbaBinary_conca, yValid_conca,
+                                                                        weights_conca)
+    yPredicted_conca_treshold = tresholding.get_yPredicted_treshold(yProbaBinary_conca,
+                                                                  best_treshold_global)
 
-    final_s_treshold, final_b_treshold = submission.get_s_b(yPredicted_conca_treshold, yValid_conca, weights_conca)
+    final_s_treshold, final_b_treshold = submission.get_s_b(yPredicted_conca_treshold,
+                                                        yValid_conca, weights_conca)
 
 
 
@@ -104,12 +114,12 @@ def analyse(train_s, valid_s, method_name, kwargs):
 
     final_s *= 250000/yValid_conca.shape[0]
     final_b *= 250000/yValid_conca.shape[0]
-    final_s_treshold = 250000/yValid_conca.shape[0]
-    final_b_treshold = 250000/yValid_conca.shape[0]
+    final_s_treshold *= 250000/yValid_conca.shape[0]
+    final_b_treshold *= 250000/yValid_conca.shape[0]
 
     # AMS final:
     AMS = hbc.AMS(final_s , final_b)
-    AMS_treshold = hbc.AMS(final_s_treshold, treshold)
+    AMS_treshold = hbc.AMS(final_s_treshold, final_b_treshold)
 
     #AMS by group:
     if type(valid_s[2]) == list:
@@ -141,10 +151,10 @@ def analyse(train_s, valid_s, method_name, kwargs):
         sum_s_s, sum_b_s = submission.get_numerical_score(yPredicted_s,
                                                            valid_s[2])
 
-    d = {'predictor_s':predictor_s, 
+    d = {'predictor_s':predictor_s,
          'yPredicted_s': yPredicted_s, 'yPredicted_conca': yPredicted_conca,
          'yProba_s': yProba_s, 'yProba_conca': yProba_conca,
-         'yProbaBinary_s': yProbaBinary_s, 'yProbaBinary_conca' = yProbaBinary_conca,
+         'yProbaBinary_s': yProbaBinary_s, 'yProbaBinary_conca': yProbaBinary_conca,
          'final_s':final_s, 'final_b':final_b,
          'sum_s':sum_s_s, 'sum_b': sum_b_s,
          'AMS':AMS, 'AMS_s': AMS_s, 'AMS_treshold': AMS_treshold,

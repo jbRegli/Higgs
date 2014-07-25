@@ -84,21 +84,11 @@ def get_prediction_FL(first_layer_predictors, xTrain_s):
 
     else:
         pred_s= []
-        print "+++  len(first_layer_predictors)= ", len(first_layer_predictors)
         for elmt in first_layer_predictors:
-            print ("+++ elmt= ", elmt)
             prediction = elmt.predict(xTrain_s)
             pred_s.append(prediction)
 
-        print ("+++ pred_s.shape= ", \
-                np.asarray(pred_s).shape)
-
-
         first_layer_predictions = zip(*pred_s)
-
-        print ("+++ first_layer_predictions.shape= ", \
-                np.asarray(first_layer_predictions).shape)
-
 
     return first_layer_predictions
 
@@ -130,10 +120,6 @@ def train_SL(first_layer_predictions, yTrain_s, method= 'tree', parameters= {}):
                         %(method))
 
             # Training the "on-top" classifier for the subset i:
-
-            print ("+++ first_layer_predictions.shape= ", \
-                np.asarray(first_layer_predictions[i]).shape)
-
             clf.fit(first_layer_predictions[i], yTrain_s[i])
 
             second_layer_predictors.append(clf)
@@ -153,8 +139,6 @@ def train_SL(first_layer_predictions, yTrain_s, method= 'tree', parameters= {}):
                         %(method))
 
         print ("Training an 'on-top' classifier for the dataset...")
-        print ("+++ first_layer_predictions.shape= ", \
-                np.asarray(first_layer_predictions).shape)
         second_layer_predictors.fit(first_layer_predictions, yTrain_s)
 
     return second_layer_predictors
@@ -205,27 +189,20 @@ def predict_SL(second_layer_predictors, first_layer_data):
         for clfier in first_layer_data:
             first_layer_predicted_label.append(clfier[2])
 
-        print "+++len(first_layer_predicted_label)= ", len(first_layer_predicted_label)
-
         first_layer_predicted_label = np.asarray(first_layer_predicted_label).T
-
-        print("+++ pas encore de bug 1")
 
         # Predictions:
         final_prediction_s= []
 
-        print "+++len(first_layer_predicted_label)= ",first_layer_predicted_label.shape
-
-
         final_label_s = second_layer_predictors.predict(
                                                       first_layer_predicted_label)
-        print("+++ pas encore de bug 2")
 
         final_proba_s = second_layer_predictors.predict_proba(
                                             first_layer_predicted_label)[:,1]
-        print("+++ pas encore de bug 3")
 
         final_prediction_s = [ID_s, final_proba_s, final_label_s]
+
+        print "+++", len(final_proba_s)
 
     return final_prediction_s
 
@@ -254,10 +231,21 @@ def evaluate_AMS(final_prediction, valid_s):
     # Get s and b for each group (s_s, b_s) and the final final_s and
     # final_b:
 
-    y_predicted_s = zip(*final_prediction)[2]
+    y_predicted_s = list(zip(*final_prediction)[2])
 
-    final_s, final_b, s_s, b_s = submission.get_s_b_8(y_predicted_s, valid_s[2],
-                                                  valid_s[3])
+
+    print ("+++ juste avant submission.get_s_b_8")
+    print ("+++ type(valid_s[2])= ", type(valid_s[2]))
+    print ("+++ valid_s[2].shape= ", np.asarray(valid_s[2]).shape)
+    print ("+++ y_predicted_s.shape= ", np.asarray(y_predicted_s).shape)
+
+    if type(y_predicted_s) == list:
+        final_s, final_b, s_s, b_s = submission.get_s_b(y_predicted_s, valid_s[2],
+                                                                    valid_s[3])
+    else:
+        final_s, final_b = submission.get_s_b(y_predicted_s, valid_s[2],
+                                                            valid_s[3])
+
 
     # Balance the s and b
     final_s *= 250000/25000
@@ -268,15 +256,20 @@ def evaluate_AMS(final_prediction, valid_s):
     print ("Expected AMS score for the 'on-top' classifier : %f") %AMS
 
     #AMS by group
-    AMS_s = []
-    for i, (s,b) in enumerate(zip(s_s, b_s)):
-        s *= 250000/y_predicted_s[i].shape[0]
-        b *= 250000/y_predicted_s[i].shape[0]
-        score = hbc.AMS(s,b)
-        AMS_s.append(score)
-        print("Expected AMS score for the 'on-top' classifer: group %i : %f" \
+    if type(y_predicted_s) == list:
+        AMS_s = []
+        for i, (s,b) in enumerate(zip(s_s, b_s)):
+            s *= 250000/y_predicted_s[i].shape[0]
+            b *= 250000/y_predicted_s[i].shape[0]
+            score = hbc.AMS(s,b)
+            AMS_s.append(score)
+            print("Expected AMS score for the 'on-top' classifer: group %i : %f" \
                 %(i, score))
-    print(" ")
+
+            print(" ")
+
+    else:
+        AMS_s = AMS
 
     return final_s, final_b, AMS, AMS_s
 
