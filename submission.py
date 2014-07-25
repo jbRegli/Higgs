@@ -61,25 +61,31 @@ def get_s_b(yPredicted, yValidation, weightsValidation):
     validation set, and returns the weighted sum of the real positive (s) and the the
     weighted sum of the real negative (b)
     """
+    if type(yPredicted) != list:
+        if yPredicted.shape != yValidation.shape or \
+                yValidation.shape != weightsValidation.shape:
+            print "submission.get_s_b: "
+            print "Bad inputs shapes. Inputs must be the same size"
+            if yPredicted.shape != yValidation.shape:
+                print "yPredicted.shape= ", yPredicted.shape
+                print "yValidation.shape= ", yValidation.shape
+            else:
+                print "yValidation.shape= ", yValidation.shape
+                print "weightsValidation.shape= ", weightsValidation.shape
+            exit()
 
-    if yPredicted.shape != yValidation.shape or \
-            yValidation.shape != weightsValidation.shape:
-        print "submission.get_s_b: "
-        print "Bad inputs shapes. Inputs must be the same size"
-        if yPredicted.shape != yValidation.shape:
-            print "yPredicted.shape= ", yPredicted.shape
-            print "yValidation.shape= ", yValidation.shape
-        else:
-            print "yValidation.shape= ", yValidation.shape
-            print "weightsValidation.shape= ", weightsValidation.shape
-        exit()
+    
+        s = np.dot(yPredicted*yValidation, weightsValidation)
+        #yPredictedComp = np.ones(yPredicted.shape) - yPredicted #vector with label 0 for event and label 1 for non event
+        yValidationComp = np.ones(yValidation.shape) - yValidation #vector with label 0 for event and label 1 for non event
+        b = np.dot(yPredicted*yValidationComp, weightsValidation)
+        
+        return s, b
 
-    s = np.dot(yPredicted*yValidation, weightsValidation)
-    #yPredictedComp = np.ones(yPredicted.shape) - yPredicted #vector with label 0 for event and label 1 for non event
-    yValidationComp = np.ones(yValidation.shape) - yValidation #vector with label 0 for event and label 1 for non event
-    b = np.dot(yPredicted*yValidationComp, weightsValidation)
-
-    return s, b
+    if type(yPredicted) == list:
+        final_s, final_b, s_s, b_s = get_s_b_8(yPredicted, yValidation, weightsValidation)
+        
+        return final_s, final_b, s_s, b_s
 
 
 def get_numerical_score(yPredicted, yValidation):

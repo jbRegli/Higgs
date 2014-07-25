@@ -46,8 +46,22 @@ def analyse(train_s, valid_s, method_name, kwargs):
                 if yPredicted_s[j] >=1:
                     yPredicted_s[j] =1
 
+    # Let's define the vector of binary probabilities b or s, 0 or 1
+    if type(yProba_s) == list:
+        yProbaBinary_s = []
+        for i in range(8):
+            yProbaBinary_s.append(np.zeros(yPredicted_s[i].shape[0])
+        for i in range(8):
+            for j in range(yPredicted_s[i].shape[0]):
+                yProbaBinary_s[i][j] = 1 - yProba_s[i][j][0]
+    else:
+        yProbaBinary_s = np.zeros(yPredicted_s.shape[0])
+        for j in range(yPredicted_s.shape[0]):
+            yProbaBinary_s[j] = 1 - yProba_s[j][0]
+
     # Get s and b for each group (s_s, b_s) and the final final_s and
     # final_b:
+
     final_s, final_b, s_s, b_s = submission.get_s_b_8(yPredicted_s, valid_s[2],
                                                   valid_s[3])
 
@@ -56,6 +70,8 @@ def analyse(train_s, valid_s, method_name, kwargs):
         yValid_conca = preTreatment.concatenate_vectors(valid_s[2])
     else:
         yValid_conca = valid_s[2]
+
+    best_treshold_global = postTreatment.best_treshold(y
 
     final_s *= 250000/yValid_conca.shape[0]
     final_b *= 250000/yValid_conca.shape[0]
