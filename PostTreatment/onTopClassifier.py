@@ -5,7 +5,6 @@ Systeme de vote entre classifier
 """
 import sys
 import numpy as np
-import scipy.stats as ss
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
@@ -91,7 +90,7 @@ def get_prediction_FL(first_layer_predictors, xTrain_s):
     return first_layer_predictions
 
 
-def train_SL(first_layer_predictions, yTrain_s, method= 'tree', parameters={}):
+def train_SL(first_layer_predictions, yTrain_s, method= 'tree', parameters= {}):
     """
     Given a list of prediction from the first layer and a list of effective
     labels, train a second layer classifier to learn the correct label from the
@@ -106,11 +105,11 @@ def train_SL(first_layer_predictions, yTrain_s, method= 'tree', parameters={}):
         print ("Training an 'on-top' classifier...")
         for i in range(len(yTrain_s)):
             if method == 'tree':
-                clf = DecisionTreeClassifier(*parameters)
+                clf = DecisionTreeClassifier(**parameters)
             elif method == 'logisticReg':
-                clf = LogisticRegression(*parameters)
+                clf = LogisticRegression(**parameters)
             elif method == 'svm':
-                clf = svm.SVC(*parameters)
+                clf = svm.SVC(**parameters)
             else:
                 raise NotImplementedError("The classifier %s is not implemented"\
                         %(method))
@@ -304,8 +303,6 @@ def SL_classification(dMethods, valid_s, train_s, ignore= [], method='tree',
     return final_prediction_s, d
 
 
-
-
 def get_SL_test_prediction(dMethods, dSl, xsTest_s):
     """
     Predict the output of the 'on-top' classifier on the test set
@@ -343,18 +340,5 @@ def get_SL_test_prediction(dMethods, dSl, xsTest_s):
                                        np.asarray(first_layer_test_predictions).T)
 
     return test_prediction_s, test_proba_s
-
-
-
-
-###############
-### RANKING ###
-###############
-
-def rank_signals(proba_prediction):
-    rank_prediction = ss.rankdata(proba_prediction,method = 'ordinal')
-
-    return rank_prediction
-
 
 

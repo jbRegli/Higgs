@@ -47,7 +47,11 @@ def analyse(train_s, valid_s, method_name, kwargs):
                                                   valid_s[3])
 
     # Balance the s and b
-    yValid_conca = preTreatment.concatenate_vectors(valid_s[2])
+    if type(valid_s[2]) == list:
+        yValid_conca = preTreatment.concatenate_vectors(valid_s[2])
+    else:
+        yValid_conca = valid_s[2]
+
     final_s *= 250000/yValid_conca.shape[0]
     final_b *= 250000/yValid_conca.shape[0]
     # AMS final:

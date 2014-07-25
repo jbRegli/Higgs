@@ -42,9 +42,11 @@ def main():
                                                       noise_variance= noise_var,
                                                       ratio_train= ratio_train)
 
-    # Remerging the y and weights of the validation
-    yValid_conca = preTreatment.concatenate_vectors(valid_s[2])
-    weights_conca = preTreatment.concatenate_vectors(valid_s[3])
+
+    # Remerging the y and weights of the validation if necessary:
+    if type(valid_s[2]) == list:
+        yValid_conca = preTreatment.concatenate_vectors(valid_s[2])
+        weights_conca = preTreatment.concatenate_vectors(valid_s[3])
 
     stop = time.clock()
     print ("Extraction time: %i s") %(stop-start)
@@ -97,7 +99,7 @@ def main():
     # QDA
     kwargs_qda= {}
     dMethods['qda'] = analyse.analyse(train_s, valid_s, 'qda', kwargs_qda)
-    """
+
     # ADABOOST
     kwargs_ada= {   'n_estimators': 50,
                     'learning_rate': 1.,
@@ -137,7 +139,17 @@ def main():
     kwargs_rdf= {'n_estimators': 100}
     dMethods['randomForest5'] = analyse.analyse(train_s, valid_s, 'randomForest',
                                                kwargs_rdf)
-    """
+
+    # GRADIENT BOOSTING:
+    kwargs_gradB = {'loss': 'deviance', 'learning_rate': 0.1,
+                    'n_estimators': 100, 'subsample': 1.0,
+                    'min_samples_split': 2, 'min_samples_leaf': 200,
+                    'max_depth': 10, 'init': None, 'random_state': None,
+                    'max_features': None, 'verbose': 0}
+
+    dMethods['gradientBoosting'] = analyse.analyse(train_s, valid_s,
+                                                'gradientBoosting', kwargs_gradB)
+
     print(" ")
 
     ##################
@@ -149,9 +161,9 @@ def main():
     #ignore = ['randomForest2', 'randomForest']
     ignore = []
     clf_onTop = 'svm'
-    parameters = {'C': 1.0, 'kernel': 'rbf', 'degree': 3, 'gamma': 0.0,
+    parameters = {'C': 0.5, 'kernel': 'rbf', 'degree': 3, 'gamma': 0.0,
                   'coef0': 0.0, 'shrinking':True, 'probability':True,
-                  'tol': 0.001, 'cache_size':200, 'class_weight': None}
+                  'tol': 0.001, 'cache_size': 200, 'class_weight': None}
 
 
     print ("We will use an 'on-top' predictor on %i classifiers using a %s.") \

@@ -5,6 +5,7 @@ Given a prediction compute the grading and a submission file
 import numpy as np
 import time
 import csv
+import scipy.stats as ss
 
 def print_submission(testIDs, RankOrder, yLabels,
     name = 'submission_'+time.strftime("%H:%M:%S")):
@@ -110,7 +111,15 @@ def get_s_b_8(yPredicted_s, yValidation_s, weightsValidation_s):
 
     return final_s, final_b, s_s, b_s
 
+
+###############
+### RANKING ###
+###############
+
 def rank_signals(proba_prediction):
+    """
+    Given a list of probability of being a signal, return the rank prediction
+    """
     rank_prediction = ss.rankdata(proba_prediction,method = 'ordinal')
 
     return rank_prediction
