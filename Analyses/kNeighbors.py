@@ -29,7 +29,7 @@ def prediction(predictor, testset):
     # Label prediction:
     label_predicted = predictor.predict(testset)
     # Probability of being in each label
-    proba_predicted = predictor.predict_proba(testset)[:,1]
+    proba_predicted = predictor.predict_proba(testset)
 
     return label_predicted, proba_predicted
 
