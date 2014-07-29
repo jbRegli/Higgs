@@ -12,11 +12,12 @@ from sklearn.metrics import accuracy_score
 from sklearn.tree import DecisionTreeClassifier
 from sklearn import svm
 
-import submission
+sys.path.append('../')
+
 import HiggsBosonCompetition_AMSMetric_rev1 as hbc
 
-sys.path.append('Analyses/')
-import analyse
+sys.path.append('../Analyses/')
+
 
 
 def proba_treshold(yPredicted_s, yProba_s, ratio):
@@ -83,6 +84,19 @@ def get_yPredicted_treshold(yProba, treshold):
     for i in range(yPredicted.shape[0]):
         if yProba[i] > treshold:
             yPredicted[i] = 1.
+    return yPredicted
+
+def get_yPredicted_ratio(yProba, ratio):
+    """
+    Returns vector of yPredicted keeping the ratio% highest percentages
+    ratio : float
+    yProba : vector of proba
+    """
+    yPredicted = np.zeros_like(yProba)
+    yProbaSorted = yProba[yProba.argsort()]
+    treshold = yProbaSorted[int(ratio*len(yProba))]
+    yPredicted = get_yPredicted_treshold(yProba, treshold)
+
     return yPredicted
 
 def best_treshold(yProba, yValidation, weightsValidation, pas = 0.01):

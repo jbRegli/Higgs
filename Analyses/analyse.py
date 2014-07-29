@@ -37,7 +37,7 @@ def analyse(train_s, valid_s, method_name, kwargs):
     predictor_s, yPredicted_s, yProba_s = eval(method_name).get_yPredicted_s(
                                                                 train_s[1],
                                                                 train_s[2],
-                                                                valid_s[1])
+                                                                valid_s[1],
                                                             **kwargs)
 
     # Let's convert the four 's' classes in s
