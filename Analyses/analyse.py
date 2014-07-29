@@ -38,7 +38,9 @@ def analyse(train_s, valid_s, method_name, kwargs):
                                                                 train_s[1],
                                                                 train_s[2],
                                                                 valid_s[1],
-                                                            **kwargs)
+                                                                **kwargs)
+                                                            
+
 
     # Let's convert the four 's' classes in s
     # TODO: Option 4 's' scenario?

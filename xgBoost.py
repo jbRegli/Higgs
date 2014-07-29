@@ -14,10 +14,11 @@ import submission
 import HiggsBosonCompetition_AMSMetric_rev1 as hbc
 
 # add path of xgboost python module (NICO DOIT AJOUTER LE CHEMIN VERS SON BOOST)
-#code_path_jb = '/home/regli/Applications/Python/xgboost/python'
-#sys.path.append(code_path_jb)
+code_path_jb = '/home/regli/Applications/Python/xgboost/python'
+sys.path.append(code_path_jb)
 code_path_nico = '../xgboost/python'
 sys.path.append(code_path_nico)
+
 
 import xgboost as xgb
 
@@ -39,23 +40,12 @@ def classifier(xTrain, yTrain, wTrain, test_size= 550000, **kwargs):
     xgmat = xgb.DMatrix(xTrain, label= yTrain, missing = -999.0,
                         weight= wRebalance)
 
-    # setup parameters for xgboost
-    param = {}
-    # use logistic regression loss, use raw prediction before logistic
-    # transformation since we only need the rank
-    param['objective'] = 'binary:logitraw'
     # scale weight of positive examples
-    param['scale_pos_weight'] = sum_wneg/sum_wpos
-    param['bst:eta'] = 0.5 #0.1
-    param['bst:max_depth'] = 10
-    param['eval_metric'] = 'auc'
-    param['silent'] = 1
-    param['nthread'] = 16
-
+    kwargs['scale_pos_weight'] = sum_wneg/sum_wpos
 
     # You can directly throw param in, though we want to watch multiple metrics
     # here
-    plst = list(param.items())+[('eval_metric', 'ams@0.15 ')]
+    plst = list(kwargs.items())+[('eval_metric', 'ams@0.15 ')]
 
     watchlist = [ (xgmat,'train') ]
     # boost 120 tres
@@ -81,8 +71,8 @@ def prediction(predictor, testset):
     return proba_predicted
 
 
-def get_yPredicted_s(xsTrain_s, yTrain_s, wTrain_s, xsValid_s, test_size= 550000,
-                     **kwargs):
+def get_yPredicted_s(xsTrain_s, yTrain_s, wTrain_s, xsValid_s, test_size,
+                     kwargs):
     """
     Perform the training and the prediction on the 8 sub-sets
     """
