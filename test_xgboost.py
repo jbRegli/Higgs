@@ -14,7 +14,7 @@ import HiggsBosonCompetition_AMSMetric_rev1 as hbc
 sys.path.append('Analyses/')
 import xgBoost
 
-train_s, train2_s, valid_s, test_s = tokenizer.extract_data(split = True, normalize = True, noise_variance = 0., n_classes = "multiclass", train_size = 200000, train_size2 = 25000, valid_size = 25000)
+train_s, train2_s, valid_s, test_s = tokenizer.extract_data(split = True, normalize = True, noise_variance = 0., n_classes = "multiclass", train_size = 225000, train_size2 = 0, valid_size = 25000)
 
 kwargs_xgb = {'objective': 'multi:softmax', 'num_class': 5, 'bst:eta': 0.1,
               'bst:max_depth': 10, 'eval_metric': 'auc', 'silent': 1, 'nthread': 16 }
@@ -50,8 +50,8 @@ yValidWeights_conca = preTreatment.concatenate_vectors(valid_s[3])
 #compute the best treshold
 best_treshold_global = tresholding.best_treshold(yTrain2ProbaBinary_conca, yTrain2Label_conca, yTrain2Weights_conca, pas = 0.01)
 
-yValidPredicted_conca = tresholding.get_yPredicted_treshold(yValidProbaBinary_conca, best_treshold_global)
-yTrain2Predicted_conca = tresholding.get_yPredicted_treshold(yTrain2ProbaBinary_conca, best_treshold_global)
+yValidPredicted_conca = tresholding.get_yPredicted_treshold(yValidProbaBinary_conca, 0.15)
+yTrain2Predicted_conca = tresholding.get_yPredicted_treshold(yTrain2ProbaBinary_conca, 0.15)
 
 svalid, bvalid = submission.get_s_b(yValidPredicted_conca, yValidLabel_conca, yValidWeights_conca)
 strain2, btrain2 = submission.get_s_b(yTrain2Predicted_conca, yTrain2Label_conca, yTrain2Weights_conca)

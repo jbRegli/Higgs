@@ -16,7 +16,7 @@ import HiggsBosonCompetition_AMSMetric_rev1 as hbc
 # add path of xgboost python module (NICO DOIT AJOUTER LE CHEMIN VERS SON BOOST)
 code_path_jb = '/home/regli/Applications/Python/xgboost/python'
 sys.path.append(code_path_jb)
-code_path_nico = '../xgboost/python'
+code_path_nico = '/home/nicolas/xgboost/python'
 sys.path.append(code_path_nico)
 
 

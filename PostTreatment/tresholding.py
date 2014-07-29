@@ -13,7 +13,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn import svm
 
 sys.path.append('../')
-
+import submission
 import HiggsBosonCompetition_AMSMetric_rev1 as hbc
 
 sys.path.append('../Analyses/')
@@ -94,7 +94,7 @@ def get_yPredicted_ratio(yProba, ratio):
     """
     yPredicted = np.zeros_like(yProba)
     yProbaSorted = yProba[yProba.argsort()]
-    treshold = yProbaSorted[int(ratio*len(yProba))]
+    treshold = yProbaSorted[int((1-ratio)*len(yProba))]
     yPredicted = get_yPredicted_treshold(yProba, treshold)
 
     return yPredicted

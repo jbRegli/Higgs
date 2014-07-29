@@ -126,6 +126,9 @@ def rank_signals(proba_prediction):
     """
     Given a list of probability of being a signal, return the rank prediction
     """
-    rank_prediction = ss.rankdata(proba_prediction,method = 'ordinal')
+    temp = proba_prediction.argsort()
+    rank_prediction = np.arange(len(proba_prediction))[temp.argsort()]
+    rank_prediction += np.ones(len(rank_prediction)) 
+    #rank_prediction = ss.rankdata(proba_prediction,method = 'ordinal')
 
     return rank_prediction

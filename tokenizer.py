@@ -166,11 +166,12 @@ def get_8_bins(normalize = True, noise_variance = 0., n_classes = "binary", \
     print("    Splitting the train sets")
     ID_train_s, xsTrain_s, yTrain_s, weightsTrain_s = \
             preTreatment.split_8_matrix(ID_train, xsTrain, yTrain, weightsTrain)
-    ID_train2_s, xsTrain2_s, yTrain2_s, weightsTrain2_s = \
+    if train_size2 !=0:
+        ID_train2_s, xsTrain2_s, yTrain2_s, weightsTrain2_s = \
             preTreatment.split_8_matrix(ID_train2, xsTrain2, yTrain2, weightsTrain2)
-
-    print("    Splitting the valid set")
-    ID_valid_s, xsValid_s,yValid_s, weightsValid_s = \
+    if valid_size !=0:
+        print("    Splitting the valid set")
+        ID_valid_s, xsValid_s,yValid_s, weightsValid_s = \
             preTreatment.split_8_matrix(ID_valid, xsValid, yValid, weightsValid)
 
 
@@ -192,31 +193,51 @@ def get_8_bins(normalize = True, noise_variance = 0., n_classes = "binary", \
             if xsTrain_s[i].shape[1] > index_column:
                 if xsTrain_s[i][0,index_column] == -999:
                     xsTrain_s[i] = np.delete(xsTrain_s[i], np.s_[index_column],1)
-                    xsTrain2_s[i] = np.delete(xsTrain2_s[i], np.s_[index_column],1)
-                    xsValid_s[i] = np.delete(xsValid_s[i], np.s_[index_column],1)
+                    if train_size2 !=0:
+                        xsTrain2_s[i] = np.delete(xsTrain2_s[i], np.s_[index_column],1)
+                    if valid_size != 0:
+                        xsValid_s[i] = np.delete(xsValid_s[i], np.s_[index_column],1)
                     xsTest_s[i] = np.delete(xsTest_s[i], np.s_[index_column],1)
 
                     nameTrain_s[i] = np.delete(nameTrain_s[i], index_column)
-                    nameTrain2_s[i] = np.delete(nameTrain2_s[i], index_column)
-                    nameValid_s[i] = np.delete(nameValid_s[i], index_column)
+                    if train_size2 !=0:
+                        nameTrain2_s[i] = np.delete(nameTrain2_s[i], index_column)
+                    if valid_size != 0:
+                        nameValid_s[i] = np.delete(nameValid_s[i], index_column)
                     nameTest_s[i] = np.delete(nameTest_s[i], index_column)
 
         # Deleting the feature identical within each group:
         xsTrain_s[i] = np.delete(xsTrain_s[i], np.s_[22],1)
-        xsTrain2_s[i] = np.delete(xsTrain2_s[i], np.s_[22],1)
-        xsValid_s[i] = np.delete(xsValid_s[i], np.s_[22],1)
+        if train_size2 !=0:
+            xsTrain2_s[i] = np.delete(xsTrain2_s[i], np.s_[22],1)
+        if valid_size !=0:
+            xsValid_s[i] = np.delete(xsValid_s[i], np.s_[22],1)
         xsTest_s[i]  = np.delete(xsTest_s[i],  np.s_[22],1)
 
         nameTrain_s[i] = np.delete(nameTrain_s[i], 22)
-        nameTrain2_s[i] = np.delete(nameTrain2_s[i], 22)
-        nameValid_s[i] = np.delete(nameValid_s[i], 22)
+        if train_size2 !=0:
+            nameTrain2_s[i] = np.delete(nameTrain2_s[i], 22)
+        if valid_size != 0:
+            nameValid_s[i] = np.delete(nameValid_s[i], 22)
         nameTest_s[i] = np.delete(nameTest_s[i], 22)
 
-
-    return (ID_train_s, xsTrain_s, yTrain_s, weightsTrain_s, nameTrain_s), \
+    if train_size2 !=0 and valid_size !=0:
+        return (ID_train_s, xsTrain_s, yTrain_s, weightsTrain_s, nameTrain_s), \
            (ID_train2_s, xsTrain2_s, yTrain2_s, weightsTrain2_s, nameTrain2_s), \
            (ID_valid_s, xsValid_s, yValid_s, weightsValid_s, nameValid_s), \
            (ID_test_s, xsTest_s, nameTest_s)
+
+    if train_size2 != 0 and valid_size ==0:
+        return (ID_train_s, xsTrain_s, yTrain_s, weightsTrain_s, nameTrain_s), \
+           (ID_train2_s, xsTrain2_s, yTrain2_s, weightsTrain2_s, nameTrain2_s), \
+           (ID_test_s, xsTest_s, nameTest_s)
+
+    if train_size2 == 0 and valid_size !=0:
+         return (ID_train_s, xsTrain_s, yTrain_s, weightsTrain_s, nameTrain_s), \
+           (ID_valid_s, xsValid_s, yValid_s, weightsValid_s, nameValid_s), \
+           (ID_test_s, xsTest_s, nameTest_s)
+
+
 
 
 def extract_data(split= True, normalize= True, noise_variance= 0.,
