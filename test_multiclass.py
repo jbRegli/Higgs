@@ -20,7 +20,7 @@ import preTreatment
 import tresholding
 import combineClassifiers
 import mergeClassifiers
-import onTopClassifier
+
 import tresholding
 
 import submission
@@ -48,31 +48,33 @@ def main():
     split= True
     normalize = True
     noise_var = 0.
-    ratio_train = 0.9
+    train_size = 250000
+    train_size2 = 0
+    valid_size = 0
 
     # Import the training data:
     print("Extracting the data sets...")
     start = time.clock()
-    train_s, valid_s, test_s = tokenizer.extract_data(split= split, \
+    train_s, test_s = tokenizer.extract_data(split= split, \
                                                       normalize= normalize, \
                                                       noise_variance= noise_var, \
-                                                     ratio_train= ratio_train,
-                                                     n_classes = "multiclass")
+                                                     n_classes = "multiclass", \
+                                                     train_size = train_size, \
+                                                     train_size2 = train_size2, \
+                                                     valid_size = valid_size)
 
 
-    # RANDOM FOREST:
-    #kwargs_rdf = {'n_estimators': 50}
+    #RANDOM FOREST:
+    kwargs_rdf = {'n_estimators': 100}
+    predictor_s = randomForest.get_predictors(train_s[1], train_s[2], **kwargs_rdf)
 
-    #dRandomForest = analyse.analyse(train_s, valid_s, "randomForest", kwargs_rdf)
-    # GRADIENT BOOSTING
-    d = analyse.analyse(train_s, valid_s, "xgBoost")
 
     yPredictedTest = []
     yProbaTest = []
 
     print "Classifying the test set..."
     for i in range(8):
-        yPredicted, yProba = gradientBoosting.prediction(d['predictor_s'][i], test_s[1][i])
+        yPredicted, yProba = randomForest.prediction(predictor_s[i], test_s[1][i])
         yPredictedTest.append(yPredicted)
         yProbaTest.append(yProba)
 
@@ -97,23 +99,16 @@ def main():
             yPredictedTest_conca[i] = 1
     
     # Let's treshold
-    yPredictedTest_conca_treshold = tresholding.get_yPredicted_treshold(yProbaTestFinal_conca, d['best_treshold_global'])
+    yPredictedTest_conca_treshold = tresholding.get_yPredicted_ratio(yProbaTestFinal_conca, 0.16)
     #let's rank the proba
-    temp = yProbaTestFinal_conca.argsort()
-    yProbaTestFinal_conca_ranked = np.arange(len(yProbaTestFinal_conca))[temp.argsort()]
-    for i in range(yProbaTestFinal_conca_ranked.shape[0]):
-        yProbaTestFinal_conca_ranked[i] = yProbaTestFinal_conca_ranked[i] + 1
+    yProbaTestFinal_conca_ranked = submission.rank_signals(yProbaTestFinal_conca)
     # let's make the ID int
     for i in IDTest_conca:
         IDTest_conca_int = IDTest_conca.astype(np.int64)
 
-    sub = submission.print_submission(IDTest_conca_int, yProbaTestFinal_conca_ranked, yPredictedTest_conca_treshold, name = 'submission_gradB_treshold')
+    sub = submission.print_submission(IDTest_conca_int, yProbaTestFinal_conca_ranked, yPredictedTest_conca_treshold, name = 'submission_rdf_ratio20')
 
-    AMS_validation = d['AMS']
-
-    return d 
-   
-    
+    return sub
 
 if __name__ == '__main__':
     main()

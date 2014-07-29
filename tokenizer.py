@@ -83,60 +83,87 @@ def get_all_data(normalize = True, noise_variance = 0.,  n_classes = "binary", t
 
     # Spliting trainsets and validation set:
     eventID_train = eventID[randomPermutation[:train_size]]
-    eventID_train2 = eventID[randomPermutation[train_size:train_size+train_size2]]
-    eventID_valid = eventID[randomPermutation[(train_size + train_size2):]]
+    if train_size2 !=0:
+        eventID_train2 = eventID[randomPermutation[train_size:train_size+train_size2]]
+    if valid_size != 0:
+        eventID_valid = eventID[randomPermutation[(train_size + train_size2):]]
 
     xsTrain = xs[randomPermutation[:train_size]]
-    xsTrain2 = xs[randomPermutation[train_size: train_size + train_size2]]
-    xsValidation = xs[randomPermutation[train_size + train_size2:]]
+    if train_size2 != 0:
+        xsTrain2 = xs[randomPermutation[train_size: train_size + train_size2]]
+    if valid_size != 0:
+        xsValidation = xs[randomPermutation[train_size + train_size2:]]
     
     sSelectorTrain = sSelector[randomPermutation[:train_size]]
     bSelectorTrain = bSelector[randomPermutation[:train_size]]
-    sSelectorTrain2 = sSelector[randomPermutation[train_size:train_size + train_size2]]
-    bSelectorTrain2 = bSelector[randomPermutation[train_size:train_size + train_size2]]
-    sSelectorValidation = sSelector[randomPermutation[train_size + train_size2:]]
-    bSelectorValidation = bSelector[randomPermutation[train_size + train_size2:]]
+    if train_size2!=0:
+        sSelectorTrain2 = sSelector[randomPermutation[train_size:train_size + train_size2]]
+        bSelectorTrain2 = bSelector[randomPermutation[train_size:train_size + train_size2]]
+    if valid_size !=0:
+        sSelectorValidation = sSelector[randomPermutation[train_size + train_size2:]]
+        bSelectorValidation = bSelector[randomPermutation[train_size + train_size2:]]
 
     # create vector of 0(b) and 1(s) for the label
     yTrain = np.zeros(train_size)
-    yTrain2 = np.zeros(train_size2)
-    yValidation = np.zeros(valid_size)
+    if train_size2 !=0:
+        yTrain2 = np.zeros(train_size2)
+    if valid_size !=0:
+        yValidation = np.zeros(valid_size)
     
     for n in xrange(train_size):
         if sSelectorTrain[n]:
             yTrain[n] = 1
-
-    for n in xrange(train_size2):
-        if sSelectorTrain2[n]:
-            yTrain2[n] = 1
-
-    for n in xrange(valid_size):
-        if sSelectorValidation[n]:
-            yValidation[n] = 1
+    if train_size2 !=0:
+        for n in xrange(train_size2):
+            if sSelectorTrain2[n]:
+                yTrain2[n] = 1
+    if valid_size !=0:
+        for n in xrange(valid_size):
+            if sSelectorValidation[n]:
+                yValidation[n] = 1
 
     weightsTrain = weights[randomPermutation[:train_size]]
-    weightsTrain2 = weights[randomPermutation[train_size:train_size + train_size2]]
-    weightsValidation = weights[randomPermutation[train_size + train_size2:]]
+    if train_size2 !=0:
+        weightsTrain2 = weights[randomPermutation[train_size:train_size + train_size2]]
+    if valid_size != 0:
+        weightsValidation = weights[randomPermutation[train_size + train_size2:]]
 
     if n_classes == "multiclass":
         yTrain = preTreatment.binary2multiclass(yTrain, weightsTrain)
-        yTrain2 = preTreatment.binary2multiclass(yTrain2, weightsTrain2)
-        yValidation = preTreatment.binary2multiclass(yValidation, weightsValidation)
+        if train_size2 !=0:
+            yTrain2 = preTreatment.binary2multiclass(yTrain2, weightsTrain2)
+        if valid_size !=0:
+            yValidation = preTreatment.binary2multiclass(yValidation, weightsValidation)
 
     sumWeightsTrain = np.sum(weightsTrain)
     sumSWeightsTrain = np.sum(weightsTrain[sSelectorTrain])
     sumBWeightsTrain = np.sum(weightsTrain[bSelectorTrain])
+    
+    if train_size2 != 0:
+        sumWeightsTrain2 = np.sum(weightsTrain2)
+        sumSWeightsTrain2 = np.sum(weightsTrain[sSelectorTrain2])
+        sumBWeightsTrain2 = np.sum(weightsTrain[bSelectorTrain2])
 
-    sumWeightsTrain2 = np.sum(weightsTrain2)
-    sumSWeightsTrain2 = np.sum(weightsTrain[sSelectorTrain2])
-    sumBWeightsTrain2 = np.sum(weightsTrain[bSelectorTrain2])
 
-
-
-    return ((eventID_train, xsTrain, yTrain, weightsTrain, names_train), \
+    if train_size2 !=0 and valid_size !=0:
+        return ((eventID_train, xsTrain, yTrain, weightsTrain, names_train), \
            (eventID_train2, xsTrain2, yTrain2, weightsTrain2, names_train), \
            (eventID_valid, xsValidation, yValidation, weightsValidation, names_train), \
            (eventID_test, xsTest, names_train))
+    if train_size2 !=0 and valid_size ==0:
+        return ((eventID_train, xsTrain, yTrain, weightsTrain, names_train), \
+           (eventID_train2, xsTrain2, yTrain2, weightsTrain2, names_train), \
+           (eventID_test, xsTest, names_train))
+    if train_size2 ==0 and valid_size !=0:
+        return ((eventID_train, xsTrain, yTrain, weightsTrain, names_train), \
+           (eventID_valid, xsValidation, yValidation, weightsValidation, names_train), \
+           (eventID_test, xsTest, names_train))
+    if train_size2 ==0 and valid_size ==0:
+        return ((eventID_train, xsTrain, yTrain, weightsTrain, names_train), \
+           (eventID_test, xsTest, names_train))
+
+
+
 
 
 def get_8_bins(normalize = True, noise_variance = 0., n_classes = "binary", \
@@ -147,16 +174,34 @@ def get_8_bins(normalize = True, noise_variance = 0., n_classes = "binary", \
     """
 
     # Extracting the train set, the validation set and the test set:
-    Train, Train2, Validation, Test = get_all_data(normalize = normalize,
+    if train_size2 !=0 and valid_size !=0:
+        Train, Train2, Validation, Test = get_all_data(normalize = normalize,
+                                     noise_variance = noise_variance,
+                                     n_classes = n_classes, train_size = train_size,
+                                     train_size2 = train_size2, valid_size = valid_size)
+    if train_size2 !=0 and valid_size ==0:
+        Train, Train2, Test = get_all_data(normalize = normalize,
+                                     noise_variance = noise_variance,
+                                     n_classes = n_classes, train_size = train_size,
+                                     train_size2 = train_size2, valid_size = valid_size)
+    if train_size2 ==0 and valid_size !=0:
+        Train, Validation, Test = get_all_data(normalize = normalize,
+                                     noise_variance = noise_variance,
+                                     n_classes = n_classes, train_size = train_size,
+                                     train_size2 = train_size2, valid_size = valid_size)
+    if train_size2==0 and valid_size ==0:
+        Train, Test = get_all_data(normalize = normalize,
                                      noise_variance = noise_variance,
                                      n_classes = n_classes, train_size = train_size,
                                      train_size2 = train_size2, valid_size = valid_size)
 
     ID_train, xsTrain, yTrain, weightsTrain, nameTrain  = Train[0], Train[1], \
                                                 Train[2], Train[3], Train[4]
-    ID_train2, xsTrain2, yTrain2, weightsTrain2, nameTrain2  = Train2[0], Train2[1], \
-                                                Train2[2], Train2[3], Train2[4]
-    ID_valid, xsValid, yValid, weightsValid, nameValid = Validation[0], \
+    if train_size2 !=0:
+        ID_train2, xsTrain2, yTrain2, weightsTrain2, nameTrain2  = Train2[0], Train2[1], \
+                                            Train2[2], Train2[3], Train2[4]
+    if valid_size !=0:
+        ID_valid, xsValid, yValid, weightsValid, nameValid = Validation[0], \
                                                     Validation[1], Validation[2],\
                                                     Validation[3], Validation[4]
 
@@ -179,8 +224,10 @@ def get_8_bins(normalize = True, noise_variance = 0., n_classes = "binary", \
     ID_test_s, xsTest_s = preTreatment.split_8_matrix(ID_test, xsTest)
 
     nameTrain_s = [nameTrain] * 8
-    nameTrain2_s = [nameTrain2] * 8
-    nameValid_s = [nameValid] * 8
+    if train_size2 !=0:
+        nameTrain2_s = [nameTrain2] * 8
+    if valid_size !=0:
+        nameValid_s = [nameValid] * 8
     nameTest_s = [nameTest] * 8
 
 
@@ -236,6 +283,11 @@ def get_8_bins(normalize = True, noise_variance = 0., n_classes = "binary", \
          return (ID_train_s, xsTrain_s, yTrain_s, weightsTrain_s, nameTrain_s), \
            (ID_valid_s, xsValid_s, yValid_s, weightsValid_s, nameValid_s), \
            (ID_test_s, xsTest_s, nameTest_s)
+    
+    if train_size2 ==0 and valid_size ==0:
+         return (ID_train_s, xsTrain_s, yTrain_s, weightsTrain_s, nameTrain_s), \
+           (ID_test_s, xsTest_s, nameTest_s)
+
 
 
 

@@ -77,7 +77,7 @@ def get_s_b(yPredicted, yValidation, weightsValidation):
 
         s = np.dot(yPredicted*yValidation, weightsValidation)
         #yPredictedComp = np.ones(yPredicted.shape) - yPredicted #vector with label 0 for event and label 1 for non event
-        yValidationComp = np.ones(yValidation.shape) - yValidation #vector with label 0 for event and label 1 for non event
+        yValidationComp = np.ones(yValidation.shape[0]) - yValidation #vector with label 0 for event and label 1 for non event
         b = np.dot(yPredicted*yValidationComp, weightsValidation)
 
         return s, b

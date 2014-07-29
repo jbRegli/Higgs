@@ -123,8 +123,21 @@ def best_treshold(yProba, yValidation, weightsValidation, pas = 0.01):
 
     return best_treshold
 
+def best_ratio(yProba, yValidation, weightsValidation, pas = 0.01):
+    ratio_s = np.arange(0.01, 0.99, pas)
+    best_ams = 0.
 
+    for ratio in ratio_s:
+        yPredicted = get_yPredicted_ratio(yProba, ratio)
+        s, b = submission.get_s_b(yPredicted, yValidation, weightsValidation)
+        s *= 250000/yPredicted.shape[0]
+        b *= 250000/yPredicted.shape[0]
+        ams = hbc.AMS(s,b)
+        if ams >= best_ams:
+            best_ratio = ratio
+            best_ams = ams
 
+    return best_ratio
 
 
 
