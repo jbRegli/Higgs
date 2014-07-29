@@ -14,10 +14,10 @@ import submission
 import HiggsBosonCompetition_AMSMetric_rev1 as hbc
 
 # add path of xgboost python module (NICO DOIT AJOUTER LE CHEMIN VERS SON BOOST)
-code_path_jb = '/home/regli/Applications/Python/xgboost/python'
-sys.path.append(code_path_jb)
-#code_path_nico = '/home/regli/Applications/Python/xgboost/python'
-#sys.path.append(code_path_nico)
+#code_path_jb = '/home/regli/Applications/Python/xgboost/python'
+#sys.path.append(code_path_jb)
+code_path_nico = '../xgboost/python'
+sys.path.append(code_path_nico)
 
 import xgboost as xgb
 
@@ -136,6 +136,7 @@ def get_test_prediction(predictor_s, xsTest_s):
 ###############
 ### IMPORT ####
 ###############
+"""
 # Importation parameters:
 split= False
 normalize = True
@@ -160,7 +161,7 @@ print np.amax(yProba_s)
 print np.amin(yProba_s)
 
 
-"""
+
 ################
 # Evaluation of the AMS on the validation set:
 if type(yProba_s) == list:

@@ -245,9 +245,12 @@ def concatenate_vectors(vector_s):
     """
     concatenate the vectors in vector_s and returns the concatenated vector
     """
-    concatenated_vector = np.empty(0)
+    if len(vector_s[0].shape)>1:
+        concatenated_vector = np.empty((0, vector_s[0].shape[1])) # empty vector with the same number of columns than the arrays in the list
+    else:
+        concatenated_vector = np.empty(0)
     for vector in vector_s:
-        concatenated_vector = np.concatenate((concatenated_vector, vector), axis = 1)
+        concatenated_vector = np.concatenate((concatenated_vector, vector))
 
     return concatenated_vector
 

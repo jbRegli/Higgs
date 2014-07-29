@@ -13,12 +13,13 @@ import adaBoost
 import lda
 import qda
 import gradientBoosting
-
+sys.path.append('../')
 import HiggsBosonCompetition_AMSMetric_rev1 as hbc
 import preTreatment
 import submission
+import xgBoost
 
-sys.path.append('PostTreatment')
+sys.path.append('../PostTreatment')
 import tresholding
 
 
@@ -36,7 +37,7 @@ def analyse(train_s, valid_s, method_name, kwargs):
     predictor_s, yPredicted_s, yProba_s = eval(method_name).get_yPredicted_s(
                                                                 train_s[1],
                                                                 train_s[2],
-                                                                valid_s[1],
+                                                                valid_s[1])
                                                             **kwargs)
 
     # Let's convert the four 's' classes in s
@@ -87,7 +88,7 @@ def analyse(train_s, valid_s, method_name, kwargs):
         yProba_conca = yProba_s
     # Predicted Vectors
     if type(yPredicted_s) == list:
-        yPredicted_conca = preTreament.concatenate_vectors(yPredicted_s)
+        yPredicted_conca = preTreatment.concatenate_vectors(yPredicted_s)
     else:
         yPredicted_conca = yPredicted_s
 
@@ -152,12 +153,12 @@ def analyse(train_s, valid_s, method_name, kwargs):
                                                            valid_s[2])
 
     d = {'predictor_s':predictor_s,
-         'yPredicted_s': yPredicted_s, 'yPredicted_conca': yPredicted_conca,
+         'yPredicted_s': yPredicted_s, 'yPredicted_conca': yPredicted_conca, 'yPredicted_conca_treshold':yPredicted_conca_treshold,
          'yProba_s': yProba_s, 'yProba_conca': yProba_conca,
          'yProbaBinary_s': yProbaBinary_s, 'yProbaBinary_conca': yProbaBinary_conca,
          'final_s':final_s, 'final_b':final_b,
          'sum_s':sum_s_s, 'sum_b': sum_b_s,
-         'AMS':AMS, 'AMS_s': AMS_s, 'AMS_treshold': AMS_treshold,
+         'AMS':AMS, 'AMS_s': AMS_s, 'AMS_treshold': AMS_treshold, 'best_treshold_global' : best_treshold_global,
          'classif_succ': classif_succ,
          'method': method_name,
          'parameters': kwargs}

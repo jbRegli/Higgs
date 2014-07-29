@@ -36,7 +36,8 @@ import kNeighbors
 import adaBoost
 import lda
 import qda
-
+import gradientBoosting
+import xgBoost
 
 def main():
 
@@ -60,19 +61,23 @@ def main():
 
 
     # RANDOM FOREST:
-    kwargs_rdf = {'n_estimators': 50}
+    #kwargs_rdf = {'n_estimators': 50}
 
-    dRandomForest = analyse.analyse(train_s, valid_s, "randomForest", kwargs_rdf)
+    #dRandomForest = analyse.analyse(train_s, valid_s, "randomForest", kwargs_rdf)
+    # GRADIENT BOOSTING
+    d = analyse.analyse(train_s, valid_s, "xgBoost")
 
     yPredictedTest = []
     yProbaTest = []
 
+    print "Classifying the test set..."
     for i in range(8):
-        yPredicted, yProba = randomForest.prediction(dRandomForest['predictor_s'][i], test_s[1][i])
+        yPredicted, yProba = gradientBoosting.prediction(d['predictor_s'][i], test_s[1][i])
         yPredictedTest.append(yPredicted)
         yProbaTest.append(yProba)
 
     
+    print "Finalizing the vectors for the submission..."
 
     yProbaTestFinal = []
     
@@ -90,7 +95,9 @@ def main():
     for i in range(yPredictedTest_conca.shape[0]):
         if yPredictedTest_conca[i] >=1:
             yPredictedTest_conca[i] = 1
-
+    
+    # Let's treshold
+    yPredictedTest_conca_treshold = tresholding.get_yPredicted_treshold(yProbaTestFinal_conca, d['best_treshold_global'])
     #let's rank the proba
     temp = yProbaTestFinal_conca.argsort()
     yProbaTestFinal_conca_ranked = np.arange(len(yProbaTestFinal_conca))[temp.argsort()]
@@ -100,11 +107,11 @@ def main():
     for i in IDTest_conca:
         IDTest_conca_int = IDTest_conca.astype(np.int64)
 
-    sub = submission.print_submission(IDTest_conca_int, yProbaTestFinal_conca_ranked, yPredictedTest_conca, name = 'submission_newmethod')
+    sub = submission.print_submission(IDTest_conca_int, yProbaTestFinal_conca_ranked, yPredictedTest_conca_treshold, name = 'submission_gradB_treshold')
 
-    AMS_validation = dRandomForest['AMS']
+    AMS_validation = d['AMS']
 
-    return yPredictedTest_conca, yProbaTestFinal_conca_ranked, AMS_validation 
+    return d 
    
     
 
