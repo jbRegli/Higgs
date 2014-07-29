@@ -16,7 +16,7 @@ import HiggsBosonCompetition_AMSMetric_rev1 as hbc
 # TODO: add path of xgboost python module
 code_path_jb = '/home/regli/Applications/Python/xgboost/python'
 sys.path.append(code_path_jb)
-code_path_nico = '../xgboost/python'
+code_path_nico = '/home/nicolas/xgboost/python'
 sys.path.append(code_path_nico)
 
 import xgboost as xgb
