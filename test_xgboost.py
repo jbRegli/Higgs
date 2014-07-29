@@ -14,10 +14,13 @@ import HiggsBosonCompetition_AMSMetric_rev1 as hbc
 sys.path.append('Analyses/')
 import xgBoost
 
-train_s, train2_s, valid_s, test_s = tokenizer.extract_data(split = True, normalize = True, noise_variance = 0., n_classes = "binary", train_size = 200000, train_size2 = 25000, valid_size = 25000)
+train_s, train2_s, valid_s, test_s = tokenizer.extract_data(split = True, normalize = True, noise_variance = 0., n_classes = "multiclass", train_size = 200000, train_size2 = 25000, valid_size = 25000)
 
-predictor_s, yTrain2ProbaBinary_s = xgBoost.get_yPredicted_s(train_s[1], train_s[2], train_s[3],train2_s[1], 550000)
+kwargs_xgb = {'objective': 'multi:softmax', 'num_class': 5, 'bst:eta': 0.1,
+              'bst:max_depth': 10, 'eval_metric': 'auc', 'silent': 1, 'nthread': 16 }
 
+
+predictor_s, yTrain2ProbaBinary_s = xgBoost.get_yPredicted_s(train_s[1], train_s[2], train_s[3], train2_s[1], 550000, kwargs_xgb)
 
 
 #predict the second test set and the validation set
