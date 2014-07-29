@@ -13,12 +13,11 @@ import preTreatment
 import submission
 import HiggsBosonCompetition_AMSMetric_rev1 as hbc
 
-# add path of xgboost python module (NICO DOIT AJOUTER LE CHEMIN VERS SON BOOST)
+# TODO: add path of xgboost python module
 code_path_jb = '/home/regli/Applications/Python/xgboost/python'
 sys.path.append(code_path_jb)
 code_path_nico = '../xgboost/python'
 sys.path.append(code_path_nico)
-
 
 import xgboost as xgb
 
@@ -33,7 +32,7 @@ def preparation(yTrain, wTrain, test_size= 550000):
     return wRebalance, sum_wpos, sum_wneg
 
 
-def classifier(xTrain, yTrain, wTrain, test_size= 550000, **kwargs):
+def classifier(xTrain, yTrain, wTrain, test_size, **kwargs):
 
     wRebalance, sum_wpos, sum_wneg  = preparation(yTrain, wTrain, test_size)
 
@@ -42,6 +41,8 @@ def classifier(xTrain, yTrain, wTrain, test_size= 550000, **kwargs):
 
     # scale weight of positive examples
     kwargs['scale_pos_weight'] = sum_wneg/sum_wpos
+
+    print kwargs.keys()
 
     # You can directly throw param in, though we want to watch multiple metrics
     # here
@@ -72,7 +73,7 @@ def prediction(predictor, testset):
 
 
 def get_yPredicted_s(xsTrain_s, yTrain_s, wTrain_s, xsValid_s, test_size,
-                     kwargs):
+                     **kwargs):
     """
     Perform the training and the prediction on the 8 sub-sets
     """
@@ -84,7 +85,8 @@ def get_yPredicted_s(xsTrain_s, yTrain_s, wTrain_s, xsValid_s, test_size,
 
         for n in range(len(xsTrain_s)):
             # Training:
-            xgb = classifier(xsTrain_s[n], yTrain_s[n], wTrain_s[n], test_size)
+            xgb = classifier(xsTrain_s[n], yTrain_s[n], wTrain_s[n], test_size,
+                             **kwargs)
 
             # Prediction:
             proba_predicted = prediction(xgb, xsValid_s[n])
@@ -119,7 +121,6 @@ def get_test_prediction(predictor_s, xsTest_s):
         test_proba_s = prediction(predictor_s, xsTest_s)
 
     return test_proba_s
-
 
 
 
