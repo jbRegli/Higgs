@@ -93,7 +93,7 @@ def get_all_data(normalize = True, noise_variance = 0.,  n_classes = "binary", t
         xsTrain2 = xs[randomPermutation[train_size: train_size + train_size2]]
     if valid_size != 0:
         xsValidation = xs[randomPermutation[train_size + train_size2:]]
-    
+
     sSelectorTrain = sSelector[randomPermutation[:train_size]]
     bSelectorTrain = bSelector[randomPermutation[:train_size]]
     if train_size2!=0:
@@ -109,7 +109,7 @@ def get_all_data(normalize = True, noise_variance = 0.,  n_classes = "binary", t
         yTrain2 = np.zeros(train_size2)
     if valid_size !=0:
         yValidation = np.zeros(valid_size)
-    
+
     for n in xrange(train_size):
         if sSelectorTrain[n]:
             yTrain[n] = 1
@@ -138,7 +138,7 @@ def get_all_data(normalize = True, noise_variance = 0.,  n_classes = "binary", t
     sumWeightsTrain = np.sum(weightsTrain)
     sumSWeightsTrain = np.sum(weightsTrain[sSelectorTrain])
     sumBWeightsTrain = np.sum(weightsTrain[bSelectorTrain])
-    
+
     if train_size2 != 0:
         sumWeightsTrain2 = np.sum(weightsTrain2)
         sumSWeightsTrain2 = np.sum(weightsTrain[sSelectorTrain2])
@@ -283,7 +283,7 @@ def get_8_bins(normalize = True, noise_variance = 0., n_classes = "binary", \
          return (ID_train_s, xsTrain_s, yTrain_s, weightsTrain_s, nameTrain_s), \
            (ID_valid_s, xsValid_s, yValid_s, weightsValid_s, nameValid_s), \
            (ID_test_s, xsTest_s, nameTest_s)
-    
+
     if train_size2 ==0 and valid_size ==0:
          return (ID_train_s, xsTrain_s, yTrain_s, weightsTrain_s, nameTrain_s), \
            (ID_test_s, xsTest_s, nameTest_s)

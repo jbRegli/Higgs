@@ -17,7 +17,7 @@ sys.path.append('Analyses/')
 import analyse # Function computing an analyse for any method in the good format
 import tuningModel
 
-sys.path.append('PostTreatment')
+sys.path.append('PostTreatment/')
 import onTopClassifier
 import mergeClassifiers
 import tresholding
@@ -29,18 +29,25 @@ def main():
     ### IMPORT ####
     ###############
     # Importation parameters:
-    split= False
+    split= True
     normalize = True
     noise_var = 0.
-    ratio_train = 0.9
+    n_classes = "binary"
+    train_size = 200000
+    train_size2 = 25000
+    valid_size = 25000
+
 
     # Import the training data:
     print("Extracting the data sets...")
     start = time.clock()
-    train_s, valid_s, test_s = tokenizer.extract_data(split= split,
+    train_s, train2_s, valid_s, test_s = tokenizer.extract_data(split= split,
                                                       normalize= normalize,
                                                       noise_variance= noise_var,
-                                                      ratio_train= ratio_train)
+                                                      n_classes = n_classes,
+                                                      train_size = train_size,
+                                                      train_size2 = train_size2,
+                                                      valid_size = valid_size)
 
 
     # Remerging the y and weights of the validation if necessary:
@@ -80,8 +87,10 @@ def main():
 
     # NAIVE BAYES:
     kwargs_bayes = {}
-    dMethods['naiveBayes'] =  analyse.analyse(train_s, valid_s, 'naiveBayes',
-                                              kwargs_bayes)
+    dMethods['naiveBayes'] =  analyse.analyse(train_s= train_s, train2_s= train2_s,
+                                              valid_s= valid_s,
+                                              method_name = 'naiveBayes',
+                                              kwargs = kwargs_bayes)
     # SVM
     """
     kwargs_svm ={}
@@ -95,10 +104,17 @@ def main():
     """
     # LDA
     kwargs_lda = {}
-    dMethods['lda'] = analyse.analyse(train_s, valid_s, 'lda', kwargs_lda)
+    dMethods['lda'] = analyse.analyse(train_s= train_s, train2_s= train2_s,
+                                              valid_s= valid_s,
+                                              method_name = 'lda',
+                                              kwargs = kwargs_lda)
+
     # QDA
     kwargs_qda= {}
-    dMethods['qda'] = analyse.analyse(train_s, valid_s, 'qda', kwargs_qda)
+    dMethods['qda'] = analyse.analyse(train_s= train_s, train2_s= train2_s,
+                                              valid_s= valid_s,
+                                              method_name = 'qda',
+                                              kwargs = kwargs_qda)
     """
     # ADABOOST
     kwargs_ada= {   'n_estimators': 50,
@@ -107,16 +123,21 @@ def main():
                     'random_state':None}
     dMethods['adaBoost'] = analyse.analyse(train_s, valid_s, 'adaBoost',
                                            kwargs_ada)
-
+    """
     # RANDOM FOREST:
-    kwargs_rdf= {'n_estimators': 10}
-    dMethods['randomForest'] = analyse.analyse(train_s, valid_s, 'randomForest',
-                                               kwargs_rdf)
+    kwargs_randomForest= {'n_estimators': 10}
+    dMethods['randomForest'] = analyse.analyse(train_s= train_s, train2_s= train2_s,
+                                              valid_s= valid_s,
+                                              method_name = 'randomForest',
+                                              kwargs = kwargs_randomForest)
 
     # RANDOM FOREST 2:
-    kwargs_rdf= {'n_estimators': 100}
-    dMethods['randomForest2'] = analyse.analyse(train_s, valid_s, 'randomForest',
-                                               kwargs_rdf)
+    kwargs_randomForest= {'n_estimators': 100}
+    dMethods['randomForest2'] = analyse.analyse(train_s= train_s, train2_s= train2_s,
+                                              valid_s= valid_s,
+                                              method_name = 'randomForest',
+                                              kwargs = kwargs_randomForest)
+    """
     # ADABOOST2
     kwargs_ada= {   'n_estimators': 100,
                     'learning_rate': .5,
@@ -126,19 +147,25 @@ def main():
                                            kwargs_ada)
 
     # RANDOM FOREST 3:
-    kwargs_rdf= {'n_estimators': 100}
-    dMethods['randomForest3'] = analyse.analyse(train_s, valid_s, 'randomForest',
-                                               kwargs_rdf)
+    kwargs_randomForest= {'n_estimators': 100}
+    dMethods['randomForest3'] = analyse.analyse(train_s= train_s, train2_s= train2_s,
+                                              valid_s= valid_s,
+                                              method_name = 'randomForest',
+                                              kwargs = kwargs_randomForest)
 
     # RANDOM FOREST 4:
-    kwargs_rdf= {'n_estimators': 100}
-    dMethods['randomForest4'] = analyse.analyse(train_s, valid_s, 'randomForest',
-                                               kwargs_rdf)
+    kwargs_randomForest= {'n_estimators': 100}
+    dMethods['randomForest4'] = analyse.analyse(train_s= train_s, train2_s= train2_s,
+                                              valid_s= valid_s,
+                                              method_name = 'randomForest',
+                                              kwargs = kwargs_randomForest)
 
     # RANDOM FOREST 5:
-    kwargs_rdf= {'n_estimators': 100}
-    dMethods['randomForest5'] = analyse.analyse(train_s, valid_s, 'randomForest',
-                                               kwargs_rdf)
+    kwargs_randomForest= {'n_estimators': 100}
+    dMethods['randomForest5'] = analyse.analyse(train_s= train_s, train2_s= train2_s,
+                                              valid_s= valid_s,
+                                              method_name = 'randomForest',
+                                              kwargs = kwargs_randomForest)
 
     # GRADIENT BOOSTING:
     kwargs_gradB = {'loss': 'deviance', 'learning_rate': 0.1,
@@ -155,8 +182,12 @@ def main():
     ##################
     # POST-TREATMENT #
     ##################
-    print("------------------------ On-top predictor -----------------------")
+    print("------------------------ Feaure importance: -----------------------")
+    for predictor_s in dMethods['randomForest2']['predictor_s']:
+        print predictor_s.feature_importances_
 
+
+    print("------------------------ On-top predictor -----------------------")
     # Classifiers to be ignored:
     #ignore = ['randomForest2', 'randomForest']
     ignore = []
