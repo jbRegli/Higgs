@@ -232,7 +232,6 @@ def analyse(train_s, train2_s=None, valid_s=None, method_name=None, kwargs=None)
     else:
         AMS_s = AMS
 
-    AMS_s = AMS
     # Classification error:
     classif_succ = eval(method_name).get_classification_error(yPredictedValid_s,
                                                        valid_s[2],
