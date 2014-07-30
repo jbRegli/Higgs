@@ -15,6 +15,7 @@ from sklearn import svm
 sys.path.append('../')
 import submission
 import HiggsBosonCompetition_AMSMetric_rev1 as hbc
+import preTreatment
 
 sys.path.append('../Analyses/')
 
@@ -92,9 +93,14 @@ def get_yPredicted_ratio(yProba, ratio):
     ratio : float
     yProba : vector of proba
     """
+    print "get_yPredicted_ratio"
     yPredicted = np.zeros_like(yProba)
     yProbaSorted = yProba[yProba.argsort()]
-    treshold = yProbaSorted[int((1-ratio)*len(yProba))]
+    print "len yProba : %i" %len(yProba)
+    print "len yProbaSorted : %i" %len(yProbaSorted)
+    print "ratio : %f" %float(ratio)
+    
+    treshold = yProbaSorted[int((1. - float(ratio))*len(yProba))]
     yPredicted = get_yPredicted_treshold(yProba, treshold)
 
     return yPredicted
@@ -139,6 +145,41 @@ def best_ratio(yProba, yValidation, weightsValidation, pas = 0.01):
 
     return best_ratio
 
+def get_yPredicted_ratio_8(yProba_s, ratio_s):
+    """
+    returns a list of predicted y for each group associated with each ratio
+    """
+    print "get_yPredicted_ratio_8"
+    print "type ratio_s %s" %type(ratio_s)
+    yPredicted_s = []
+    for i, ratio in enumerate(ratio_s):
+        yPredicted_s.append(get_yPredicted_ratio(yProba_s[i], ratio))
+    yPredicted_conca = preTreatment.concatenate_vectors(yPredicted_s)
 
+    return yPredicted_s, yPredicted_conca
+
+def best_ratio_combinaison(yProba_s, yValidation_s, weightsValidation_s):
+    best_ratio_comb = [0.,0.,0.,0.,0.,0.,0.,0.]
+    AMS_max = 0.
+    ratio_s = np.arange(0.04,0.2,0.04)
+    for a in ratio_s:
+        for b in ratio_s:
+            for c in ratio_s:
+                for d in ratio_s:
+                    for e in ratio_s:
+                        for f in ratio_s:
+                            for g in ratio_s:
+                                for h in ratio_s:
+                                    print "best_ratio_combinaison"
+                                    yPredicted_s = get_yPredicted_ratio_8(yProba_s,
+                                    ["%.2f" %a,"%.2f" %b,"%.2f" %c,"%.2f" %d,"%.2f" %e,"%.2f" %f,"%.2f" %g,"%.2f" %h])[0]
+                                    fs, fb, s, b = submission.get_s_b(yPredicted_s, yValidation_s, weightsValidation_s)
+                                    fs *=10
+                                    fb *=10
+                                    AMS = hbc.AMS(fs, fb)
+                                    if AMS > AMS_max:
+                                        AMS_max = AMS
+                                        best_ratio_comb = [a,b,c,d,e,f,g,h]
+    return AMS_max, best_ratio_comb
 
 

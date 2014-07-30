@@ -34,6 +34,24 @@ def prediction(predictor, testset):
 
     return label_predicted, proba_predicted
 
+def get_predictors(xsTrain_s, yTrain_s, **kwargs):
+    """
+    performs the training and returns the predictors
+    """
+    # If we work with the splitted dataset:
+    if type(xsTrain_s) == list:
+        predictor_s = []
+
+        for n in range(len(xsTrain_s)):
+            # Training:
+            gradB = classifier(xsTrain_s[n], yTrain_s[n], **kwargs)
+            predictor_s.append(gradB)
+
+    else:
+        # Training:
+        predictor_s = classifier(xsTrain_s, yTrain_s, **kwargs)
+
+    return predictor_s 
 
 def get_yPredicted_s(xsTrain_s, yTrain_s, xsValidation_s, **kwargs):
     """

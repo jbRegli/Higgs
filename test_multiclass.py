@@ -65,8 +65,10 @@ def main():
 
 
     #RANDOM FOREST:
-    kwargs_rdf = {'n_estimators': 100}
-    predictor_s = randomForest.get_predictors(train_s[1], train_s[2], **kwargs_rdf)
+    kwargs_grad = {}
+    #kwargs_rdf = {'n_estimators': 100}
+    print "Training on the train set ..."
+    predictor_s = gradientBoosting.get_predictors(train_s[1], train_s[2], **kwargs_grad)
 
 
     yPredictedTest = []
@@ -74,7 +76,7 @@ def main():
 
     print "Classifying the test set..."
     for i in range(8):
-        yPredicted, yProba = randomForest.prediction(predictor_s[i], test_s[1][i])
+        yPredicted, yProba = gradientBoosting.prediction(predictor_s[i], test_s[1][i])
         yPredictedTest.append(yPredicted)
         yProbaTest.append(yProba)
 
@@ -106,7 +108,7 @@ def main():
     for i in IDTest_conca:
         IDTest_conca_int = IDTest_conca.astype(np.int64)
 
-    sub = submission.print_submission(IDTest_conca_int, yProbaTestFinal_conca_ranked, yPredictedTest_conca_treshold, name = 'submission_rdf_ratio20')
+    sub = submission.print_submission(IDTest_conca_int, yProbaTestFinal_conca_ranked, yPredictedTest_conca_treshold, name = 'submission_gradB_ratio15')
 
     return sub
 
