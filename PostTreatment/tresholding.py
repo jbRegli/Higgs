@@ -6,6 +6,7 @@ Systeme de vote entre classifier
 import sys
 import numpy as np
 import scipy.stats as ss
+import itertools
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
@@ -82,27 +83,26 @@ def get_yPredicted_treshold(yProba, treshold):
     pas : size of the interval between two probabilities tested
     """
     yPredicted = np.zeros_like(yProba)
+    yPredicted[yProba > treshold] =1
+    """
     for i in range(yPredicted.shape[0]):
         if yProba[i] > treshold:
             yPredicted[i] = 1.
+    """
     return yPredicted
-
+    
 def get_yPredicted_ratio(yProba, ratio):
     """
     Returns vector of yPredicted keeping the ratio% highest percentages
     ratio : float
     yProba : vector of proba
     """
-    print "get_yPredicted_ratio"
     yPredicted = np.zeros_like(yProba)
-    yProbaSorted = yProba[yProba.argsort()]
-    print "len yProba : %i" %len(yProba)
-    print "len yProbaSorted : %i" %len(yProbaSorted)
-    print "ratio : %f" %float(ratio)
+    if ratio !=0:
+        yProbaSorted = yProba[yProba.argsort()]
+        treshold = yProbaSorted[int((1. - float(ratio))*len(yProba))]
+        yPredicted = get_yPredicted_treshold(yProba, treshold)
     
-    treshold = yProbaSorted[int((1. - float(ratio))*len(yProba))]
-    yPredicted = get_yPredicted_treshold(yProba, treshold)
-
     return yPredicted
 
 def best_treshold(yProba, yValidation, weightsValidation, pas = 0.01):
@@ -130,7 +130,7 @@ def best_treshold(yProba, yValidation, weightsValidation, pas = 0.01):
     return best_treshold
 
 def best_ratio(yProba, yValidation, weightsValidation, pas = 0.01):
-    ratio_s = np.arange(0.01, 0.99, pas)
+    ratio_s = np.arange(0., 0.99, pas)
     best_ams = 0.
 
     for ratio in ratio_s:
@@ -149,8 +149,6 @@ def get_yPredicted_ratio_8(yProba_s, ratio_s):
     """
     returns a list of predicted y for each group associated with each ratio
     """
-    print "get_yPredicted_ratio_8"
-    print "type ratio_s %s" %type(ratio_s)
     yPredicted_s = []
     for i, ratio in enumerate(ratio_s):
         yPredicted_s.append(get_yPredicted_ratio(yProba_s[i], ratio))
@@ -158,28 +156,73 @@ def get_yPredicted_ratio_8(yProba_s, ratio_s):
 
     return yPredicted_s, yPredicted_conca
 
-def best_ratio_combinaison(yProba_s, yValidation_s, weightsValidation_s):
+def best_ratio_combinaison(yProba_s, yValidation_s, weightsValidation_s, ratio_s):
+    """
+    returns the best ratio combinaison with the ratios specified in ratio_s for each group
+    ratio_s : List of the list of the ratios to test for each group
+    the size of each list should not exceed 4 for computationnal time issues
+    """
     best_ratio_comb = [0.,0.,0.,0.,0.,0.,0.,0.]
     AMS_max = 0.
-    ratio_s = np.arange(0.04,0.2,0.04)
-    for a in ratio_s:
-        for b in ratio_s:
-            for c in ratio_s:
-                for d in ratio_s:
-                    for e in ratio_s:
-                        for f in ratio_s:
-                            for g in ratio_s:
-                                for h in ratio_s:
-                                    print "best_ratio_combinaison"
-                                    yPredicted_s = get_yPredicted_ratio_8(yProba_s,
-                                    ["%.2f" %a,"%.2f" %b,"%.2f" %c,"%.2f" %d,"%.2f" %e,"%.2f" %f,"%.2f" %g,"%.2f" %h])[0]
-                                    fs, fb, s, b = submission.get_s_b(yPredicted_s, yValidation_s, weightsValidation_s)
-                                    fs *=10
-                                    fb *=10
-                                    AMS = hbc.AMS(fs, fb)
-                                    if AMS > AMS_max:
-                                        AMS_max = AMS
-                                        best_ratio_comb = [a,b,c,d,e,f,g,h]
+    """
+    ratio_1_s = [0.06, 0.08,0.10,0.12]
+    ratio_2_s = [0.15,0.16,0.17,0.18]
+    ratio_3_s = [0.36,0.38,0.40,0.42]
+    ratio_4_s = [0.16,0.18,0.2,0.22]
+    ratio_5_s = [0.007,0.008,0.009,0.01]
+    ratio_6_s = [0.003,0.004,0.005,0.006]
+    ratio_7_s = [0.003,0.004,0.005,0.006]
+    ratio_8_s = [0.007,0.008,0.009,0.01]
+    """
+    g_combinaisons = itertools.product(ratio_s[0], ratio_s[1], ratio_s[2], ratio_s[3], \
+                                        ratio_s[4], ratio_s[5], ratio_s[6], ratio_s[7])
+    compteur = 0
+    for combinaison in g_combinaisons:
+        if compteur%10000==0:
+            print "number of iterations : %i" %compteur
+        compteur +=1
+        L = list(combinaison)
+        yPredicted_s, yPredicted_conca = get_yPredicted_ratio_8(yProba_s, L)
+        finals, finalb, s_s, b_s = submission.get_s_b(yPredicted_s, yValidation_s, weightsValidation_s)
+        finals *= 10
+        finalb *= 10
+        AMS = hbc.AMS(finals, finalb)
+        if AMS > AMS_max:
+            AMS_max = AMS
+            best_ratio_comb = L
+
     return AMS_max, best_ratio_comb
 
+def best_ratio_combinaison_global(yProba_s, yValidation_s, weightsValidation_s, max_iters):
+    """
+    returns the best ratio combinaison global after n iterations
+    """
+    AMS_max = 0.
+    ratio_s = []
+    for i in range(8):
+        ratio_s.append([0, 0.25,0.5])
+    
+    for n in range(max_iters):
+        print "iteration globale : %i" %n
+        AMS_new, ratio_comb = best_ratio_combinaison(yProba_s, yValidation_s, weightsValidation_s, ratio_s)
+        for i in range(8):
+            # Case 1 : minimum
+            if ratio_comb[i] == ratio_s[i][0]:
+                if ratio_s[i][0] !=0:
+                    ratio_s[i] = [0, ratio_s[i][0], ratio_s[i][1]]
+                else:
+                    ratio_s[i] = [0, ratio_s[i][1]/2, ratio_s[i][1]]
+            # Case 2 : maximum
+            if ratio_comb[i] == ratio_s[i][2]:
+                ratio_s[i] = [ratio_s[i][1], ratio_s[i][2], 2*ratio_s[i][2] - ratio_s[i][1]]
+            else:
+                ratio_s[i] = [(ratio_s[i][1]+ratio_s[i][0])/2, ratio_s[i][1], (ratio_s[i][2] + ratio_s[i][1])/2]
+        for i in range(8):
+            print ratio_s[i]
+        if AMS_max < AMS_new:
+            AMS_max = AMS_new
+            best_ratio_comb = ratio_comb
+            #else:
+             #   equilibre = True
 
+    return AMS_max, best_ratio_comb

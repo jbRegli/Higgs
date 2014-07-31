@@ -65,10 +65,10 @@ def main():
 
 
     #RANDOM FOREST:
-    kwargs_grad = {}
-    #kwargs_rdf = {'n_estimators': 100}
+    #kwargs_grad = {}
+    kwargs_rdf = {'n_estimators': 100}
     print "Training on the train set ..."
-    predictor_s = gradientBoosting.get_predictors(train_s[1], train_s[2], **kwargs_grad)
+    predictor_s = randomForest.get_predictors(train_s[1], train_s[2], **kwargs_rdf)
 
 
     yPredictedTest = []
@@ -76,7 +76,7 @@ def main():
 
     print "Classifying the test set..."
     for i in range(8):
-        yPredicted, yProba = gradientBoosting.prediction(predictor_s[i], test_s[1][i])
+        yPredicted, yProba = randomForest.prediction(predictor_s[i], test_s[1][i])
         yPredictedTest.append(yPredicted)
         yProbaTest.append(yProba)
 
@@ -91,7 +91,9 @@ def main():
         for j in range(yPredictedTest[i].shape[0]):
             yProbaTestFinal[i][j] = 1 - yProbaTest[i][j][0]
 
-    yPredictedTest_conca = preTreatment.concatenate_vectors(yPredictedTest)
+    yPredicted_s, yPredicted = tresholding.get_yPredicted_ratio_8(yProbaTestFinal, [0.11328125, 0.1142578125, 0.375, 0.2265625, 0.0107421875, 0.046875, 0.08984375, 0.029296875])
+    #yPredictedTest_conca = preTreatment.concatenate_vectors(yPredictedTest)
+    yPredictedTest_conca = yPredicted
     yProbaTestFinal_conca = preTreatment.concatenate_vectors(yProbaTestFinal)
     IDTest_conca = preTreatment.concatenate_vectors(test_s[0])
 
@@ -101,14 +103,14 @@ def main():
             yPredictedTest_conca[i] = 1
     
     # Let's treshold
-    yPredictedTest_conca_treshold = tresholding.get_yPredicted_ratio(yProbaTestFinal_conca, 0.16)
+    #yPredictedTest_conca_treshold = tresholding.get_yPredicted_ratio(yProbaTestFinal_conca, 0.16)
     #let's rank the proba
     yProbaTestFinal_conca_ranked = submission.rank_signals(yProbaTestFinal_conca)
     # let's make the ID int
     for i in IDTest_conca:
         IDTest_conca_int = IDTest_conca.astype(np.int64)
 
-    sub = submission.print_submission(IDTest_conca_int, yProbaTestFinal_conca_ranked, yPredictedTest_conca_treshold, name = 'submission_gradB_ratio15')
+    sub = submission.print_submission(IDTest_conca_int, yProbaTestFinal_conca_ranked, yPredictedTest_conca, name = 'submission_rdf_ratiocombine')
 
     return sub
 

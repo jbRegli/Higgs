@@ -17,7 +17,7 @@ import preTreatment
 import submission
 import xgBoost
 
-sys.path.append('PostTreatment')
+sys.path.append('../PostTreatment')
 import tresholding
 
 
