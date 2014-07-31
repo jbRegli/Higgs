@@ -21,95 +21,67 @@ sys.path.append('../PostTreatment')
 import tresholding
 
 
-def analyse(train_s, train2_s=None, valid_s=None, method_name=None, kwargs=None):
+def analyse(train_s, train2_s, valid_s, method_name, kwargs={}):
     """
     methode name = string, name of the method (eg :"naiveBayes")
     kwargs = dictionnary of the paraters of the method
+    train_s = training set for the classifier(s)
+    train2_s = training set for the meta parameters (eg : the best treshold)
+    valid_s : validation set
+    None of the set must be empty !
     """
     # Prediction on the validation set:
     print("------------------- Analyse: %s -----------------------") \
                         %(method_name)
 
-    predictor_s, yPredictedTrain2_s, yProbaTrain2_s = eval(method_name).\
-                                get_yPredicted_s(train_s[1],
-                                                 train_s[2],
-                                                 train2_s[1],
-                                                 **kwargs)
+    classifier_s = eval(method_name).train_classifier(train_s[1], train_s[2], kwargs)
 
-    yPredictedValid_s, yProbaValid_s = eval(method_name).get_test_prediction(
-                                                        predictor_s, valid_s[1])
+    yProbaValid_s = eval(method_name).predict_proba(classifier_s, valid_s[1]) 
+    yProbaTrain2_s = eval(method_name).predict_proba(classifier_s, train2_s[1]) 
 
-    # Let's convert the four 's' classes in s
-    # TODO: Option 4 's' scenario?
-    if type(yPredictedTrain2_s) == list:
-        for i in range(len(yPredictedTrain2_s)):
-            for j in range(yPredictedTrain2_s[i].shape[0]):
-                if yPredictedTrain2_s[i][j] >=1:
-                    yPredictedTrain2_s[i][j] =1
-    else:
-        for j in range(yPredictedTrain2_s.shape[0]):
-                if yPredictedTrain2_s[j] >=1:
-                    yPredictedTrain2_s[j] =1
-
-    if type(yPredictedValid_s) == list:
-        for i in range(len(yPredictedValid_s)):
-            for j in range(yPredictedValid_s[i].shape[0]):
-                if yPredictedValid_s[i][j] >=1:
-                    yPredictedValid_s[i][j] =1
-    else:
-        for j in range(yPredictedValid_s.shape[0]):
-                if yPredictedValid_s[j] >=1:
-                    yPredictedValid_s[j] =1
-
-    # Convert the validations vectors four 's' into s
+    # Convert the validations vectors four 's' classes into one single s
+    # classe
     if type(valid_s[2]) == list:
         for i in range(len(valid_s[2])):
             for j in range(valid_s[2][i].shape[0]):
                 if valid_s[2][i][j] >=1:
                     valid_s[2][i][j] = 1
 
-    # Cconvert the train2 vectors four 's' into s
+    # Convert the train2 vectors four 's' classes into one single s
+    # classe
     if type(train2_s[2]) == list:
         for i in range(len(train2_s[2])):
             for j in range(train2_s[2][i].shape[0]):
                 if train2_s[2][i][j] >=1:
                     train2_s[2][i][j] = 1
 
-    # Let's define the vector of probabilities of 's'
+    # Let's define the vectors of probabilities of being 's'
+    # Train2 set 
     if type(yProbaTrain2_s) == list:
         yProbaTrain2Binary_s = []
         for i in range(8):
-            yProbaTrain2Binary_s.append(np.zeros(yPredictedTrain2_s[i].shape[0]))
+            yProbaTrain2Binary_s.append(np.zeros(len(yProbaTrain2_s[i][:,1])))
         for i in range(8):
-            for j in range(yPredictedTrain2_s[i].shape[0]):
+            for j in range(len(yProbaTrain2_s[i][:,1])):
                 yProbaTrain2Binary_s[i][j] = 1 - yProbaTrain2_s[i][j][0]
     else:
-        yProbaTrain2Binary_s = np.zeros(yPredictedTrain2_s.shape[0])
-        for j in range(yPredictedTrain2_s.shape[0]):
+        yProbaTrain2Binary_s = np.zeros(len(yProbaTrain2_s[i][:,1]))
+        for j in range(len(yProbaTrain2_s[i][:,1])):
             yProbaTrain2Binary_s[j] = 1 - yProbaTrain2_s[j][0]
 
-
-    if type(yPredictedValid_s) == list:
-        for i in range(len(yPredictedValid_s)):
-            for j in range(yPredictedValid_s[i].shape[0]):
-                if yPredictedValid_s[i][j] >=1:
-                    yPredictedValid_s[i][j] =1
-    else:
-        yProbaValidBinary_s = np.zeros(yPredictedValid_s.shape[0])
-        for j in range(yPredictedValid_s.shape[0]):
-            yProbaValidBinary_s[j] = 1 - yProbaValid_s[j][0]
-
-    # Let's define the vector of probabilities of 's'
+    # Validation set 
     if type(yProbaValid_s) == list:
         yProbaValidBinary_s = []
         for i in range(8):
-            yProbaValidBinary_s.append(np.zeros(yPredictedValid_s[i].shape[0]))
+            yProbaValidBinary_s.append(np.zeros(len(yProbaValid_s[i][:,1])))
+            print yProbaValidBinary_s[i].shape
+            print type(yProbaValidBinary_s[i])
         for i in range(8):
-            for j in range(yPredictedValid_s[i].shape[0]):
+            for j in range(len(yProbaValid_s[i][:,1])):
                 yProbaValidBinary_s[i][j] = 1 - yProbaValid_s[i][j][0]
     else:
-        yProbaValidBinary_s = np.zeros(yPredictedValid_s.shape[0])
-        for j in range(yPredictedValid_s.shape[0]):
+        yProbaValidBinary_s = np.zeros(len(yProbaValid_s[i][:,1]))
+        for j in range(len(yProbaValid_s[i][:,1])):
             yProbaValidBinary_s[j] = 1 - yProbaValid_s[j][0]
 
     # If we work with lists, let's get the concatenated vectors:
@@ -135,12 +107,6 @@ def analyse(train_s, train2_s=None, valid_s=None, method_name=None, kwargs=None)
         yProbaValid_conca = preTreatment.concatenate_vectors(yProbaValid_s)
     else:
         yProbaValid_conca = yProbaValid_s
-    # Predicted Valid Vectors
-    if type(yPredictedValid_s) == list:
-        yPredictedValid_conca = preTreatment.concatenate_vectors(
-                                                                yPredictedValid_s)
-    else:
-        yPredictedValid_conca = yPredictedValid_s
 
     #TRAIN2 SET
     # Validation Vectors
@@ -164,114 +130,153 @@ def analyse(train_s, train2_s=None, valid_s=None, method_name=None, kwargs=None)
         yProbaTrain2_conca = preTreatment.concatenate_vectors(yProbaTrain2_s)
     else:
         yProbaTrain2_conca = yProbaTrain2_s
-    # Predicted Valid Vectors
-    if type(yPredictedTrain2_s) == list:
-        yPredictedTrain2_conca = preTreatment.concatenate_vectors(
-                                                               yPredictedTrain2_s)
-    else:
-        yPredictedTrain2_conca = yPredictedTrain2_s
 
 
-    # Get s and b for each group (s_s, b_s) and the final final_s and
-    # final_b:
-    if type(yPredictedValid_s) == list:
-        final_s, final_b, s_s, b_s = submission.get_s_b(yPredictedValid_s,
-                                                        valid_s[2],
-                                                        valid_s[3])
-    else:
-        final_s, final_b = submission.get_s_b(yPredictedValid_s, valid_s[2],
-                                              valid_s[3])
-
-    # Let's get the best global treshold and ratio on the train2 set and
-    # estimate
-    best_treshold_global = tresholding.best_treshold(yProbaTrain2Binary_conca,
-                                                     yTrain2_conca,
-                                                     weightsTrain2_conca)
+    # Let's get the best global treshold on the train2 set 
+    AMS_treshold_train2, best_treshold_global = tresholding.best_treshold(yProbaTrain2Binary_conca,
+                                                     yTrain2_conca, weightsTrain2_conca)
     yPredictedValid_conca_treshold = tresholding.get_yPredicted_treshold(
                                                         yProbaValidBinary_conca,
                                                         best_treshold_global)
-
-    best_ratio_global = tresholding.best_ratio(yProbaTrain2Binary_conca,
+    # Let's get the best ratio treshold on the train2 set
+    AMS_ratio_global_train2, best_ratio_global = tresholding.best_ratio(yProbaTrain2Binary_conca,
                                                yTrain2_conca,
                                                weightsTrain2_conca)
 
-    yPredictedValid_conca_ratio = tresholding.get_yPredicted_ratio(
+    yPredictedValid_conca_ratio_global = tresholding.get_yPredicted_ratio(
                                                         yProbaValidBinary_conca,
                                                         best_ratio_global)
+    # Let's get the best ratios combinaison
+    if type(train_s[2]) == list:
+        AMS_ratio_combinaison_train2, best_ratio_combinaison = tresholding.best_ratio_combinaison_global(
+                                                                            yProbaTrain2Binary_s,
+                                                                            train2_s[2], 
+                                                                            train2_s[3],
+                                                                            10)
+        yPredictedValid_ratio_comb_s, yPredictedValid_conca_ratio_combinaison = tresholding.get_yPredicted_ratio_8(
+                                                                                    yProbaValidBinary_s, 
+                                                                                    best_ratio_combinaison)
 
-    final_s_treshold, final_b_treshold = submission.get_s_b(
+    # Let's compute the final s and b for each method
+    s_treshold, b_treshold = submission.get_s_b(
                                                 yPredictedValid_conca_treshold,
                                                 yValid_conca,
                                                 weightsValid_conca)
-    final_s_ratio, final_b_ratio = submission.get_s_b(
-                                                yPredictedValid_conca_ratio,
-                                                yValid_conca,
-                                                weightsValid_conca)
+    s_ratio_global, b_ratio_global = submission.get_s_b(
+                                            yPredictedValid_conca_ratio_global,
+                                            yValid_conca,
+                                            weightsValid_conca)
+    if type(train_s[2]) == list:
+        s_ratio_combinaison, b_ratio_combinaison = submission.get_s_b(
+                                            yPredictedValid_conca_ratio_combinaison,
+                                            yValid_conca,
+                                            weightsValid_conca)
 
     #Balance the s and b
-    final_s *= 250000/yValid_conca.shape[0]
-    final_b *= 250000/yValid_conca.shape[0]
-    final_s_treshold *= 250000/yValid_conca.shape[0]
-    final_b_treshold *= 250000/yValid_conca.shape[0]
-    final_s_ratio *= 250000/yValid_conca.shape[0]
-    final_b_ratio *= 250000/yValid_conca.shape[0]
+    valid_size = yValid_conca.shape[0]
+    s_treshold *= 250000/valid_size
+    b_treshold *= 250000/valid_size
+    s_ratio_global *= 250000/valid_size
+    b_ratio_global *= 250000/valid_size
+    if type(train_s[2])==list:
+        s_ratio_combinaison *=250000/valid_size
+        b_ratio_combinaison *= 250000/valid_size
 
     # AMS final:
-    AMS = hbc.AMS(final_s , final_b)
-    AMS_treshold = hbc.AMS(final_s_treshold, final_b_treshold)
-    AMS_ratio = hbc.AMS(final_s_ratio, final_b_ratio)
-
+    AMS_treshold_valid = hbc.AMS(s_treshold, b_treshold)
+    AMS_ratio_global_valid = hbc.AMS(s_ratio_global, b_ratio_global)
+    if type(train_s[2]) == list:
+        AMS_ratio_combinaison_valid = hbc.AMS(s_ratio_combinaison, b_ratio_combinaison)
+    """
     #AMS by group:
-    if type(valid_s[2]) == list:
+    if type(train_s[2]) == list:
         AMS_s = []
         for i, (s,b) in enumerate(zip(s_s, b_s)):
             s *= 250000/yPredictedValid_s[i].shape[0]
             b *= 250000/yPredictedValid_s[i].shape[0]
             score = hbc.AMS(s,b)
             AMS_s.append(score)
-    else:
-        AMS_s = AMS
-
+    """
     # Classification error:
-    classif_succ = eval(method_name).get_classification_error(yPredictedValid_s,
-                                                       valid_s[2],
+    classif_succ_treshold = eval(method_name).get_classification_error(yPredictedValid_conca_treshold,
+                                                       yValid_conca,
+                                                       normalize= True)
+    classif_succ_ratio_global = eval(method_name).get_classification_error(yPredictedValid_conca_ratio_global,
+                                                       yValid_conca,
+                                                       normalize= True)
+    classif_succ_ratio_combinaison = eval(method_name).get_classification_error(yPredictedValid_conca_ratio_combinaison,
+                                                       yValid_conca,
                                                        normalize= True)
 
+
+
     # Numerical score:
-    if type(yPredictedValid_s) == list:
-        sum_s_s = []
-        sum_b_s = []
+    """
+    if type(yProbaValid_s) == list:
+        sum_s_treshold_s = []
+        sum_b_treshold_s = []
+        sum_s_ratio_global_s = []
+        sum_b_ratio_global_s = []
+        sum_s_ratio_combinaison_s = []
+        sum_b_ratio_combinaison_s = []
         for i in range(len(yPredictedValid_s)):
-            sum_s, sum_b = submission.get_numerical_score(yPredictedValid_s[i],
+            # treshold
+            sum_s_treshold, sum_b_treshold = submission.get_numerical_score(yPredictedValid_conca_treshold_s[i],
                                                           valid_s[2][i])
-            sum_s_s.append(sum_s)
-            sum_b_s.append(sum_b)
+            sum_s_treshold_s.append(sum_s)
+            sum_b_treshold_s.append(sum_b)
+            # ratio global
+            sum_s_ratio_global, sum_b_ratio_global = submission.get_numerical_score(yPredictedValid_conca_ratio_global_s[i],
+                                                          valid_s[2][i])
+            sum_s_ratio_global_s.append(sum_s_ratio_global)
+            sum_b_ratio_global_s.append(sum_b_ratio_global)
+            # ratio combinaison
+            sum_s_ratio_combinaison, sum_b_ratio_combinaison = submission.get_numerical_score(yPredictedValid_conca_ratio_combinaison_s[i],
+                                                          valid_s[2][i])
+            sum_s_ratio_combinaison_s.append(sum_s_ratio_combinaison)
+            sum_b_ratio_combinaison_s.append(sum_b_ratio_combinaison)
+
+
+
 
     else:
-        sum_s_s, sum_b_s = submission.get_numerical_score(yPredictedValid_s,
+        sum_s, sum_b = submission.get_numerical_score(yPredictedValid_s,
                                                            valid_s[2])
-
-    d = {'predictor_s':predictor_s,
-         'yPredicted_s': yPredictedValid_s,
-         'yPredicted_conca': yPredictedValid_conca,
-         'yPredicted_conca_treshold':yPredictedValid_conca_treshold,
-         'yProba_s': yProbaValid_s, 'yProba_conca': yProbaValid_conca,
-         'yProbaBinary_s': yProbaValidBinary_s,
-         'yProbaBinary_conca': yProbaValidBinary_conca,
-         'final_s':final_s, 'final_b':final_b,
-         'sum_s':sum_s_s, 'sum_b': sum_b_s,
-         'AMS':AMS, 'AMS_s': AMS_s, 'AMS_treshold': AMS_treshold,
+    """
+    d = {'classifier_s':classifier_s,
+         'yPredictedValid_conca_treshold': yPredictedValid_conca_treshold,
+         'yPredictedValid_conca_ratio_global' : yPredictedValid_conca_ratio_global,
+         'yProbaTrain2_s': yProbaTrain2_s,
+         'yProbaTrain2Binary_s': yProbaTrain2Binary_s,
+         'yProbaTrain2_conca': yProbaTrain2_conca,
+         'yProbaTrain2Binary_conca': yProbaTrain2Binary_conca,
+         'yProbaValid_s':yProbaValid_s,
+         'yProbaValidBinary_s':yProbaValidBinary_s,
+         'yProbaValid_conca':yProbaValid_conca,
+         'yProbaValidBinary_conca': yProbaValidBinary_conca,
+         'AMS_treshold_train2':AMS_treshold_train2,
+         'AMS_ratio_global_train2':AMS_ratio_global_train2,
+         'AMS_treshold_valid':AMS_treshold_valid,
+         'AMS_ratio_global_valid':AMS_ratio_global_valid,
          'best_treshold_global' : best_treshold_global,
-         'AMS_ratio': AMS_ratio, 'best_ratio_global':best_ratio_global,
-         'classif_succ': classif_succ,
+         'best_ratio_global':best_ratio_global,
+         'classif_succ_treshold': classif_succ_treshold,
+         'classif_succ_ratio_global': classif_succ_ratio_global,
          'method': method_name,
          'parameters': kwargs}
+
+    if type(train_s[2])==list:
+        d['yPredictedValid_conca_ratio_combinaison'] = yPredictedValid_conca_ratio_combinaison
+        d['AMS_ratio_combinaison_train2'] = AMS_ratio_combinaison_train2
+        d['AMS_ratio_combinaison_valid'] = AMS_ratio_combinaison_valid,
+        d['best_ratio_combinaison'] = best_ratio_combinaison,
+        d['classif_succ_ratio_combinaison'] = classif_succ_ratio_combinaison 
 
     return d
 
 
-def get_test_prediction(method_name, predictor_s, xsTest_s):
-    return eval(method_name).get_test_prediction(predictor_s, xsTest_s)
+def get_test_prediction(method_name, classifier_s, xsTest_s):
+    return eval(method_name).get_test_prediction(classifier_s, xsTest_s)
 
 
 

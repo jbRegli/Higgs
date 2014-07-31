@@ -10,101 +10,62 @@ GB builds an additive model in a forward stage-wise fashion; it allows for the o
 
 """
 
-def classifier(xTrain, yTrain, **kwargs):
+def train_classifier(xTrain_s, yTrain_s, kwargs):
     """
-    Train a ada classifier on xTrain and yTrain and return the trained
+    Train a naive baise classifier on xTrain and yTrain and return the trained
     classifier
     """
-    gradB = GradientBoostingClassifier(**kwargs)
-    gradB.fit(xTrain, yTrain)
+    if type(xTrain_s) != list:
+        classifier_s = GradientBoostingClassifier(**kwargs)
+        classifier_s.fit(xTrain_s, yTrain_s)
 
-    return gradB
+    else:
+        classifier_s = train_classifier_8(xTrain_s, yTrain_s, kwargs)
 
+    return classifier_s
 
-def prediction(predictor, testset):
-    """
-    Given a dataset and a classifier, compute the prediction (label and proba - if
-    available).
-    This function can be use for validation as well as for the test.
-    """
-    # Label prediction:
-    label_predicted = predictor.predict(testset)
-    # Probability of being in each label
-    proba_predicted = predictor.predict_proba(testset)
-
-    return label_predicted, proba_predicted
-
-def get_predictors(xsTrain_s, yTrain_s, **kwargs):
+def train_classifier_8(xsTrain_s, yTrain_s, kwargs):
     """
     performs the training and returns the predictors
     """
     # If we work with the splitted dataset:
-    if type(xsTrain_s) == list:
-        predictor_s = []
 
-        for n in range(len(xsTrain_s)):
-            # Training:
-            gradB = classifier(xsTrain_s[n], yTrain_s[n], **kwargs)
-            predictor_s.append(gradB)
+    classifier_s = []
+
+    for n in range(len(xsTrain_s)):
+        # Training:
+        classifier = train_classifier(xsTrain_s[n], yTrain_s[n], kwargs)
+        classifier_s.append(classifier)
+
+    return classifier_s
+
+def predict_proba(classifier_s, dataset_s):
+    """
+    Given a dataset and a classifier, compute the proba prediction
+    This function can be use for validation as well as for the test.
+    """
+    if type(classifier_s) != list:
+        # Probability of being in each label
+        proba_predicted_s = classifier_s.predict_proba(dataset_s) #[:,1]
 
     else:
-        # Training:
-        predictor_s = classifier(xsTrain_s, yTrain_s, **kwargs)
+        proba_predicted_s = predict_proba_8(classifier_s, dataset_s)
 
-    return predictor_s 
+    return proba_predicted_s
 
-def get_yPredicted_s(xsTrain_s, yTrain_s, xsValidation_s, **kwargs):
+def predict_proba_8(classifier_s, dataset_s):
     """
-    Perform the training and the prediction on the 8 sub-sets
-    """
-    # If we work with the splitted dataset:
-    if type(xsTrain_s) == list:
-        predictor_s = []
-        yPredicted_s = []
-        yProba_s = []
-
-        for n in range(len(xsTrain_s)):
-            # Training:
-            clf = classifier(xsTrain_s[n], yTrain_s[n], **kwargs)
-
-            # Prediction:
-            label_predicted, proba_predicted = prediction(clf, xsValidation_s[n])
-
-            predictor_s.append(clf)
-            yPredicted_s.append(label_predicted)
-            yProba_s.append(proba_predicted)
-
-    else:
-        # Training:
-        predictor_s = classifier(xsTrain_s, yTrain_s, **kwargs)
-
-        #Prediction:
-        yPredicted_s, yProba_s = prediction(predictor_s, xsValidation_s)
-
-    return predictor_s, yPredicted_s, yProba_s
-
-
-def get_test_prediction(predictor_s, xsTest_s):
-    """
-    Predict the output of this classifier on the test set
+    Predict the output of this classifier on the the dataset divided in 8 groups
     """
 
     # If we work with the splitted dataset:
-    if type(xsTest_s) == list:
-        test_prediction_s = []
-        test_proba_s = []
+    proba_predicted_s = []
 
-        for n in range(len(xsTest_s)):
-            label_predicted, proba_predicted = prediction(predictor_s[n],
-                                                            xsTest_s[n])
+    for n in range(len(dataset_s)):
+        proba_predicted = predict_proba(classifier_s[n], dataset_s[n])
+        proba_predicted_s.append(proba_predicted)
 
-            test_prediction_s.append(label_predicted)
-            test_proba_s.append(proba_predicted)
-
-    else:
-        test_prediction_s , test_proba_s = prediction(predictor_s, xsTest_s)
-
-    return test_prediction_s, test_proba_s
+    return proba_predicted_s
 
 
 def get_classification_error(y_predicted_s, y_true_s, normalize= True):

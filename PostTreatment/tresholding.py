@@ -127,7 +127,7 @@ def best_treshold(yProba, yValidation, weightsValidation, pas = 0.01):
             best_treshold = treshold
             best_ams = ams
 
-    return best_treshold
+    return best_ams, best_treshold
 
 def best_ratio(yProba, yValidation, weightsValidation, pas = 0.01):
     ratio_s = np.arange(0., 0.99, pas)
@@ -143,7 +143,7 @@ def best_ratio(yProba, yValidation, weightsValidation, pas = 0.01):
             best_ratio = ratio
             best_ams = ams
 
-    return best_ratio
+    return best_ams, best_ratio
 
 def get_yPredicted_ratio_8(yProba_s, ratio_s):
     """
