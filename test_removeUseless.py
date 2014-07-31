@@ -6,6 +6,7 @@ Perform a full analysis of the dataset
 import numpy as np
 import time
 from sklearn.metrics import accuracy_score
+import copy
 
 import tokenizer
 import preTreatment
@@ -32,7 +33,7 @@ def main():
     split= True
     normalize = True
     noise_var = 0.
-    n_classes = "binary"
+    n_classes = "multiclass"
     train_size = 200000
     train_size2 = 25000
     valid_size = 25000
@@ -85,21 +86,27 @@ def main():
     dMethods ={}
 
     # NAIVE BAYES:
+    """
     kwargs_bayes = {}
     dMethods['naiveBayes'] =  analyse.analyse(train_s= train_s, train2_s= train2_s,
                                               valid_s= valid_s,
                                               method_name = 'naiveBayes',
                                               kwargs = kwargs_bayes)
+    """
     # SVM
     """
     kwargs_svm ={}
     dMethods['svm'] = analyse.analyse(train_s, valid_s,'svm', kwargs_svm)
     """
-    """
+
     # K NEIGHBORS
-    kwargs_kn = {'n_neighbors':50}
-    dMethods['kNeighbors'] = analyse.analyse(train_s, valid_s, 'kNeighbors',
-                                             kwargs_kn)
+    kwargs_kn = {'n_neighbors': 100}
+    dMethods['kNeighbors'] = analyse.analyse(train_s= train_s,
+                                              train2_s= train2_s,
+                                              valid_s= valid_s,
+                                              method_name= 'kNeighbors',
+                                              kwargs= kwargs_kn)
+
     """
     # LDA
     kwargs_lda = {}
@@ -114,7 +121,6 @@ def main():
                                               valid_s= valid_s,
                                               method_name = 'qda',
                                               kwargs = kwargs_qda)
-    """
     # ADABOOST
     kwargs_ada= {   'n_estimators': 50,
                     'learning_rate': 1.,
@@ -124,15 +130,9 @@ def main():
                                            kwargs_ada)
     """
     # RANDOM FOREST:
-    kwargs_randomForest= {'n_estimators': 10}
-    dMethods['randomForest'] = analyse.analyse(train_s= train_s, train2_s= train2_s,
-                                              valid_s= valid_s,
-                                              method_name = 'randomForest',
-                                              kwargs = kwargs_randomForest)
-
-    # RANDOM FOREST 2:
     kwargs_randomForest= {'n_estimators': 100}
-    dMethods['randomForest2'] = analyse.analyse(train_s= train_s, train2_s= train2_s,
+    dMethods['randomForest'] = analyse.analyse(train_s= train_s,
+                                              train2_s= train2_s,
                                               valid_s= valid_s,
                                               method_name = 'randomForest',
                                               kwargs = kwargs_randomForest)
@@ -142,30 +142,37 @@ def main():
                     'learning_rate': .5,
                     'algorithm': 'SAMME.R',
                     'random_state':None}
-    dMethods['adaBoost2'] = analyse.analyse(train_s, valid_s, 'adaBoost',
-                                           kwargs_ada)
+    dMethods['adaBoost2'] = analyse.analyse(train_s= train_s,
+                                            train2_s= train2_s,
+                                            valid_s= valid_s,
+                                            method_name= 'adaBoost',
+                                            kwargs= kwargs_ada)
 
     # RANDOM FOREST 3:
     kwargs_randomForest= {'n_estimators': 100}
-    dMethods['randomForest3'] = analyse.analyse(train_s= train_s, train2_s= train2_s,
-                                              valid_s= valid_s,
-                                              method_name = 'randomForest',
-                                              kwargs = kwargs_randomForest)
+    dMethods['randomForest3'] = analyse.analyse(train_s= train_s,
+                                                train2_s= train2_s,
+                                                valid_s= valid_s,
+                                                method_name= 'randomForest',
+                                                kwargs= kwargs_randomForest)
 
     # RANDOM FOREST 4:
     kwargs_randomForest= {'n_estimators': 100}
-    dMethods['randomForest4'] = analyse.analyse(train_s= train_s, train2_s= train2_s,
-                                              valid_s= valid_s,
-                                              method_name = 'randomForest',
-                                              kwargs = kwargs_randomForest)
+    dMethods['randomForest4'] = analyse.analyse(train_s= train_s,
+                                                train2_s= train2_s,
+                                                valid_s= valid_s,
+                                                method_name = 'randomForest',
+                                                kwargs = kwargs_randomForest)
 
     # RANDOM FOREST 5:
     kwargs_randomForest= {'n_estimators': 100}
-    dMethods['randomForest5'] = analyse.analyse(train_s= train_s, train2_s= train2_s,
-                                              valid_s= valid_s,
-                                              method_name = 'randomForest',
-                                              kwargs = kwargs_randomForest)
-
+    dMethods['randomForest5'] = analyse.analyse(train_s= train_s,
+                                                train2_s= train2_s,
+                                                valid_s= valid_s,
+                                                method_name = 'randomForest',
+                                                kwargs = kwargs_randomForest)
+    """
+    """
     # GRADIENT BOOSTING:
     kwargs_gradB = {'loss': 'deviance', 'learning_rate': 0.1,
                     'n_estimators': 100, 'subsample': 1.0,
@@ -173,24 +180,99 @@ def main():
                     'max_depth': 10, 'init': None, 'random_state': None,
                     'max_features': None, 'verbose': 0}
 
-    dMethods['gradientBoosting'] = analyse.analyse(train_s, valid_s,
-                                                'gradientBoosting', kwargs_gradB)
+    dMethods['gradientBoosting'] = analyse.analyse(train_s= train_s,
+                                              train2_s= train2_s,
+                                              valid_s= valid_s,
+                                              method_name= 'gradientBoosting'
+                                              kwargs= kwargs_gradB)
     """
     print(" ")
 
     ##################
     # POST-TREATMENT #
     ##################
-    print("------------------------ Feaure importance: -----------------------")
+    print("---------------------- Feature importance: -----------------------")
 
-    if type(dMethods['randomForest2']['predictor_s']) == list:
-        for i,predictor_s in enumerate(dMethods['randomForest2']['predictor_s']):
-            print "Subset %i:" %i
-            print predictor_s.feature_importances_
+    importance_lim = 0.03
+
+    if type(dMethods['randomForest']['predictor_s']) == list:
+
+        # Create a copy of the dataset to be modified:
+        train_RM_s= copy.deepcopy(train_s)
+        train2_RM_s= copy.deepcopy(train2_s)
+        valid_RM_s= copy.deepcopy(valid_s)
+
+        for i,predictor_s in enumerate(dMethods['randomForest']['predictor_s']):
+            toBeRemove = []
+
+            #importance_lim = np.mean(np.asarray(
+            #                            predictor_s.feature_importances_))\
+            #               - np.var(np.asarray(
+            #                           predictor_s.feature_importances_))/5\
+
+            for j,importance in  enumerate(predictor_s.feature_importances_):
+                # Remove this feature for the dataset if its infuence is lower
+                # than importance_lim
+                if importance < importance_lim:
+                    toBeRemove.append(j)
+
+            train_RM_s[1][i] = np.delete(train_RM_s[1][i],toBeRemove,axis=1)
+            train_RM_s[4][i] = np.delete(train_RM_s[4][i],toBeRemove)
+
+            train2_RM_s[1][i] = np.delete(train2_RM_s[1][i],toBeRemove,axis=1)
+            train2_RM_s[4][i] = np.delete(train2_RM_s[4][i],toBeRemove)
+
+            valid_RM_s[1][i] = np.delete(valid_RM_s[1][i],toBeRemove,axis=1)
+            valid_RM_s[4][i] = np.delete(valid_RM_s[4][i],toBeRemove)
+
+            print ("Subset %i: %i features removed out of %i" \
+                    %(i, len(toBeRemove), len(predictor_s.feature_importances_)) )
+
     else:
         print "Dataset: "
-        print dMethods['randomForest2']['predictor_s'].feature_importances_
+        print dMethods['randomForest']['predictor_s'].feature_importances_
 
+    dMethods_RM ={}
+
+    print train_RM_s[1][0].shape
+    print train_s[1][0].shape
+
+
+    # GRADIENT BOOSTING on the modified dataset:
+    dMethods_RM['kNeighbors'] = analyse.analyse(train_s= train_RM_s,
+                                              train2_s= train2_RM_s,
+                                              valid_s= valid_RM_s,
+                                              method_name= 'kNeighbors',
+                                              kwargs= kwargs_kn)
+
+    dMethods_RM['randomForest'] = analyse.analyse(train_s= train_s,
+                                              train2_s= train2_s,
+                                              valid_s= valid_s,
+                                              method_name = 'randomForest',
+                                              kwargs = kwargs_randomForest)
+
+    """
+    dMethods_RM['gradientBoosting'] = analyse.analyse(train_s= train_RM_s,
+                                              train2_s= train2_RM_s,
+                                              valid_s= valid_RM_s,
+                                              method_name= 'gradientBoosting',
+                                              kwargs= kwargs_gradB)
+    """
+
+    # Compare the 2 gradient boosting methods:
+    print (" AMS kNeighbors =       ", dMethods['kNeighbors']['AMS'])
+    print (" AMS kNeighbors RM =    ", dMethods_RM['kNeighbors']['AMS'])
+
+    print(" ")
+    print (" AMS randomForest =       ", dMethods['randomForest']['AMS'])
+    print (" AMS randomForest RM =    ", dMethods_RM['randomForest']['AMS'])
+
+
+
+    """
+    print (" AMS gradientBoosting =     ", dMethods['gradientBoosting']['AMS'])
+    print (" AMS gradientBoosting RM =  ", dMethods_RM['gradientBoosting']['AMS'])
+    """
 
     print("------------------------ On-top predictor -----------------------")
     # Classifiers to be ignored:
@@ -200,7 +282,6 @@ def main():
     parameters = {}#{'C': 0.5, 'kernel': 'rbf', 'degree': 3, 'gamma': 0.0,
                  # 'coef0': 0.0, 'shrinking':True, 'probability':True,
                  # 'tol': 0.001, 'cache_size': 200, 'class_weight': None}
-
 
     print ("We will use an 'on-top' predictor on %i classifiers using a %s.") \
             %(len(dMethods.keys())-len(ignore), clf_onTop)
