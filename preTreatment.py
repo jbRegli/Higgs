@@ -300,5 +300,16 @@ def binary2multiclass(yBinary, weights):
 
     return yMultiClass
 
+def multiclass2binary(yMulticlass):
+    """
+    function that transforms a multiclass label vectors into a binary one
+    """
+    yBinary = np.zeros(yMulticlass.shape[0])
+    for i in range(yMulticlass.shape[0]):
+        if yMulticlass[i] >=1:
+            yBinary[i] = 1
+    
+    return yBinary
+
 
 
