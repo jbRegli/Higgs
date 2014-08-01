@@ -20,8 +20,6 @@ import preTreatment
 
 sys.path.append('../Analyses/')
 
-
-
 def proba_treshold(yPredicted_s, yProba_s, ratio):
     """
     return a vector or a list of vector which keeps only the ratio% of events with the highest proba
@@ -112,16 +110,15 @@ def best_treshold(yProba, yValidation, weightsValidation, pas = 0.01):
     yValid : vectors of the true label of the data
     yWeights : vectors of the weights
     pas : size of the interval between two probabilities tested
+    The weights must be balanced !
     """
+
     treshold_s = np.arange(0., 1.0, pas)
     best_ams = 0.
-
 
     for treshold in treshold_s:
         yPredicted = get_yPredicted_treshold(yProba, treshold)
         s, b = submission.get_s_b(yPredicted, yValidation, weightsValidation)
-        s *= 250000/yPredicted.shape[0]
-        b *= 250000/yPredicted.shape[0]
         ams = hbc.AMS(s,b)
         if ams >= best_ams:
             best_treshold = treshold
@@ -136,8 +133,6 @@ def best_ratio(yProba, yValidation, weightsValidation, pas = 0.01):
     for ratio in ratio_s:
         yPredicted = get_yPredicted_ratio(yProba, ratio)
         s, b = submission.get_s_b(yPredicted, yValidation, weightsValidation)
-        s *= 250000/yPredicted.shape[0]
-        b *= 250000/yPredicted.shape[0]
         ams = hbc.AMS(s,b)
         if ams >= best_ams:
             best_ratio = ratio
@@ -184,8 +179,6 @@ def best_ratio_combinaison(yProba_s, yValidation_s, weightsValidation_s, ratio_s
         L = list(combinaison)
         yPredicted_s, yPredicted_conca = get_yPredicted_ratio_8(yProba_s, L)
         finals, finalb, s_s, b_s = submission.get_s_b(yPredicted_s, yValidation_s, weightsValidation_s)
-        finals *= 10
-        finalb *= 10
         AMS = hbc.AMS(finals, finalb)
         if AMS > AMS_max:
             AMS_max = AMS
