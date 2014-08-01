@@ -16,25 +16,31 @@ import xgBoost
 
 train_s, train2_s, valid_s, test_s = tokenizer.extract_data(split = True, normalize = True, noise_variance = 0., n_classes = "multiclass", train_size = 200000, train_size2 = 25000, valid_size = 25000)
 
-kwargs_xgb = {'objective': 'multi:softmax', 'num_class': 5, 'bst:eta': 0.1,
-              'bst:max_depth': 10, 'eval_metric': 'auc', 'silent': 1, 'nthread': 8 }
+kwargs_xgb = {'bst_parameters': \
+                    {'objective': 'multi:softmax', 'num_class': 5, 'bst:eta': 0.1,
+                     'bst:max_depth': 10, 'eval_metric': 'auc', 'silent': 0,
+                     'nthread': 8 }, \
+              'n_rounds': 100}
 
 print "Getting the classifiers..."
-predictor_s = xgBoost.get_yPredicted_s(train_s[1], train_s[2], train_s[3], valid_s[1], 550000, **kwargs_xgb)[0]
+predictor_s = xgBoost.train_classifier(train_s[1], train_s[2], train_s[3],
+                                        550000, kwargs_xgb)
 
 
 print "Making predictions on the train2 test..."
 for i in range(100):
     yPredictedTrain2_s_s = []
-    yPredictedTrain2_s = xgBoost.get_test_prediction(predictor_s, train2_s[1])
+    yPredictedTrain2_s = xgBoost.predict_proba(predictor_s, train2_s[1])
     yPredictedTrain2_s_s.append(yPredictedTrain2_s)
-# vector to count the label
+
+# Vector to count the label
 yTrain2Label_s = []
 for i in range(8):
     yTrain2Label = np.zeros((yPredictedTrain2_s_s[0][i].shape[0], 5))
     yTrain2Label_s.append(yTrain2Label)
+
 # Monte Carlo to estimate the proba
-# compting the occurence of each label
+# Compting the occurence of each label
 print "Estimating the probabilities ..."
 for n in range(100):
     for i in range(8):
@@ -58,7 +64,7 @@ print "Train2 - best ratio : %f - best ams : %f" %(best_ratio, best_ams_train2)
 print "Making predictions on the validation test..."
 for i in range(100):
     yPredictedValid_s_s = []
-    yPredictedValid_s = xgBoost.get_test_prediction(predictor_s, valid_s[1])
+    yPredictedValid_s = xgBoost.predict_proba(predictor_s, valid_s[1])
     yPredictedValid_s_s.append(yPredictedValid_s)
 # vector to count the label
 yValidLabel_s = []
@@ -82,21 +88,12 @@ for i in range(8):
     yValidProba_s.append(yValidProba)
 
 
-
 yValidProba = preTreatment.concatenate_vectors(yValidProba_s)
 yValid = preTreatment.concatenate_vectors(valid_s[2])
 weightsValid = preTreatment.concatenate_vectors(valid_s[3])
 
 yValidPredicted = tresholding.get_yPredicted_ratio(yValidProba, best_ratio)
 
-
-"""
-for i in range(8):
-    for j in range(yPredicted_s[i].shape[0]):
-        if yPredicted_s[i][j] >=1:
-            yPredicted_s[i][j] = 1
-            #let's concatenate
-"""
 
 s, b = submission.get_s_b(yValidPredicted, yValid, weightsValid)
 
@@ -105,6 +102,6 @@ b*=10
 
 AMS = hbc.AMS(s, b)
 
-print "AMS valid = %f :" %AMS
+print "AMS valid = %f" %AMS
 
 

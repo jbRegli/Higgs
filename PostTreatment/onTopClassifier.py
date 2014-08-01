@@ -49,11 +49,6 @@ def create_inputs(dMethods, valid_s, ignore= []):
     return first_layer_predictors, first_layer_data
 
 
-def plot_first_layer_data(first_layer_data, valid_s):
-    """
-    Plo
-    """
-    return 0
 
 def get_prediction_FL(first_layer_predictors, xTrain_s):
     """
