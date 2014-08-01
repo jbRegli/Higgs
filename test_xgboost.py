@@ -20,7 +20,7 @@ kwargs_xgb = {'bst_parameters': \
                     {'objective': 'multi:softmax', 'num_class': 5, 'bst:eta': 0.1,
                      'bst:max_depth': 10, 'eval_metric': 'auc', 'silent': 0,
                      'nthread': 8 }, \
-              'n_rounds': 100}
+              'n_rounds': 200}
 
 print "Getting the classifiers..."
 predictor_s = xgBoost.train_classifier(train_s[1], train_s[2], train_s[3],
