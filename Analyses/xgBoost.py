@@ -108,6 +108,7 @@ def predict_proba(classifier_s, dataset_s):
     if type(classifier_s) != list:
         # Probability of being in each label
         xgmat = xgb.DMatrix(dataset_s, missing = -999.0 )
+
         proba_predicted_s = classifier_s.predict(xgmat)
 
     else:
@@ -125,6 +126,11 @@ def predict_proba_8(classifier_s, dataset_s):
 
     for n in range(len(dataset_s)):
         proba_predicted = predict_proba(classifier_s[n], dataset_s[n])
+
+        # If we work with proba, we need to reshape the output:
+        if proba_predicted.shape[0] == 5 * dataset_s[n].shape[0]:
+            proba_predicted = proba_predicted.reshape(5, dataset_s[n].shape[0]).T
+
         proba_predicted_s.append(proba_predicted)
 
     return proba_predicted_s

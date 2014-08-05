@@ -36,8 +36,8 @@ def analyse(train_s, train2_s, valid_s, method_name, kwargs={}):
 
     classifier_s = eval(method_name).train_classifier(train_s[1], train_s[2], kwargs)
 
-    yProbaValid_s = eval(method_name).predict_proba(classifier_s, valid_s[1]) 
-    yProbaTrain2_s = eval(method_name).predict_proba(classifier_s, train2_s[1]) 
+    yProbaValid_s = eval(method_name).predict_proba(classifier_s, valid_s[1])
+    yProbaTrain2_s = eval(method_name).predict_proba(classifier_s, train2_s[1])
 
     # Convert the validations vectors four 's' classes into one single s
     # classe
@@ -56,7 +56,7 @@ def analyse(train_s, train2_s, valid_s, method_name, kwargs={}):
                     train2_s[2][i][j] = 1
 
     # Let's define the vectors of probabilities of being 's'
-    # Train2 set 
+    # Train2 set
     if type(yProbaTrain2_s) == list:
         yProbaTrain2Binary_s = []
         for i in range(8):
@@ -69,13 +69,11 @@ def analyse(train_s, train2_s, valid_s, method_name, kwargs={}):
         for j in range(len(yProbaTrain2_s[i][:,1])):
             yProbaTrain2Binary_s[j] = 1 - yProbaTrain2_s[j][0]
 
-    # Validation set 
+    # Validation set
     if type(yProbaValid_s) == list:
         yProbaValidBinary_s = []
         for i in range(8):
             yProbaValidBinary_s.append(np.zeros(len(yProbaValid_s[i][:,1])))
-            print yProbaValidBinary_s[i].shape
-            print type(yProbaValidBinary_s[i])
         for i in range(8):
             for j in range(len(yProbaValid_s[i][:,1])):
                 yProbaValidBinary_s[i][j] = 1 - yProbaValid_s[i][j][0]
@@ -132,7 +130,7 @@ def analyse(train_s, train2_s, valid_s, method_name, kwargs={}):
         yProbaTrain2_conca = yProbaTrain2_s
 
 
-    # Let's get the best global treshold on the train2 set 
+    # Let's get the best global treshold on the train2 set
     AMS_treshold_train2, best_treshold_global = tresholding.best_treshold(yProbaTrain2Binary_conca,
                                                      yTrain2_conca, weightsTrain2_conca)
     yPredictedValid_conca_treshold = tresholding.get_yPredicted_treshold(
@@ -150,11 +148,11 @@ def analyse(train_s, train2_s, valid_s, method_name, kwargs={}):
     if type(train_s[2]) == list:
         AMS_ratio_combinaison_train2, best_ratio_combinaison = tresholding.best_ratio_combinaison_global(
                                                                             yProbaTrain2Binary_s,
-                                                                            train2_s[2], 
+                                                                            train2_s[2],
                                                                             train2_s[3],
                                                                             10)
         yPredictedValid_ratio_comb_s, yPredictedValid_conca_ratio_combinaison = tresholding.get_yPredicted_ratio_8(
-                                                                                    yProbaValidBinary_s, 
+                                                                                    yProbaValidBinary_s,
                                                                                     best_ratio_combinaison)
 
     # Let's compute the final s and b for each method
@@ -245,7 +243,8 @@ def analyse(train_s, train2_s, valid_s, method_name, kwargs={}):
     """
     d = {'classifier_s':classifier_s,
          'yPredictedValid_conca_treshold': yPredictedValid_conca_treshold,
-         'yPredictedValid_conca_ratio_global' : yPredictedValid_conca_ratio_global,
+         'yPredictedValid_conca_ratio_global' : \
+                 yPredictedValid_conca_ratio_global,
          'yProbaTrain2_s': yProbaTrain2_s,
          'yProbaTrain2Binary_s': yProbaTrain2Binary_s,
          'yProbaTrain2_conca': yProbaTrain2_conca,
@@ -270,7 +269,7 @@ def analyse(train_s, train2_s, valid_s, method_name, kwargs={}):
         d['AMS_ratio_combinaison_train2'] = AMS_ratio_combinaison_train2
         d['AMS_ratio_combinaison_valid'] = AMS_ratio_combinaison_valid,
         d['best_ratio_combinaison'] = best_ratio_combinaison,
-        d['classif_succ_ratio_combinaison'] = classif_succ_ratio_combinaison 
+        d['classif_succ_ratio_combinaison'] = classif_succ_ratio_combinaison
 
     return d
 

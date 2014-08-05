@@ -68,7 +68,7 @@ def main():
     #kwargs_grad = {}
     kwargs_rdf = {'n_estimators': 100}
     print "Training on the train set ..."
-    predictor_s = randomForest.get_predictors(train_s[1], train_s[2], **kwargs_rdf)
+    predictor_s = randomForest.train_classifier(train_s[1], train_s[2], kwargs_rdf)
 
 
     yPredictedTest = []
@@ -76,15 +76,15 @@ def main():
 
     print "Classifying the test set..."
     for i in range(8):
-        yPredicted, yProba = randomForest.prediction(predictor_s[i], test_s[1][i])
-        yPredictedTest.append(yPredicted)
+        yProba = randomForest.predict_proba(predictor_s[i], test_s[1][i])
         yProbaTest.append(yProba)
 
-    
+    print yProbaTest[0].shape
+
     print "Finalizing the vectors for the submission..."
 
     yProbaTestFinal = []
-    
+
     for i in range(8):
         yProbaTestFinal.append(np.zeros(yPredictedTest[i].shape[0]))
     for i in range(8):
@@ -101,7 +101,7 @@ def main():
     for i in range(yPredictedTest_conca.shape[0]):
         if yPredictedTest_conca[i] >=1:
             yPredictedTest_conca[i] = 1
-    
+
     # Let's treshold
     #yPredictedTest_conca_treshold = tresholding.get_yPredicted_ratio(yProbaTestFinal_conca, 0.16)
     #let's rank the proba
@@ -116,4 +116,4 @@ def main():
 
 if __name__ == '__main__':
     main()
-  
+

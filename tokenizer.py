@@ -289,9 +289,6 @@ def get_8_bins(normalize = True, noise_variance = 0., n_classes = "binary", \
            (ID_test_s, xsTest_s, nameTest_s)
 
 
-
-
-
 def extract_data(split= True, normalize= True, noise_variance= 0.,
                   n_classes = "binary", train_size = 200000, train_size2 = 25000,
                   valid_size = 25000):

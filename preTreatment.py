@@ -1,7 +1,16 @@
+# -*- coding: utf-8 -*-
 """
 Gathered the function for the pre-tratment
 """
 import numpy as np
+import copy
+import sys
+
+sys.path.append('PostTreatment/')
+import tresholding
+
+sys.path.append('Analyses/')
+import randomForest
 
 
 def split_8(ID, x, y= None, weights= None):
@@ -227,7 +236,6 @@ def split_8_matrix(ID, x, y= None, weights= None):
         weights_s[6] = weights[np.logical_and(x[:,0]==-999, x[:,22]==2)]
         weights_s[7] = weights[np.logical_and(x[:,0]==-999, x[:,22]==3)]
 
-
     if y != None:
         if weights != None:
             return ID_s, xs_s, y_s, weights_s
@@ -241,18 +249,22 @@ def split_8_matrix(ID, x, y= None, weights= None):
             print ("Not a normal splitting case...")
             exit()
 
+
 def concatenate_vectors(vector_s):
     """
     concatenate the vectors in vector_s and returns the concatenated vector
     """
     if len(vector_s[0].shape)>1:
-        concatenated_vector = np.empty((0, vector_s[0].shape[1])) # empty vector with the same number of columns than the arrays in the list
+        # Empty vector with the same number of columns than the arrays in the list
+        concatenated_vector = np.empty((0, vector_s[0].shape[1]))
     else:
         concatenated_vector = np.empty(0)
+
     for vector in vector_s:
         concatenated_vector = np.concatenate((concatenated_vector, vector))
 
     return concatenated_vector
+
 
 def ratio_sig_per_dataset(y_s):
     """
@@ -272,6 +284,7 @@ def ratio_sig_per_dataset(y_s):
 
     return average
 
+
 def binary2multiclass(yBinary, weights):
     """
     function that gives a multiclass label vector
@@ -287,29 +300,128 @@ def binary2multiclass(yBinary, weights):
 
     for i, (y, weight) in enumerate(zip(yBinary, weights)):
         if y ==1:
-            if weight ==0.018636116671999998:
+            if weight == 0.018636116671999998:
                 yMultiClass[i] = 1
-            elif weight ==0.0015027048310100001:
+            elif weight == 0.0015027048310100001:
                 yMultiClass[i] = 2
-            elif weight ==0.0026533113373300001:
+            elif weight == 0.0026533113373300001:
                 yMultiClass[i] = 3
-            elif weight ==0.00150187015894:
+            elif weight == 0.00150187015894:
                 yMultiClass[i] = 4
         else:
             yMultiClass[i] = 0
 
     return yMultiClass
 
+
 def multiclass2binary(yMulticlass):
     """
     function that transforms a multiclass label vectors into a binary one
     """
-    yBinary = np.zeros(yMulticlass.shape[0])
-    for i in range(yMulticlass.shape[0]):
-        if yMulticlass[i] >=1:
-            yBinary[i] = 1
-    
+
+    if yMulticlass.shape[1] == 5:
+        # Reduce multiclass to binary
+        yBinary = np.ones(yMulticlass.shape[0])
+        yBinary[yMulticlass[:,4] == 0] = 0
+    else:
+        yBinary = np.zeros(yMulticlass.shape[0])
+
+        for i in range(yMulticlass.shape[0]):
+            if yMulticlass[i] >=1:
+                yBinary[i] = 1
+
     return yBinary
+
+
+
+def featureUsage(train_s):
+    """
+    Function that rank the feature by importance
+    """
+    # Train a random forest to get the feature importance
+    kwargs_kn = {'n_estimators': 100}
+    randomFor = randomForest.train_classifier(train_s[1], train_s[2], kwargs_kn)
+
+     # Remove feature whose importance is below the limit
+    if type(randomFor) == list:
+        featureImportance = []
+        for i,predictor_s in enumerate(randomFor):
+            featureImportance.append(predictor_s.feature_importances_)
+    else:
+        featureImportance = randomFor.feature_importances_
+
+    return featureImportance
+
+
+def removeUnusedFeature(train_s, train2_s, valid_s, test_s, featureImportance,
+                            importance_lim = 0.03):
+    """
+    Funcion that removes the least used features
+    """
+    # Create a copy of the dataset to be modified:
+    train_RM_s= copy.deepcopy(train_s)
+    train2_RM_s= copy.deepcopy(train2_s)
+    valid_RM_s= copy.deepcopy(valid_s)
+    test_RM_s= copy.deepcopy(test_s)
+
+    # Remove feature whose importance is below the limit
+    if type(train_s[0]) == list:
+
+        for i in range(len(train_s[0])):
+            toBeRemove = []
+            for j,importance in  enumerate(featureImportance[i]):
+                # Remove this feature for the dataset if its infuence is lower
+                # than importance_lim
+                if importance < importance_lim:
+                    toBeRemove.append(j)
+
+            initial_len = len(train_RM_s[1][i])
+
+            train_RM_s[1][i] = np.delete(train_RM_s[1][i],toBeRemove,axis=1)
+            train_RM_s[4][i] = np.delete(train_RM_s[4][i],toBeRemove)
+
+            train2_RM_s[1][i] = np.delete(train2_RM_s[1][i],toBeRemove,axis=1)
+            train2_RM_s[4][i] = np.delete(train2_RM_s[4][i],toBeRemove)
+
+            valid_RM_s[1][i] = np.delete(valid_RM_s[1][i],toBeRemove,axis=1)
+            valid_RM_s[4][i] = np.delete(valid_RM_s[4][i],toBeRemove)
+
+            test_RM_s[1][i] = np.delete(test_RM_s[1][i],toBeRemove,axis=1)
+            test_RM_s[2][i] = np.delete(test_RM_s[2][i],toBeRemove)
+
+            print ("Subset %i: %i features removed out of %i" \
+                    %(i, len(toBeRemove), initial_len))
+
+    else:
+        toBeRemove = []
+
+        for j,importance in  enumerate(featureImportance):
+            # Remove this feature for the dataset if its infuence is lower
+            # than importance_lim
+            if importance < importance_lim:
+                toBeRemove.append(j)
+
+        train_RM_s[1] = np.delete(train_RM_s[1],toBeRemove,axis=1)
+        train_RM_s[4] = np.delete(train_RM_s[4],toBeRemove)
+
+        train2_RM_s[1] = np.delete(train2_RM_s[1],toBeRemove,axis=1)
+        train2_RM_s[4] = np.delete(train2_RM_s[4],toBeRemove)
+
+        valid_RM_s[1] = np.delete(valid_RM_s[1],toBeRemove,axis=1)
+        valid_RM_s[4] = np.delete(valid_RM_s[4],toBeRemove)
+
+        test_RM_s[1][i] = np.delete(test_RM_s[1][i],toBeRemove,axis=1)
+        test_RM_s[2][i] = np.delete(test_RM_s[2][i],toBeRemove)
+
+        print ("Dataset: %i features removed out of %i" \
+                    %(i, len(toBeRemove), len(predictor_s.feature_importances_)))
+
+    return train_RM_s, train2_RM_s, valid_RM_s, test_RM_s
+
+
+
+
+
 
 
 

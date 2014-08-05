@@ -29,7 +29,7 @@ def proba_treshold(yPredicted_s, yProba_s, ratio):
     yProba = vector of vectors of proba or vector of label
     ratio : the percentage of events we want to keep
     """
-    
+
     if type(yPredicted_s) == list:
         yPredicted_thd_s = []
         L=[]
@@ -51,9 +51,9 @@ def proba_treshold(yPredicted_s, yProba_s, ratio):
                     yPredicted_thd[i] = 0
                 else:
                     yPredicted_thd[i] = 1
-            
+
             yPredicted_thd_s.append(yPredicted_thd)
-        
+
         return yPredicted_thd_s
 
     else:
@@ -83,6 +83,7 @@ def get_yPredicted_treshold(yProba, treshold):
     pas : size of the interval between two probabilities tested
     """
     yPredicted = np.zeros_like(yProba)
+
     yPredicted[yProba > treshold] =1
     """
     for i in range(yPredicted.shape[0]):
@@ -90,7 +91,7 @@ def get_yPredicted_treshold(yProba, treshold):
             yPredicted[i] = 1.
     """
     return yPredicted
-    
+
 def get_yPredicted_ratio(yProba, ratio):
     """
     Returns vector of yPredicted keeping the ratio% highest percentages
@@ -98,11 +99,21 @@ def get_yPredicted_ratio(yProba, ratio):
     yProba : vector of proba
     """
     yPredicted = np.zeros_like(yProba)
+
     if ratio !=0:
-        yProbaSorted = yProba[yProba.argsort()]
-        treshold = yProbaSorted[int((1. - float(ratio))*len(yProba))]
-        yPredicted = get_yPredicted_treshold(yProba, treshold)
-    
+        # if we work with multi-class:
+        if yProba.shape[1] == 5:
+            # Maximum on the label s over a line sorted
+            yProbaSorted = yProba[np.max(yProba[:,0:3], axis=1).argsort()]
+            treshold = yProbaSorted[int((1. - float(ratio))*len(yProba))]
+            yPredicted = get_yPredicted_treshold(yProba, treshold)
+
+        else:
+            yProbaSorted = yProba[yProba.argsort()]
+            treshold = np.max(yProbaSorted[int((1. - float(ratio))*len(yProba)),0:3],
+                              axis = 1)
+            yPredicted = get_yPredicted_treshold(yProba, treshold)
+
     return yPredicted
 
 def best_treshold(yProba, yValidation, weightsValidation, pas = 0.01):
@@ -118,7 +129,16 @@ def best_treshold(yProba, yValidation, weightsValidation, pas = 0.01):
 
 
     for treshold in treshold_s:
-        yPredicted = get_yPredicted_treshold(yProba, treshold)
+        yPredicted_prov = get_yPredicted_treshold(yProba, treshold)
+
+        # if we work with multi-class:
+        if yPredicted_prov.shape[1] == 5:
+            # Reduce multiclass to binary
+            yPredicted = np.ones(yPredicted_prov.shape[0])
+            yPredicted[yPredicted_prov[:,4] == 0] = 0
+        else:
+            yPredicted = yPredicted_prov
+
         s, b = submission.get_s_b(yPredicted, yValidation, weightsValidation)
         s *= 250000/yPredicted.shape[0]
         b *= 250000/yPredicted.shape[0]
@@ -129,19 +149,33 @@ def best_treshold(yProba, yValidation, weightsValidation, pas = 0.01):
 
     return best_ams, best_treshold
 
+
 def best_ratio(yProba, yValidation, weightsValidation, pas = 0.01):
     ratio_s = np.arange(0., 0.99, pas)
     best_ams = 0.
 
     for ratio in ratio_s:
-        yPredicted = get_yPredicted_ratio(yProba, ratio)
+        yPredicted_prov = get_yPredicted_ratio(yProba, ratio)
+
+        # if we work with multi-class:
+        if yPredicted_prov.shape[1] == 5:
+            yPredicted = np.ones(yPredicted_prov.shape[0])
+            yPredicted[yPredicted_prov[:,4] == 0] = 0
+        else:
+            yPredicted = yPredicted_prov
+
         s, b = submission.get_s_b(yPredicted, yValidation, weightsValidation)
         s *= 250000/yPredicted.shape[0]
         b *= 250000/yPredicted.shape[0]
-        ams = hbc.AMS(s,b)
-        if ams >= best_ams:
-            best_ratio = ratio
-            best_ams = ams
+
+        if b > 0:
+            ams = hbc.AMS(s,b)
+            if ams >= best_ams:
+                best_ratio = ratio
+                best_ams = ams
+        else:
+            print ("WARNING: For a ratio of %f, b >0.") %ratio
+            print ("This ratio has been ignored.")
 
     return best_ams, best_ratio
 
@@ -201,7 +235,7 @@ def best_ratio_combinaison_global(yProba_s, yValidation_s, weightsValidation_s, 
     ratio_s = []
     for i in range(8):
         ratio_s.append([0, 0.25,0.5])
-    
+
     for n in range(max_iters):
         print "iteration globale : %i" %n
         AMS_new, ratio_comb = best_ratio_combinaison(yProba_s, yValidation_s, weightsValidation_s, ratio_s)

@@ -98,15 +98,13 @@ def main():
     kwargs_svm ={}
     dMethods['svm'] = analyse.analyse(train_s, valid_s,'svm', kwargs_svm)
     """
-
     # K NEIGHBORS
-    kwargs_kn = {'n_neighbors': 100}
+    kwargs_kn = {'n_neighbors': 20}
     dMethods['kNeighbors'] = analyse.analyse(train_s= train_s,
                                               train2_s= train2_s,
                                               valid_s= valid_s,
                                               method_name= 'kNeighbors',
                                               kwargs= kwargs_kn)
-
     """
     # LDA
     kwargs_lda = {}
@@ -129,6 +127,7 @@ def main():
     dMethods['adaBoost'] = analyse.analyse(train_s, valid_s, 'adaBoost',
                                            kwargs_ada)
     """
+    """
     # RANDOM FOREST:
     kwargs_randomForest= {'n_estimators': 100}
     dMethods['randomForest'] = analyse.analyse(train_s= train_s,
@@ -136,6 +135,7 @@ def main():
                                               valid_s= valid_s,
                                               method_name = 'randomForest',
                                               kwargs = kwargs_randomForest)
+    """
     """
     # ADABOOST2
     kwargs_ada= {   'n_estimators': 100,
@@ -195,48 +195,14 @@ def main():
 
     importance_lim = 0.03
 
-    if type(dMethods['randomForest']['predictor_s']) == list:
+    featureImportance = preTreatment.featureUsage(train_s)
 
-        # Create a copy of the dataset to be modified:
-        train_RM_s= copy.deepcopy(train_s)
-        train2_RM_s= copy.deepcopy(train2_s)
-        valid_RM_s= copy.deepcopy(valid_s)
-
-        for i,predictor_s in enumerate(dMethods['randomForest']['predictor_s']):
-            toBeRemove = []
-
-            #importance_lim = np.mean(np.asarray(
-            #                            predictor_s.feature_importances_))\
-            #               - np.var(np.asarray(
-            #                           predictor_s.feature_importances_))/5\
-
-            for j,importance in  enumerate(predictor_s.feature_importances_):
-                # Remove this feature for the dataset if its infuence is lower
-                # than importance_lim
-                if importance < importance_lim:
-                    toBeRemove.append(j)
-
-            train_RM_s[1][i] = np.delete(train_RM_s[1][i],toBeRemove,axis=1)
-            train_RM_s[4][i] = np.delete(train_RM_s[4][i],toBeRemove)
-
-            train2_RM_s[1][i] = np.delete(train2_RM_s[1][i],toBeRemove,axis=1)
-            train2_RM_s[4][i] = np.delete(train2_RM_s[4][i],toBeRemove)
-
-            valid_RM_s[1][i] = np.delete(valid_RM_s[1][i],toBeRemove,axis=1)
-            valid_RM_s[4][i] = np.delete(valid_RM_s[4][i],toBeRemove)
-
-            print ("Subset %i: %i features removed out of %i" \
-                    %(i, len(toBeRemove), len(predictor_s.feature_importances_)) )
-
-    else:
-        print "Dataset: "
-        print dMethods['randomForest']['predictor_s'].feature_importances_
+    train_RM_s, train2_RM_s, valid_RM_s, test_R = preTreatment.\
+                removeUnusedFeature(train_s, train2_s, valid_s, test_s,
+                                    featureImportance,
+                                    importance_lim = importance_lim)
 
     dMethods_RM ={}
-
-    print train_RM_s[1][0].shape
-    print train_s[1][0].shape
-
 
     # GRADIENT BOOSTING on the modified dataset:
     dMethods_RM['kNeighbors'] = analyse.analyse(train_s= train_RM_s,
@@ -245,11 +211,6 @@ def main():
                                               method_name= 'kNeighbors',
                                               kwargs= kwargs_kn)
 
-    dMethods_RM['randomForest'] = analyse.analyse(train_s= train_s,
-                                              train2_s= train2_s,
-                                              valid_s= valid_s,
-                                              method_name = 'randomForest',
-                                              kwargs = kwargs_randomForest)
 
     """
     dMethods_RM['gradientBoosting'] = analyse.analyse(train_s= train_RM_s,
@@ -260,12 +221,25 @@ def main():
     """
 
     # Compare the 2 gradient boosting methods:
-    print (" AMS kNeighbors =       ", dMethods['kNeighbors']['AMS'])
-    print (" AMS kNeighbors RM =    ", dMethods_RM['kNeighbors']['AMS'])
-
+    print ("AMS_treshold_train2 kNeighbors =       ", \
+                    dMethods['kNeighbors']['AMS_treshold_train2'])
+    print ("RM AMS_treshold_train2 kNeighbors =       ", \
+                    dMethods_RM['kNeighbors']['AMS_treshold_train2'])
     print(" ")
-    print (" AMS randomForest =       ", dMethods['randomForest']['AMS'])
-    print (" AMS randomForest RM =    ", dMethods_RM['randomForest']['AMS'])
+    print ("AMS_ratio_global_train2 kNeighbors =    ", \
+            dMethods['kNeighbors']['AMS_ratio_global_train2'])
+    print ("RM AMS_ratio_global_train2 kNeighbors =    ", \
+            dMethods_RM['kNeighbors']['AMS_ratio_global_train2'])
+    print(" ")
+    print ("AMS_treshold_valid kNeighbors =       ", \
+                    dMethods['kNeighbors']['AMS_treshold_valid'])
+    print ("RM AMS_treshold_valid kNeighbors =       ", \
+                    dMethods_RM['kNeighbors']['AMS_treshold_valid'])
+    print(" ")
+    print ("AMS_ratio_global_valid kNeighbors =    ", \
+            dMethods['kNeighbors']['AMS_ratio_global_valid'])
+    print ("RM AMS_ratio_global_valid kNeighbors RM =    ", \
+            dMethods_RM['kNeighbors']['AMS_ratio_global_valid'])
 
 
 
