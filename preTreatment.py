@@ -254,14 +254,18 @@ def concatenate_vectors(vector_s):
     """
     concatenate the vectors in vector_s and returns the concatenated vector
     """
-    if len(vector_s[0].shape)>1:
-        # Empty vector with the same number of columns than the arrays in the list
-        concatenated_vector = np.empty((0, vector_s[0].shape[1]))
-    else:
-        concatenated_vector = np.empty(0)
+    if type(vector_s) == list:
+        if len(vector_s[0].shape)>1:
+            # Empty vector with the same number of columns than the arrays in the list
+            concatenated_vector = np.empty((0, vector_s[0].shape[1]))
+        else:
+            concatenated_vector = np.empty(0)
 
-    for vector in vector_s:
-        concatenated_vector = np.concatenate((concatenated_vector, vector))
+        for vector in vector_s:
+            concatenated_vector = np.concatenate((concatenated_vector, vector))
+    else:
+        print("No concatenation needed")
+        concatenated_vector = vector_s
 
     return concatenated_vector
 
@@ -401,6 +405,15 @@ def removeUnusedFeature(train_s, train2_s, valid_s, test_s, featureImportance,
             if importance < importance_lim:
                 toBeRemove.append(j)
 
+        initial_len = len(train_RM_s[1])
+
+
+        # Convert everything to list:
+        train_RM_s = list(train_RM_s)
+        train2_RM_s = list(train2_RM_s)
+        valid_RM_s = list(valid_RM_s)
+        test_RM_s = list(test_RM_s)
+
         train_RM_s[1] = np.delete(train_RM_s[1],toBeRemove,axis=1)
         train_RM_s[4] = np.delete(train_RM_s[4],toBeRemove)
 
@@ -410,11 +423,18 @@ def removeUnusedFeature(train_s, train2_s, valid_s, test_s, featureImportance,
         valid_RM_s[1] = np.delete(valid_RM_s[1],toBeRemove,axis=1)
         valid_RM_s[4] = np.delete(valid_RM_s[4],toBeRemove)
 
-        test_RM_s[1][i] = np.delete(test_RM_s[1][i],toBeRemove,axis=1)
-        test_RM_s[2][i] = np.delete(test_RM_s[2][i],toBeRemove)
+        test_RM_s[1] = np.delete(test_RM_s[1],toBeRemove,axis=1)
+        test_RM_s[2] = np.delete(test_RM_s[2],toBeRemove)
+
+        # Convert everything back to tuple:
+        train_RM_s = tuple(train_RM_s)
+        train2_RM_s = tuple(train2_RM_s)
+        valid_RM_s = tuple(valid_RM_s)
+        test_RM_s = tuple(test_RM_s)
+
 
         print ("Dataset: %i features removed out of %i" \
-                    %(i, len(toBeRemove), len(predictor_s.feature_importances_)))
+                    %(len(toBeRemove), initial_len))
 
     return train_RM_s, train2_RM_s, valid_RM_s, test_RM_s
 

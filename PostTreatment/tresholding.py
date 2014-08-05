@@ -155,12 +155,16 @@ def best_ratio(yProba, yValidation, weightsValidation, pas = 0.01):
     best_ams = 0.
 
     for ratio in ratio_s:
+
         yPredicted_prov = get_yPredicted_ratio(yProba, ratio)
 
         # if we work with multi-class:
-        if yPredicted_prov.shape[1] == 5:
-            yPredicted = np.ones(yPredicted_prov.shape[0])
-            yPredicted[yPredicted_prov[:,4] == 0] = 0
+        if len(yPredicted_prov.shape) == 2:
+            if yPredicted_prov.shape[1] == 5:
+                yPredicted = np.ones(yPredicted_prov.shape[0])
+                yPredicted[yPredicted_prov[:,4] == 0] = 0
+            else:
+                yPredicted = yPredicted_prov
         else:
             yPredicted = yPredicted_prov
 
@@ -174,7 +178,7 @@ def best_ratio(yProba, yValidation, weightsValidation, pas = 0.01):
                 best_ratio = ratio
                 best_ams = ams
         else:
-            print ("WARNING: For a ratio of %f, b >0.") %ratio
+            print ("WARNING: For a ratio of %f, b < 0 (b= %f).") %(ratio, b)
             print ("This ratio has been ignored.")
 
     return best_ams, best_ratio

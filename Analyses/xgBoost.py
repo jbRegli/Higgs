@@ -111,6 +111,10 @@ def predict_proba(classifier_s, dataset_s):
 
         proba_predicted_s = classifier_s.predict(xgmat)
 
+        # If we work with proba, we need to reshape the output:
+        if proba_predicted_s.shape[0] == 5 * dataset_s.shape[0]:
+            proba_predicted_s = proba_predicted_s.reshape(5, dataset_s.shape[0]).T
+
     else:
         proba_predicted_s = predict_proba_8(classifier_s, dataset_s)
 
