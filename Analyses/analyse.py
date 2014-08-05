@@ -83,6 +83,11 @@ def analyse(train_s, train2_s, valid_s, method_name, kwargs={}):
             yProbaValidBinary_s[j] = 1 - yProbaValid_s[j][0]
 
     # If we work with lists, let's get the concatenated vectors:
+    # TRAIN SET
+    if type(train_s[3]) ==list:
+        weightsTrain_conca = preTreatment.concatenate_vectors(train_s[3])
+    else:
+        weightsTrain_conca = train_s[3]
     # VALID SET
     # Validation Vectors
     if type(valid_s[2]) == list:
@@ -129,6 +134,14 @@ def analyse(train_s, train2_s, valid_s, method_name, kwargs={}):
     else:
         yProbaTrain2_conca = yProbaTrain2_s
 
+    # Let's rebalance the weight so their sum is equal to the total sum
+    # of the train set
+    sumWeightsTotal = sum(weightsTrain_conca)+sum(weightsTrain2_conca)+sum(weightsValid_conca)
+    weightsTrain2_conca *= sumWeightsTotal/sum(weightsTrain2_conca)
+    weightsValid_conca *= sumWeightsTotal/sum(weightsValid_conca)
+    for i in range(8):
+        train2_s[3][i] *= sumWeightsTotal/sum(weightsTrain2_conca)
+        valid_s[3][i] *= sumWeightsTotal/sum(weightsValid_conca)
 
     # Let's get the best global treshold on the train2 set
     AMS_treshold_train2, best_treshold_global = tresholding.best_treshold(yProbaTrain2Binary_conca,
@@ -150,7 +163,7 @@ def analyse(train_s, train2_s, valid_s, method_name, kwargs={}):
                                                                             yProbaTrain2Binary_s,
                                                                             train2_s[2],
                                                                             train2_s[3],
-                                                                            10)
+                                                                            30)
         yPredictedValid_ratio_comb_s, yPredictedValid_conca_ratio_combinaison = tresholding.get_yPredicted_ratio_8(
                                                                                     yProbaValidBinary_s,
                                                                                     best_ratio_combinaison)
@@ -169,16 +182,6 @@ def analyse(train_s, train2_s, valid_s, method_name, kwargs={}):
                                             yPredictedValid_conca_ratio_combinaison,
                                             yValid_conca,
                                             weightsValid_conca)
-
-    #Balance the s and b
-    valid_size = yValid_conca.shape[0]
-    s_treshold *= 250000/valid_size
-    b_treshold *= 250000/valid_size
-    s_ratio_global *= 250000/valid_size
-    b_ratio_global *= 250000/valid_size
-    if type(train_s[2])==list:
-        s_ratio_combinaison *=250000/valid_size
-        b_ratio_combinaison *= 250000/valid_size
 
     # AMS final:
     AMS_treshold_valid = hbc.AMS(s_treshold, b_treshold)
