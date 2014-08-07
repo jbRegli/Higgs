@@ -100,16 +100,18 @@ def get_yPredicted_ratio(yProba, ratio):
 
     if ratio !=0:
         # if we work with multi-class:
-        if yProba.shape[1] == 5:
-            # Maximum on the label s over a line sorted
-            yProbaSorted = yProba[np.max(yProba[:,0:3], axis=1).argsort()]
-            treshold = yProbaSorted[int((1. - float(ratio))*len(yProba))]
-            yPredicted = get_yPredicted_treshold(yProba, treshold)
+        if len(yProba.shape) == 2:
+            if yProba.shape[1] == 5:
+                # Maximum on the label s over a line sorted
+                yProbaSorted = yProba[np.max(yProba[:,1:4], axis=1).argsort()]
+                treshold = yProbaSorted[int((1. - float(ratio))*len(yProba))]
+                yPredicted = get_yPredicted_treshold(yProba, treshold)
+            else:
+                print "Error: in get_yPredicted_ratio() the shape of the input isn't correct"
 
         else:
             yProbaSorted = yProba[yProba.argsort()]
-            treshold = np.max(yProbaSorted[int((1. - float(ratio))*len(yProba)),0:3],
-                              axis = 1)
+            treshold = np.max(yProbaSorted[int((1. - float(ratio))*len(yProba))])
             yPredicted = get_yPredicted_treshold(yProba, treshold)
 
     return yPredicted
@@ -131,10 +133,13 @@ def best_treshold(yProba, yValidation, weightsValidation, pas = 0.01):
         yPredicted_prov = get_yPredicted_treshold(yProba, treshold)
 
         # if we work with multi-class:
-        if yPredicted_prov.shape[1] == 5:
-            # Reduce multiclass to binary
-            yPredicted = np.ones(yPredicted_prov.shape[0])
-            yPredicted[yPredicted_prov[:,4] == 0] = 0
+        if len(yPredicted_prov.shape) == 2:
+            if yPredicted_prov.shape[1] == 5:
+                # Reduce multiclass to binary
+                yPredicted = np.ones(yPredicted_prov.shape[0])
+                yPredicted[yPredicted_prov[:,4] == 0] = 0
+            else:
+                print "Error: in best_treshold() the shape of the input isn't correct"
         else:
             yPredicted = yPredicted_prov
 
@@ -161,29 +166,30 @@ def best_ratio(yProba, yValidation, weightsValidation, pas = 0.01):
                 yPredicted = np.ones(yPredicted_prov.shape[0])
                 yPredicted[yPredicted_prov[:,4] == 0] = 0
             else:
-                yPredicted = yPredicted_prov
+                print "Error: in best_ratio() the shape of the input isn't correct"
         else:
             yPredicted = yPredicted_prov
 
         s, b = submission.get_s_b(yPredicted, yValidation, weightsValidation)
-<<<<<<< HEAD
         s *= 250000/yPredicted.shape[0]
         b *= 250000/yPredicted.shape[0]
 
-        if b > 0:
+        if b > 0 and s > 0:
             ams = hbc.AMS(s,b)
             if ams >= best_ams:
                 best_ratio = ratio
                 best_ams = ams
         else:
-            print ("WARNING: For a ratio of %f, b < 0 (b= %f).") %(ratio, b)
-            print ("This ratio has been ignored.")
-=======
+            if b <= 0:
+                print ("WARNING: For a ratio of %f, b < 0 (b= %f).") %(ratio, b)
+                print ("This ratio has been ignored.")
+            else:
+                print ("WARNING: For a ratio of %f, s < 0 (s= %f).") %(ratio, s)
+                print ("This ratio has been ignored.")
         ams = hbc.AMS(s,b)
         if ams >= best_ams:
             best_ratio = ratio
             best_ams = ams
->>>>>>> 5ddd69a51ab3d9795bc6186a5efede1cd06229e8
 
     return best_ams, best_ratio
 

@@ -322,11 +322,14 @@ def multiclass2binary(yMulticlass):
     """
     function that transforms a multiclass label vectors into a binary one
     """
-
-    if yMulticlass.shape[1] == 5:
-        # Reduce multiclass to binary
-        yBinary = np.ones(yMulticlass.shape[0])
-        yBinary[yMulticlass[:,4] == 0] = 0
+    # if we work with multi-class:
+    if len(yMulticlass.shape) == 2:
+        if yMulticlass.shape[1] == 5:
+            # Reduce multiclass to binary
+            yBinary = np.ones(yMulticlass.shape[0])
+            yBinary[yMulticlass[:,4] == 0] = 0
+        else:
+            print "Error: in best_treshold() the shape of the input isn't correct"
     else:
         yBinary = np.zeros(yMulticlass.shape[0])
 
@@ -338,12 +341,12 @@ def multiclass2binary(yMulticlass):
 
 
 
-def featureUsage(train_s):
+def featureUsage(train_s, n_estimators = 100):
     """
     Function that rank the feature by importance
     """
     # Train a random forest to get the feature importance
-    kwargs_kn = {'n_estimators': 100}
+    kwargs_kn = {'n_estimators': n_estimators}
     randomFor = randomForest.train_classifier(train_s[1], train_s[2], kwargs_kn)
 
      # Remove feature whose importance is below the limit
@@ -371,6 +374,7 @@ def removeUnusedFeature(train_s, train2_s, valid_s, test_s, featureImportance,
     # Remove feature whose importance is below the limit
     if type(train_s[0]) == list:
 
+        n_removeFeatures = 0
         for i in range(len(train_s[0])):
             toBeRemove = []
             for j,importance in  enumerate(featureImportance[i]):
@@ -379,7 +383,7 @@ def removeUnusedFeature(train_s, train2_s, valid_s, test_s, featureImportance,
                 if importance < importance_lim:
                     toBeRemove.append(j)
 
-            initial_len = len(train_RM_s[1][i])
+            initial_len = len(train_RM_s[4][i])
 
             train_RM_s[1][i] = np.delete(train_RM_s[1][i],toBeRemove,axis=1)
             train_RM_s[4][i] = np.delete(train_RM_s[4][i],toBeRemove)
@@ -393,6 +397,8 @@ def removeUnusedFeature(train_s, train2_s, valid_s, test_s, featureImportance,
             test_RM_s[1][i] = np.delete(test_RM_s[1][i],toBeRemove,axis=1)
             test_RM_s[2][i] = np.delete(test_RM_s[2][i],toBeRemove)
 
+            n_removeFeatures += len(toBeRemove)
+
             print ("Subset %i: %i features removed out of %i" \
                     %(i, len(toBeRemove), initial_len))
 
@@ -405,7 +411,7 @@ def removeUnusedFeature(train_s, train2_s, valid_s, test_s, featureImportance,
             if importance < importance_lim:
                 toBeRemove.append(j)
 
-        initial_len = len(train_RM_s[1])
+        initial_len = len(train_RM_s[4])
 
 
         # Convert everything to list:
@@ -432,11 +438,12 @@ def removeUnusedFeature(train_s, train2_s, valid_s, test_s, featureImportance,
         valid_RM_s = tuple(valid_RM_s)
         test_RM_s = tuple(test_RM_s)
 
+        n_removeFeatures = len(toBeRemove)
 
         print ("Dataset: %i features removed out of %i" \
-                    %(len(toBeRemove), initial_len))
+                    %(n_removeFeatures, initial_len))
 
-    return train_RM_s, train2_RM_s, valid_RM_s, test_RM_s
+    return train_RM_s, train2_RM_s, valid_RM_s, test_RM_s, n_removeFeatures
 
 
 
