@@ -15,7 +15,7 @@ import HiggsBosonCompetition_AMSMetric_rev1 as ams
 def main():
     train_size = 230000
     valid_size = 20000
-
+    """
     ##############
     ### Binary ###
     ##############
@@ -117,11 +117,12 @@ def main():
 
                 plt.savefig( savepath + title + ".png", bbox_inches='tight')
 
-
+    """
 
     ##################
     ### Multiclass ###
     ##################
+    """
     split= False
     normalize = True
     noise_var = 0.
@@ -178,7 +179,7 @@ def main():
 
             plt.savefig( savepath + title + ".png", bbox_inches='tight')
 
-
+    """
     # Importation parameters:
     split= True
     normalize = True

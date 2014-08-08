@@ -12,7 +12,8 @@ import random,string,math,csv
 import preTreatment
 
 
-def get_all_data(normalize = True, noise_variance = 0.,  n_classes = "binary", train_size = 200000, train_size2 = 25000, valid_size = 25000):
+def get_all_data(normalize = True, noise_variance = 0., n_classes = "binary",
+                 train_size = 200000, train_size2 = 25000, valid_size = 25000):
     """
     normalize : binary
     if True normalize all the data
@@ -166,7 +167,8 @@ def get_all_data(normalize = True, noise_variance = 0.,  n_classes = "binary", t
 
 
 
-def get_8_bins(normalize = True, noise_variance = 0., n_classes = "binary", \
+def get_8_bins(normalize = True, noise_variance = 0., remove_999= True,
+                n_classes = "binary",
                 train_size = 200000, train_size2 = 25000, valid_size = 25000):
     """
     returns (xsTrain_s, yTrain_s, weightsTrain_s), (xsValidation_s, yValidation_s, weightsValidation_s)
@@ -233,40 +235,44 @@ def get_8_bins(normalize = True, noise_variance = 0., n_classes = "binary", \
 
 
     # Delete the columns full of -999
-    print("    Deleting the invalid inputs")
-    # (if u see any suspicious looking person, or article ...)
-    for i in range(8):
-        for index_column in range(xsTrain.shape[1]):
-            if xsTrain_s[i].shape[1] > index_column:
-                if xsTrain_s[i][0,index_column] == -999:
-                    xsTrain_s[i] = np.delete(xsTrain_s[i], np.s_[index_column],1)
-                    if train_size2 !=0:
-                        xsTrain2_s[i] = np.delete(xsTrain2_s[i], np.s_[index_column],1)
-                    if valid_size != 0:
-                        xsValid_s[i] = np.delete(xsValid_s[i], np.s_[index_column],1)
-                    xsTest_s[i] = np.delete(xsTest_s[i], np.s_[index_column],1)
+    if remove_999 == True:
+        print("    Deleting the invalid inputs")
+        # (if u see any suspicious looking person, or article ...)
+        for i in range(8):
 
-                    nameTrain_s[i] = np.delete(nameTrain_s[i], index_column)
-                    if train_size2 !=0:
-                        nameTrain2_s[i] = np.delete(nameTrain2_s[i], index_column)
-                    if valid_size != 0:
-                        nameValid_s[i] = np.delete(nameValid_s[i], index_column)
-                    nameTest_s[i] = np.delete(nameTest_s[i], index_column)
+            # Deleting the feature identical within each group:
+            xsTrain_s[i] = np.delete(xsTrain_s[i], np.s_[22],1)
+            nameTrain_s[i] = np.delete(nameTrain_s[i], 22)
 
-        # Deleting the feature identical within each group:
-        xsTrain_s[i] = np.delete(xsTrain_s[i], np.s_[22],1)
-        if train_size2 !=0:
-            xsTrain2_s[i] = np.delete(xsTrain2_s[i], np.s_[22],1)
-        if valid_size !=0:
-            xsValid_s[i] = np.delete(xsValid_s[i], np.s_[22],1)
-        xsTest_s[i]  = np.delete(xsTest_s[i],  np.s_[22],1)
+            if train_size2 !=0:
+                xsTrain2_s[i] = np.delete(xsTrain2_s[i], np.s_[22],1)
+                nameTrain2_s[i] = np.delete(nameTrain2_s[i], 22)
 
-        nameTrain_s[i] = np.delete(nameTrain_s[i], 22)
-        if train_size2 !=0:
-            nameTrain2_s[i] = np.delete(nameTrain2_s[i], 22)
-        if valid_size != 0:
-            nameValid_s[i] = np.delete(nameValid_s[i], 22)
-        nameTest_s[i] = np.delete(nameTest_s[i], 22)
+            if valid_size !=0:
+                xsValid_s[i] = np.delete(xsValid_s[i], np.s_[22],1)
+                nameValid_s[i] = np.delete(nameValid_s[i], 22)
+
+            xsTest_s[i]  = np.delete(xsTest_s[i],  np.s_[22],1)
+            nameTest_s[i] = np.delete(nameTest_s[i], 22)
+
+            # List of columns to be removed: if there is a -999
+            toBeRemoved = np.sum(xsTrain_s[i]==-999, axis=0) >= 1
+            tBR_ind = []
+            for j,elmt in enumerate(toBeRemoved):
+                if elmt == True:
+                    tBR_ind.append(j)
+            # Remove the colums:
+            if train_size2 !=0:
+                xsTrain2_s[i] = np.delete(xsTrain2_s[i], tBR_ind, axis=1)
+                nameTrain2_s[i] = np.delete(nameTrain2_s[i], tBR_ind)
+
+            if valid_size !=0:
+                xsValid_s[i] = np.delete(xsValid_s[i], tBR_ind, axis=1)
+                nameValid_s[i] = np.delete(nameValid_s[i], tBR_ind)
+
+            xsTest_s[i] = np.delete(xsTest_s[i], tBR_ind, axis=1)
+            nameTest_s[i] = np.delete(nameTest_s[i], tBR_ind)
+
 
     if train_size2 !=0 and valid_size !=0:
         return (ID_train_s, xsTrain_s, yTrain_s, weightsTrain_s, nameTrain_s), \
