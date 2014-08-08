@@ -215,15 +215,15 @@ def main():
                 s4_index = cValue == 4
 
                 b = plt.scatter(xValue[b_index], yValue[b_index],
-                                c = cValue, color= colors[0])
+                                c = cValue[b_index], color= 'c')
                 s1 = plt.scatter(xValue[s1_index], yValue[s1_index],
-                                 c = cValue, color= colors[1])
+                                 c = cValue[s1_index], color= 'g')
                 s2 = plt.scatter(xValue[s2_index], yValue[s2_index],
-                                 c = cValue, color= colors[2])
+                                 c = cValue[s2_index], color= 'y')
                 s3 = plt.scatter(xValue[s3_index], yValue[s3_index],
-                                 c = cValue, color= colors[3])
+                                 c = cValue[s3_index], color= 'm')
                 s4 = plt.scatter(xValue[s4_index], yValue[s4_index],
-                                c = cValue, color= colors[4])
+                                c = cValue[s4_index], color= 'r')
 
                 plt.legend((b,s1,s2,s3,s4), names)
 
@@ -238,10 +238,6 @@ def main():
                                 + "/"
 
                 plt.savefig( savepath + title + ".png", bbox_inches='tight')
-
-
-
-
 
     return 0
 

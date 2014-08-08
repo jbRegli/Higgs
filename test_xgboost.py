@@ -20,30 +20,20 @@ import xgBoost
 print(" ")
 print("---------------------------- Import: ---------------------------")
 
-split = True
-norm = True
-remove_999 = True
+split = False
+norm = False
+remove_999 = False
+n_classes = "multiclass" #"binary"
 
-train_s, test_s = tokenizer.extract_data(split = split, normalize = norm,
-                                         remove_999 = remove_999,
-                                         noise_variance = 0.,
-                                         #n_classes = "multiclass",
-                                         n_classes = "binary",
-                                         train_size = 250000,
-                                         train_size2 = 0,
-                                         valid_size = 0)
-
-print(" ")
-
-train_s_2, valid_s_2, test_s_2 = tokenizer.extract_data(
-                                        split = split, normalize = norm,
-                                        remove_999 = remove_999,
-                                        noise_variance = 0.,
-                                        #n_classes = "multiclass",
-                                        n_classes = "binary",
-                                        train_size = 200000,
-                                        train_size2 = 0,
-                                        valid_size = 50000)
+train_s, train_s_2, valid_s_2, test_s = tokenizer.extract_data(
+                                                        split = split,
+                                                        normalize = norm,
+                                                        remove_999 = remove_999,
+                                                        noise_variance = 0.,
+                                                        n_classes = n_classes,
+                                                        train_size = 180000,
+                                                        train_size2 = 35000,
+                                                        valid_size = 35000)
 
 print(" ")
 
@@ -53,7 +43,7 @@ print(" ")
 print("---------------------- Feature importance: ----------------------")
 
 # Compute the feature usage:
-featureImportance = preTreatment.featureUsage(train_s, n_estimators= 10)
+featureImportance = preTreatment.featureUsage(train_s, n_estimators= 100)
 
 # Number of features (sum if splited dataset)
 if type(train_s[1]) == list:
@@ -81,7 +71,7 @@ for importance_lim in np.arange(0.0, 0.1 , 0.001):
                                              importance_lim = importance_lim)
 
     if (n_removeFeatures != n_removeFeatures_old or best_ams == 0) \
-            and n_removeFeatures < n_total_feature -1:
+            and n_removeFeatures <= n_total_feature -1:
         print(" ")
         print("Testing importance_limit= %f" %importance_lim)
         n_removeFeatures_old = n_removeFeatures
@@ -93,13 +83,13 @@ for importance_lim in np.arange(0.0, 0.1 , 0.001):
         # XgBoost parameters:
         kwargs_xgb = {'bst_parameters': \
                 {'booster_type': 0,
-                     'objective': 'binary:logistic',
-                     #'objective': 'multi:softprob', 'num_class': 5,
-                     'bst:eta': 0.3, # the bigger the more conservative
+                     #'objective': 'binary:logitraw',
+                     'objective': 'multi:softprob', 'num_class': 5,
+                     'bst:eta': 0.1, # the bigger the more conservative
                      'bst:subsample': 1, # prevent over fitting if <1
-                     'bst:max_depth': 10, 'eval_metric': 'auc', 'silent': 1,
+                     'bst:max_depth': 15, 'eval_metric': 'auc', 'silent': 1,
                      'nthread': 8 }, \
-                'n_rounds': 10}
+                'n_rounds': 120}
 
         print "Getting the classifiers..."
         # Training:
@@ -197,7 +187,7 @@ yTestProbaRanked = submission.rank_signals(predProbaRank_Test)
 
 
 # Create the submission file:
-submission_name = "submssion_xgb_2c_SPT_r10_ams" + str(best_ams[0:6])
+submission_name = "submssion_xgb_5c_SPT_r120_ams" + str(best_ams)[0:6]
 
 print ("Generating a submsission file named %s" %submission_name)
 
