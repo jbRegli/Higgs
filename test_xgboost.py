@@ -22,8 +22,10 @@ print("---------------------------- Import: ---------------------------")
 
 split = True
 norm = True
+remove_999 = True
 
 train_s, test_s = tokenizer.extract_data(split = split, normalize = norm,
+                                         remove_999 = remove_999,
                                          noise_variance = 0.,
                                          #n_classes = "multiclass",
                                          n_classes = "binary",
@@ -35,6 +37,7 @@ print(" ")
 
 train_s_2, valid_s_2, test_s_2 = tokenizer.extract_data(
                                         split = split, normalize = norm,
+                                        remove_999 = remove_999,
                                         noise_variance = 0.,
                                         #n_classes = "multiclass",
                                         n_classes = "binary",

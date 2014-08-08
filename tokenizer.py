@@ -295,17 +295,19 @@ def get_8_bins(normalize = True, noise_variance = 0., remove_999= True,
            (ID_test_s, xsTest_s, nameTest_s)
 
 
-def extract_data(split= True, normalize= True, noise_variance= 0.,
-                  n_classes = "binary", train_size = 200000, train_size2 = 25000,
-                  valid_size = 25000):
+def extract_data(split= True, normalize= True,
+                 noise_variance= 0., remove_999= True,
+                 n_classes = "binary", train_size = 200000, train_size2 = 25000,
+                 valid_size = 25000):
     """
     Function wrapping the extraction of the data for any of the possible cases.
     """
     if split == True:
         # Split the data into 8 sub-datasets:
         return get_8_bins(normalize= normalize, noise_variance= noise_variance,
-                           n_classes = n_classes, train_size = train_size, train_size2 = train_size2,
-                           valid_size = valid_size)
+                          remove_999 = remove_999, n_classes = n_classes,
+                          train_size = train_size, train_size2 = train_size2,
+                          valid_size = valid_size)
     else:
         # Extract the data as a unique dataset:
         return get_all_data(normalize= normalize, noise_variance= noise_variance,

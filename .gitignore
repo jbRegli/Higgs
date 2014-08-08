@@ -42,6 +42,10 @@ coverage.xml
 #CSV
 *.csv
 
+#XLS
+*.xls
+*.xls#
+
 #TXT:
 *.txt
 
