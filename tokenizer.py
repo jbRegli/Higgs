@@ -313,7 +313,6 @@ def extract_data(split= True, normalize= True,
         # Extract the data as a unique dataset:
         return get_all_data(normalize= normalize,
                             noise_variance= noise_variance,
-                            remove_999 = remove_999,
                             n_classes = n_classes,
                             train_size = train_size,
                             train_size2 = train_size2,

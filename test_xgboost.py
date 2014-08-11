@@ -20,8 +20,8 @@ import xgBoost
 print(" ")
 print("---------------------------- Import: ---------------------------")
 
-split = False
-norm = False
+split = True
+norm = True
 remove_999 = False
 n_classes = "multiclass" #"binary"
 
@@ -43,7 +43,7 @@ print(" ")
 print("---------------------- Feature importance: ----------------------")
 
 # Compute the feature usage:
-featureImportance = preTreatment.featureUsage(train_s, n_estimators= 100)
+featureImportance = preTreatment.featureUsage(train_s, n_estimators= 10)
 
 # Number of features (sum if splited dataset)
 if type(train_s[1]) == list:

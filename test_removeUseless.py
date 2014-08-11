@@ -88,7 +88,8 @@ best_imp_lim = 0.
 best_best_ratio = 0.
 best_n_removeFeatures = 0.
 
-print(" Looping over importance_limit")
+print("Looping over importance_limit")
+dMethods ={}
 for importance_lim in np.arange(0.0, 0.1 , 0.001):
     train_RM_s, train_RM_s_2, valid_RM_s, test_RM_s, n_removeFeatures = \
             preTreatment.removeUnusedFeature(train_s, train2_s, valid_s,
@@ -110,7 +111,6 @@ for importance_lim in np.arange(0.0, 0.1 , 0.001):
         # we'll have a dict of dict
         # Keys of the methods : {naiveBayes, svm, kNeighbors, lda, qda, adaBoost,
         #                       randomForest}
-        dMethods ={}
         """
         # NAIVE BAYES:
         kwargs_bayes = {}
@@ -184,12 +184,21 @@ for importance_lim in np.arange(0.0, 0.1 , 0.001):
         """
         print(" ")
 
-
         # Looking for the best threshold:
         for key in dMethods:
-            print "%s - Valid AMS - best ratio: %f - best ams: %f" \
+            print ("%s - Valid AMS - best ratio: %f - best ams: %f" \
                     %(key, dMethods[key]['best_treshold_global'],
-                            dMethods[key]['AMS_treshold_valid'],)
+                            dMethods[key]['AMS_treshold_valid']) )
+
+            if dMethods[key]['best_treshold_global'] > best_ams:
+                best_ams = dMethods[key]['best_treshold_global']
+                best_imp_lim = importance_lim
+                best_best_ratio = dMethods[key]['AMS_treshold_valid']
+                best_n_removeFeatures = n_removeFeatures
+
+
+        print(" ")
+        print(" ")
 
         """
         print("------------------------ On-top predictor -----------------------")
