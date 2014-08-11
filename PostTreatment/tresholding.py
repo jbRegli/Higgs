@@ -174,13 +174,13 @@ def best_ratio(yProba, yValidation, weightsValidation, pas = 0.01):
         s *= 250000/yPredicted.shape[0]
         b *= 250000/yPredicted.shape[0]
 
-        if b > 0 and s > 0:
+        if b >= 0. and s >= 0.:
             ams = hbc.AMS(s,b)
             if ams >= best_ams:
                 best_ratio = ratio
                 best_ams = ams
         else:
-            if b <= 0:
+            if b < 0.:
                 print ("WARNING: For a ratio of %f, b < 0 (b= %f).") %(ratio, b)
                 print ("This ratio has been ignored.")
             else:
