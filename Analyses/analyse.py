@@ -34,16 +34,8 @@ def analyse(train_s, train2_s, valid_s, method_name, kwargs={}):
     print("------------------- Analyse: %s -----------------------") \
                         %(method_name)
 
-    print train_s[1][0].shape
-    print train_s[2][0].shape
-
-
     classifier_s = eval(method_name).train_classifier(train_s[1], train_s[2],
                                                       kwargs)
-
-
-    print train2_s[1][0].shape
-    print valid_s[1][0].shape
 
     yProbaTrain2_s = eval(method_name).predict_proba(classifier_s, train2_s[1])
     yProbaValid_s = eval(method_name).predict_proba(classifier_s, valid_s[1])
@@ -153,13 +145,18 @@ def analyse(train_s, train2_s, valid_s, method_name, kwargs={}):
         valid_s[3][i] *= sumWeightsTotal/sum(weightsValid_conca)
 
     # Let's get the best global treshold on the train2 set
-    AMS_treshold_train2, best_treshold_global = tresholding.best_treshold(yProbaTrain2Binary_conca,
-                                                     yTrain2_conca, weightsTrain2_conca)
+    AMS_treshold_train2, best_treshold_global = tresholding.\
+                            best_treshold(yProbaTrain2Binary_conca,
+                                          yTrain2_conca,
+                                          weightsTrain2_conca)
+
     yPredictedValid_conca_treshold = tresholding.get_yPredicted_treshold(
                                                         yProbaValidBinary_conca,
                                                         best_treshold_global)
+
     # Let's get the best ratio treshold on the train2 set
-    AMS_ratio_global_train2, best_ratio_global = tresholding.best_ratio(yProbaTrain2Binary_conca,
+    AMS_ratio_global_train2, best_ratio_global = tresholding.\
+                                    best_ratio(yProbaTrain2Binary_conca,
                                                yTrain2_conca,
                                                weightsTrain2_conca)
 
@@ -168,14 +165,17 @@ def analyse(train_s, train2_s, valid_s, method_name, kwargs={}):
                                                         best_ratio_global)
     # Let's get the best ratios combinaison
     if type(train_s[2]) == list:
-        AMS_ratio_combinaison_train2, best_ratio_combinaison = tresholding.best_ratio_combinaison_global(
-                                                                            yProbaTrain2Binary_s,
-                                                                            train2_s[2],
-                                                                            train2_s[3],
-                                                                            30)
-        yPredictedValid_ratio_comb_s, yPredictedValid_conca_ratio_combinaison = tresholding.get_yPredicted_ratio_8(
-                                                                                    yProbaValidBinary_s,
-                                                                                    best_ratio_combinaison)
+        AMS_ratio_combinaison_train2, best_ratio_combinaison = tresholding.\
+                                best_ratio_combinaison_global(
+                                                           yProbaTrain2Binary_s,
+                                                           train2_s[2],
+                                                           train2_s[3],
+                                                           30)
+
+        yPredictedValid_ratio_comb_s, yPredictedValid_conca_ratio_combinaison =\
+                                tresholding.get_yPredicted_ratio_8(
+                                                    yProbaValidBinary_s,
+                                                    best_ratio_combinaison)
 
     # Let's compute the final s and b for each method
     s_treshold, b_treshold = submission.get_s_b(
@@ -188,15 +188,17 @@ def analyse(train_s, train2_s, valid_s, method_name, kwargs={}):
                                             weightsValid_conca)
     if type(train_s[2]) == list:
         s_ratio_combinaison, b_ratio_combinaison = submission.get_s_b(
-                                            yPredictedValid_conca_ratio_combinaison,
-                                            yValid_conca,
-                                            weightsValid_conca)
+                                        yPredictedValid_conca_ratio_combinaison,
+                                        yValid_conca,
+                                        weightsValid_conca)
 
     # AMS final:
     AMS_treshold_valid = hbc.AMS(s_treshold, b_treshold)
     AMS_ratio_global_valid = hbc.AMS(s_ratio_global, b_ratio_global)
     if type(train_s[2]) == list:
-        AMS_ratio_combinaison_valid = hbc.AMS(s_ratio_combinaison, b_ratio_combinaison)
+        AMS_ratio_combinaison_valid = hbc.AMS(s_ratio_combinaison,
+                                              b_ratio_combinaison)
+
     """
     #AMS by group:
     if type(train_s[2]) == list:
@@ -208,17 +210,20 @@ def analyse(train_s, train2_s, valid_s, method_name, kwargs={}):
             AMS_s.append(score)
     """
     # Classification error:
-    classif_succ_treshold = eval(method_name).get_classification_error(yPredictedValid_conca_treshold,
-                                                       yValid_conca,
-                                                       normalize= True)
-    classif_succ_ratio_global = eval(method_name).get_classification_error(yPredictedValid_conca_ratio_global,
-                                                       yValid_conca,
-                                                       normalize= True)
-    classif_succ_ratio_combinaison = eval(method_name).get_classification_error(yPredictedValid_conca_ratio_combinaison,
-                                                       yValid_conca,
-                                                       normalize= True)
+    classif_succ_treshold = eval(method_name).get_classification_error(
+                                                   yPredictedValid_conca_treshold,
+                                                   yValid_conca,
+                                                   normalize= True)
 
+    classif_succ_ratio_global = eval(method_name).get_classification_error(
+                                               yPredictedValid_conca_ratio_global,
+                                               yValid_conca,
+                                               normalize= True)
 
+    classif_succ_ratio_combinaison = eval(method_name).get_classification_error(
+                                          yPredictedValid_conca_ratio_combinaison,
+                                          yValid_conca,
+                                          normalize= True)
 
     # Numerical score:
     """

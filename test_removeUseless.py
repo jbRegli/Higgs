@@ -69,12 +69,6 @@ print(" ")
 
 print("---------------------- Feature importance: ----------------------")
 
-
-print train_s[1][0].shape
-print train2_s[1][0].shape
-print valid_s[1][0].shape
-
-
 # Compute the feature usage:
 featureImportance = preTreatment.featureUsage(train_s, n_estimators= 10)
 
@@ -133,7 +127,8 @@ for importance_lim in np.arange(0.0, 0.1 , 0.001):
         """
         # K NEIGHBORS
         kwargs_kn = {'n_neighbors': 20}
-        dMethods['kNeighbors'] = analyse.analyse(train_s= train_RM_s,
+        dMethods['kNeighbors_RM_' + str(n_removeFeatures)] = analyse.analyse(
+                                                 train_s= train_RM_s,
                                                  train2_s= train_RM_s_2,
                                                  valid_s= valid_RM_s,
                                                  method_name= 'kNeighbors',
@@ -193,8 +188,8 @@ for importance_lim in np.arange(0.0, 0.1 , 0.001):
         # Looking for the best threshold:
         for key in dMethods:
             print "%s - Valid AMS - best ratio: %f - best ams: %f" \
-                    %(key, dMethods[key]['AMS_treshold_valid'],
-                                dMethods[key]['best_treshold_global'])
+                    %(key, dMethods[key]['best_treshold_global'],
+                            dMethods[key]['AMS_treshold_valid'],)
 
         """
         print("------------------------ On-top predictor -----------------------")

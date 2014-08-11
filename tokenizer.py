@@ -274,11 +274,6 @@ def get_8_bins(normalize = True, noise_variance = 0., remove_999= True,
             xsTest_s[i] = np.delete(xsTest_s[i], tBR_ind, axis=1)
             nameTest_s[i] = np.delete(nameTest_s[i], tBR_ind)
 
-    print ("+++ xsTrain_s[1][0].shape= ", xsTrain_s[1][0].shape)
-    print ("+++ xsValid_s[1][0].shape= ", xsValid_s[1][0].shape)
-    print ("+++ xsTrain2_s[1][0].shape= ", xsTrain2_s[1][0].shape)
-    print ("+++ xsTest_s[1][0].shape= ", xsTest_s[1][0].shape)
-
     if train_size2 !=0 and valid_size !=0:
         return (ID_train_s, xsTrain_s, yTrain_s, weightsTrain_s, nameTrain_s), \
            (ID_train2_s, xsTrain2_s, yTrain2_s, weightsTrain2_s, nameTrain2_s), \
