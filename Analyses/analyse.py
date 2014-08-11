@@ -34,10 +34,19 @@ def analyse(train_s, train2_s, valid_s, method_name, kwargs={}):
     print("------------------- Analyse: %s -----------------------") \
                         %(method_name)
 
-    classifier_s = eval(method_name).train_classifier(train_s[1], train_s[2], kwargs)
+    print train_s[1][0].shape
+    print train_s[2][0].shape
 
-    yProbaValid_s = eval(method_name).predict_proba(classifier_s, valid_s[1])
+
+    classifier_s = eval(method_name).train_classifier(train_s[1], train_s[2],
+                                                      kwargs)
+
+
+    print train2_s[1][0].shape
+    print valid_s[1][0].shape
+
     yProbaTrain2_s = eval(method_name).predict_proba(classifier_s, train2_s[1])
+    yProbaValid_s = eval(method_name).predict_proba(classifier_s, valid_s[1])
 
     # Convert the validations vectors four 's' classes into one single s
     # classe

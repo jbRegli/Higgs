@@ -25,232 +25,181 @@ import tresholding
 
 
 
-def main():
-    ###############
-    ### IMPORT ####
-    ###############
-    # Importation parameters:
-    split= True
-    normalize = True
-    noise_var = 0.
-    n_classes = "multiclass"
-    train_size = 200000
-    train_size2 = 25000
-    valid_size = 25000
+###############
+### IMPORT ####
+###############
+# Importation parameters:
+split= True
+normalize = True
+remove_999 = True
+noise_var = 0.
+n_classes = "multiclass"
+train_size = 200000
+train_size2 = 25000
+valid_size = 25000
 
 
-    # Import the training data:
-    print("Extracting the data sets...")
-    start = time.clock()
-    train_s, train2_s, valid_s, test_s = tokenizer.extract_data(split= split,
+# Import the training data:
+print(" ")
+print("---------------------------- Import: ---------------------------")
+train_s, train2_s, valid_s, test_s = tokenizer.extract_data(split= split,
                                                       normalize= normalize,
+                                                      remove_999 = remove_999,
                                                       noise_variance= noise_var,
                                                       n_classes = n_classes,
                                                       train_size = train_size,
                                                       train_size2 = train_size2,
                                                       valid_size = valid_size)
+print(" ")
+print(" ")
 
-    # Remerging the y and weights of the validation if necessary:
-    if type(valid_s[2]) == list:
-        yValid_conca = preTreatment.concatenate_vectors(valid_s[2])
-        weights_conca = preTreatment.concatenate_vectors(valid_s[3])
+######################
+### PRE-TREATMENT ####
+######################
+print("------------------------- Pre-treatment --------------------------")
+### Average number of signal per subset:
+print("Train subsets signal average:")
+train_s_average = preTreatment.ratio_sig_per_dataset(train_s[2])
+print(" ")
+print("Valid subsets signal average:")
+valid_s_average = preTreatment.ratio_sig_per_dataset(valid_s[2])
 
-    stop = time.clock()
-    print ("Extraction time: %i s") %(stop-start)
+print(" ")
+print(" ")
 
-    print(" ")
-    print(" ")
+print("---------------------- Feature importance: ----------------------")
 
-    ######################
-    ### PRE-TREATMENT ####
-    ######################
-    print("------------------------- Pre-treatment --------------------------")
-    ### Average number of signal per subset:
-    print("Train subsets signal average:")
-    train_s_average = preTreatment.ratio_sig_per_dataset(train_s[2])
-    print(" ")
-    print("Valid subsets signal average:")
-    valid_s_average = preTreatment.ratio_sig_per_dataset(valid_s[2])
 
-    print(" ")
-    print(" ")
+print train_s[1][0].shape
+print train2_s[1][0].shape
+print valid_s[1][0].shape
 
-    ############
-    # ANALYSES #
-    ############
 
-    # Dictionnary that will contain all the data for each methods. In the end
-    # we'll have a dict of dict
-    # Keys of the methods : {naiveBayes, svm, kNeighbors, lda, qda, adaBoost,
-    #                       randomForest}
-    dMethods ={}
+# Compute the feature usage:
+featureImportance = preTreatment.featureUsage(train_s, n_estimators= 10)
 
-    # NAIVE BAYES:
-    """
-    kwargs_bayes = {}
-    dMethods['naiveBayes'] =  analyse.analyse(train_s= train_s, train2_s= train2_s,
-                                              valid_s= valid_s,
-                                              method_name = 'naiveBayes',
-                                              kwargs = kwargs_bayes)
-    """
-    # SVM
-    """
-    kwargs_svm ={}
-    dMethods['svm'] = analyse.analyse(train_s, valid_s,'svm', kwargs_svm)
-    """
-    # K NEIGHBORS
-    kwargs_kn = {'n_neighbors': 20}
-    dMethods['kNeighbors'] = analyse.analyse(train_s= train_s,
-                                              train2_s= train2_s,
-                                              valid_s= valid_s,
-                                              method_name= 'kNeighbors',
-                                              kwargs= kwargs_kn)
-    """
-    # LDA
-    kwargs_lda = {}
-    dMethods['lda'] = analyse.analyse(train_s= train_s, train2_s= train2_s,
-                                              valid_s= valid_s,
-                                              method_name = 'lda',
-                                              kwargs = kwargs_lda)
+# Number of features (sum if splited dataset)
+if type(train_s[1]) == list:
+    n_total_feature = 0
+    for elmt in featureImportance:
+        n_total_feature += len(elmt)
+else:
+    n_total_feature = len(featureImportance)
 
-    # QDA
-    kwargs_qda= {}
-    dMethods['qda'] = analyse.analyse(train_s= train_s, train2_s= train2_s,
-                                              valid_s= valid_s,
-                                              method_name = 'qda',
-                                              kwargs = kwargs_qda)
-    # ADABOOST
-    kwargs_ada= {   'n_estimators': 50,
+# Remove the least used feature from each subset
+n_removeFeatures_old = 0
+
+best_ams = 0.
+best_imp_lim = 0.
+best_best_ratio = 0.
+best_n_removeFeatures = 0.
+
+print(" Looping over importance_limit")
+for importance_lim in np.arange(0.0, 0.1 , 0.001):
+    train_RM_s, train_RM_s_2, valid_RM_s, test_RM_s, n_removeFeatures = \
+            preTreatment.removeUnusedFeature(train_s, train2_s, valid_s,
+                                             test_s,
+                                             featureImportance,
+                                             importance_lim = importance_lim)
+
+    if (n_removeFeatures != n_removeFeatures_old or best_ams == 0) \
+            and n_removeFeatures <= n_total_feature -1:
+        print(" ")
+        print("Testing importance_limit= %f" %importance_lim)
+        n_removeFeatures_old = n_removeFeatures
+
+        ############
+        # ANALYSES #
+        ############
+
+        # Dictionnary that will contain all the data for each methods. In the end
+        # we'll have a dict of dict
+        # Keys of the methods : {naiveBayes, svm, kNeighbors, lda, qda, adaBoost,
+        #                       randomForest}
+        dMethods ={}
+        """
+        # NAIVE BAYES:
+        kwargs_bayes = {}
+        dMethods['naiveBayes'] =  analyse.analyse(train_s= train_RM_s,
+                                                  train2_s= train_RM_s_2,
+                                                  valid_s= valid_RM_s,
+                                                  method_name = 'naiveBayes',
+                                                  kwargs = kwargs_bayes)
+        """
+        # SVM
+        """
+        kwargs_svm ={}
+        dMethods['svm'] = analyse.analyse(train_s, valid_s,'svm', kwargs_svm)
+        """
+        # K NEIGHBORS
+        kwargs_kn = {'n_neighbors': 20}
+        dMethods['kNeighbors'] = analyse.analyse(train_s= train_RM_s,
+                                                 train2_s= train_RM_s_2,
+                                                 valid_s= valid_RM_s,
+                                                 method_name= 'kNeighbors',
+                                                 kwargs= kwargs_kn)
+        """
+        # LDA
+        kwargs_lda = {}
+        dMethods['lda'] = analyse.analyse(train_s= train_RM_s,
+                                          train2_s= train_RM_s_2,
+                                          valid_s= valid_RM_s,
+                                          method_name = 'lda',
+                                          kwargs = kwargs_lda)
+
+        # QDA
+        kwargs_qda= {}
+        dMethods['qda'] = analyse.analyse(train_s= train_RM_s,
+                                          train2_s= train_RM_s_2,
+                                          valid_s= valid_RM_s,
+                                          method_name = 'qda',
+                                          kwargs = kwargs_qda)
+        """
+        """
+        # ADABOOST
+        kwargs_ada= {   'n_estimators': 50,
                     'learning_rate': 1.,
                     'algorithm': 'SAMME.R',
                     'random_state':None}
-    dMethods['adaBoost'] = analyse.analyse(train_s, valid_s, 'adaBoost',
+        dMethods['adaBoost'] = analyse.analyse(, 'adaBoost',
                                            kwargs_ada)
-    """
-    """
-    # RANDOM FOREST:
-    kwargs_randomForest= {'n_estimators': 100}
-    dMethods['randomForest'] = analyse.analyse(train_s= train_s,
+        """
+        """
+        # RANDOM FOREST:
+        kwargs_randomForest= {'n_estimators': 100}
+        dMethods['randomForest'] = analyse.analyse(train_s= train_s,
                                               train2_s= train2_s,
                                               valid_s= valid_s,
                                               method_name = 'randomForest',
                                               kwargs = kwargs_randomForest)
-    """
-    """
-    # ADABOOST2
-    kwargs_ada= {   'n_estimators': 100,
-                    'learning_rate': .5,
-                    'algorithm': 'SAMME.R',
-                    'random_state':None}
-    dMethods['adaBoost2'] = analyse.analyse(train_s= train_s,
-                                            train2_s= train2_s,
-                                            valid_s= valid_s,
-                                            method_name= 'adaBoost',
-                                            kwargs= kwargs_ada)
-
-    # RANDOM FOREST 3:
-    kwargs_randomForest= {'n_estimators': 100}
-    dMethods['randomForest3'] = analyse.analyse(train_s= train_s,
-                                                train2_s= train2_s,
-                                                valid_s= valid_s,
-                                                method_name= 'randomForest',
-                                                kwargs= kwargs_randomForest)
-
-    # RANDOM FOREST 4:
-    kwargs_randomForest= {'n_estimators': 100}
-    dMethods['randomForest4'] = analyse.analyse(train_s= train_s,
-                                                train2_s= train2_s,
-                                                valid_s= valid_s,
-                                                method_name = 'randomForest',
-                                                kwargs = kwargs_randomForest)
-
-    # RANDOM FOREST 5:
-    kwargs_randomForest= {'n_estimators': 100}
-    dMethods['randomForest5'] = analyse.analyse(train_s= train_s,
-                                                train2_s= train2_s,
-                                                valid_s= valid_s,
-                                                method_name = 'randomForest',
-                                                kwargs = kwargs_randomForest)
-    """
-    """
-    # GRADIENT BOOSTING:
-    kwargs_gradB = {'loss': 'deviance', 'learning_rate': 0.1,
+        """
+        """
+        # GRADIENT BOOSTING:
+        kwargs_gradB = {'loss': 'deviance', 'learning_rate': 0.1,
                     'n_estimators': 100, 'subsample': 1.0,
                     'min_samples_split': 2, 'min_samples_leaf': 200,
                     'max_depth': 10, 'init': None, 'random_state': None,
                     'max_features': None, 'verbose': 0}
 
-    dMethods['gradientBoosting'] = analyse.analyse(train_s= train_s,
+        dMethods['gradientBoosting'] = analyse.analyse(train_s= train_s,
                                               train2_s= train2_s,
                                               valid_s= valid_s,
                                               method_name= 'gradientBoosting'
                                               kwargs= kwargs_gradB)
-    """
-    print(" ")
-
-    ##################
-    # POST-TREATMENT #
-    ##################
-    print("---------------------- Feature importance: -----------------------")
-
-    importance_lim = 0.03
-
-    featureImportance = preTreatment.featureUsage(train_s)
-
-    train_RM_s, train2_RM_s, valid_RM_s, test_R = preTreatment.\
-                removeUnusedFeature(train_s, train2_s, valid_s, test_s,
-                                    featureImportance,
-                                    importance_lim = importance_lim)
-
-    dMethods_RM ={}
-
-    # GRADIENT BOOSTING on the modified dataset:
-    dMethods_RM['kNeighbors'] = analyse.analyse(train_s= train_RM_s,
-                                              train2_s= train2_RM_s,
-                                              valid_s= valid_RM_s,
-                                              method_name= 'kNeighbors',
-                                              kwargs= kwargs_kn)
+        """
+        print(" ")
 
 
-    """
-    dMethods_RM['gradientBoosting'] = analyse.analyse(train_s= train_RM_s,
-                                              train2_s= train2_RM_s,
-                                              valid_s= valid_RM_s,
-                                              method_name= 'gradientBoosting',
-                                              kwargs= kwargs_gradB)
-    """
+        # Looking for the best threshold:
+        for key in dMethods:
+            print "%s - Valid AMS - best ratio: %f - best ams: %f" \
+                    %(key, dMethods[key]['AMS_treshold_valid'],
+                                dMethods[key]['best_treshold_global'])
 
-    # Compare the 2 gradient boosting methods:
-    print ("AMS_treshold_train2 kNeighbors =       ", \
-                    dMethods['kNeighbors']['AMS_treshold_train2'])
-    print ("RM AMS_treshold_train2 kNeighbors =       ", \
-                    dMethods_RM['kNeighbors']['AMS_treshold_train2'])
-    print(" ")
-    print ("AMS_ratio_global_train2 kNeighbors =    ", \
-            dMethods['kNeighbors']['AMS_ratio_global_train2'])
-    print ("RM AMS_ratio_global_train2 kNeighbors =    ", \
-            dMethods_RM['kNeighbors']['AMS_ratio_global_train2'])
-    print(" ")
-    print ("AMS_treshold_valid kNeighbors =       ", \
-                    dMethods['kNeighbors']['AMS_treshold_valid'])
-    print ("RM AMS_treshold_valid kNeighbors =       ", \
-                    dMethods_RM['kNeighbors']['AMS_treshold_valid'])
-    print(" ")
-    print ("AMS_ratio_global_valid kNeighbors =    ", \
-            dMethods['kNeighbors']['AMS_ratio_global_valid'])
-    print ("RM AMS_ratio_global_valid kNeighbors RM =    ", \
-            dMethods_RM['kNeighbors']['AMS_ratio_global_valid'])
-
-
-
-    """
-    print (" AMS gradientBoosting =     ", dMethods['gradientBoosting']['AMS'])
-    print (" AMS gradientBoosting RM =  ", dMethods_RM['gradientBoosting']['AMS'])
-    """
-
-    print("------------------------ On-top predictor -----------------------")
-    # Classifiers to be ignored:
-    #ignore = ['randomForest2', 'randomForest']
+        """
+        print("------------------------ On-top predictor -----------------------")
+        # Classifiers to be ignored:
+        #ignore = ['randomForest2', 'randomForest']
     ignore = []
     clf_onTop = 'randomForest'
     parameters = {}#{'C': 0.5, 'kernel': 'rbf', 'degree': 3, 'gamma': 0.0,
@@ -362,8 +311,6 @@ def main():
     print " "
 
 
-
-    """
     # Best treshold group by group
     for i in range(8):
         OT_best_treshold_s = tresholding.best_treshold(OT_yProba_s[i],
@@ -440,9 +387,5 @@ def main():
 
     return sub
     """
-    return 0
-if __name__ == '__main__':
-    main()
-
 
 

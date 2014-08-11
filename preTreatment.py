@@ -389,11 +389,8 @@ def removeUnusedFeature(train_s, train2_s, valid_s, test_s, featureImportance,
                 print("WARNING: subset: %i - importance_lim: %f")
                 print ("   All features removed --> add the most important one")
                 # Remove the most important feature from toBeRemove
-                print("+++ toBeRemove= ", toBeRemove)
                 most_important_input = np.argmax(featureImportance[i])
-                print ("+++ most_important_input= ", most_important_input)
                 toBeRemove = toBeRemove.remove(most_important_input)
-                print ("+++ toBeRemove= ", toBeRemove)
 
             train_RM_s[1][i] = np.delete(train_RM_s[1][i],toBeRemove,axis=1)
             train_RM_s[4][i] = np.delete(train_RM_s[4][i],toBeRemove)

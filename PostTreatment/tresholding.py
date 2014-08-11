@@ -206,7 +206,8 @@ def get_yPredicted_ratio_8(yProba_s, ratio_s):
 
 def best_ratio_combinaison(yProba_s, yValidation_s, weightsValidation_s, ratio_s):
     """
-    returns the best ratio combinaison with the ratios specified in ratio_s for each group
+    returns the best ratio combinaison with the ratios specified in ratio_s for each
+    group
     ratio_s : List of the list of the ratios to test for each group
     the size of each list should not exceed 4 for computationnal time issues
     """
@@ -222,12 +223,12 @@ def best_ratio_combinaison(yProba_s, yValidation_s, weightsValidation_s, ratio_s
     ratio_7_s = [0.003,0.004,0.005,0.006]
     ratio_8_s = [0.007,0.008,0.009,0.01]
     """
-    g_combinaisons = itertools.product(ratio_s[0], ratio_s[1], ratio_s[2], ratio_s[3], \
-                                        ratio_s[4], ratio_s[5], ratio_s[6], ratio_s[7])
+    g_combinaisons = itertools.product(ratio_s[0], ratio_s[1], ratio_s[2], ratio_s[3],
+                                       ratio_s[4], ratio_s[5], ratio_s[6], ratio_s[7])
     compteur = 0
     for combinaison in g_combinaisons:
-        if compteur%10000==0:
-            print "number of iterations : %i" %compteur
+        #if compteur%10000==0:
+            # print "number of iterations : %i" %compteur
         compteur +=1
         L = list(combinaison)
         yPredicted_s, yPredicted_conca = get_yPredicted_ratio_8(yProba_s, L)
@@ -249,7 +250,7 @@ def best_ratio_combinaison_global(yProba_s, yValidation_s, weightsValidation_s, 
         ratio_s.append([0, 0.25,0.5])
 
     for n in range(max_iters):
-        print "iteration globale : %i" %n
+        # print "iteration globale : %i" %n
         AMS_new, ratio_comb = best_ratio_combinaison(yProba_s, yValidation_s, weightsValidation_s, ratio_s)
         for i in range(8):
             # Case 1 : minimum
@@ -263,8 +264,6 @@ def best_ratio_combinaison_global(yProba_s, yValidation_s, weightsValidation_s, 
                 ratio_s[i] = [ratio_s[i][1], ratio_s[i][2], 2*ratio_s[i][2] - ratio_s[i][1]]
             else:
                 ratio_s[i] = [(ratio_s[i][1]+ratio_s[i][0])/2, ratio_s[i][1], (ratio_s[i][2] + ratio_s[i][1])/2]
-        for i in range(8):
-            print ratio_s[i]
         if AMS_max < AMS_new:
             AMS_max = AMS_new
             best_ratio_comb = ratio_comb

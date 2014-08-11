@@ -232,14 +232,11 @@ def get_8_bins(normalize = True, noise_variance = 0., remove_999= True,
         nameValid_s = [nameValid] * 8
     nameTest_s = [nameTest] * 8
 
-
-
     # Delete the columns full of -999
     if remove_999 == True:
         print("    Deleting the invalid inputs")
         # (if u see any suspicious looking person, or article ...)
         for i in range(8):
-
             # Deleting the feature identical within each group:
             xsTrain_s[i] = np.delete(xsTrain_s[i], np.s_[22],1)
             nameTrain_s[i] = np.delete(nameTrain_s[i], 22)
@@ -261,7 +258,11 @@ def get_8_bins(normalize = True, noise_variance = 0., remove_999= True,
             for j,elmt in enumerate(toBeRemoved):
                 if elmt == True:
                     tBR_ind.append(j)
+
             # Remove the colums:
+            xsTrain_s[i] = np.delete(xsTrain_s[i], tBR_ind, axis=1)
+            nameTrain_s[i] = np.delete(nameTrain_s[i], tBR_ind)
+
             if train_size2 !=0:
                 xsTrain2_s[i] = np.delete(xsTrain2_s[i], tBR_ind, axis=1)
                 nameTrain2_s[i] = np.delete(nameTrain2_s[i], tBR_ind)
@@ -273,6 +274,10 @@ def get_8_bins(normalize = True, noise_variance = 0., remove_999= True,
             xsTest_s[i] = np.delete(xsTest_s[i], tBR_ind, axis=1)
             nameTest_s[i] = np.delete(nameTest_s[i], tBR_ind)
 
+    print ("+++ xsTrain_s[1][0].shape= ", xsTrain_s[1][0].shape)
+    print ("+++ xsValid_s[1][0].shape= ", xsValid_s[1][0].shape)
+    print ("+++ xsTrain2_s[1][0].shape= ", xsTrain2_s[1][0].shape)
+    print ("+++ xsTest_s[1][0].shape= ", xsTest_s[1][0].shape)
 
     if train_size2 !=0 and valid_size !=0:
         return (ID_train_s, xsTrain_s, yTrain_s, weightsTrain_s, nameTrain_s), \
@@ -304,14 +309,19 @@ def extract_data(split= True, normalize= True,
     """
     if split == True:
         # Split the data into 8 sub-datasets:
-        return get_8_bins(normalize= normalize, noise_variance= noise_variance,
+        return get_8_bins(normalize= normalize,
+                          noise_variance= noise_variance,
                           remove_999 = remove_999, n_classes = n_classes,
                           train_size = train_size, train_size2 = train_size2,
                           valid_size = valid_size)
     else:
         # Extract the data as a unique dataset:
-        return get_all_data(normalize= normalize, noise_variance= noise_variance,
-                             n_classes = n_classes, train_size = train_size, train_size2 = train_size2,
-                             valid_size = valid_size)
+        return get_all_data(normalize= normalize,
+                            noise_variance= noise_variance,
+                            remove_999 = remove_999,
+                            n_classes = n_classes,
+                            train_size = train_size,
+                            train_size2 = train_size2,
+                            valid_size = valid_size)
 
 
