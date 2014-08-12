@@ -170,8 +170,6 @@ def best_ratio(yProba, yValidation, weightsValidation, pas = 0.01):
             yPredicted = yPredicted_prov
 
         s, b = submission.get_s_b(yPredicted, yValidation, weightsValidation)
-        s *= 250000/yPredicted.shape[0]
-        b *= 250000/yPredicted.shape[0]
 
         if b >= 0. and s >= 0.:
             ams = hbc.AMS(s,b)

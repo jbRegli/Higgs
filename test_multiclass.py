@@ -39,7 +39,7 @@ import qda
 import gradientBoosting
 import xgBoost
 
-def main():
+def train(max_depth, n_rounds):
 
     ###############
     ### IMPORT ####
@@ -48,72 +48,153 @@ def main():
     split= True
     normalize = True
     noise_var = 0.
-    train_size = 250000
-    train_size2 = 0
-    valid_size = 0
+    train_size = 200000
+    train_size2 = 25000
+    valid_size = 25000
+    remove_999 = True
 
     # Import the training data:
     print("Extracting the data sets...")
     start = time.clock()
-    train_s, test_s = tokenizer.extract_data(split= split, \
-                                                      normalize= normalize, \
-                                                      noise_variance= noise_var, \
-                                                     n_classes = "multiclass", \
-                                                     train_size = train_size, \
-                                                     train_size2 = train_size2, \
-                                                     valid_size = valid_size)
+    train_s, train2_s, valid_s, test_s = tokenizer.extract_data(split= split, \
+                                             normalize= normalize, \
+                                             remove_999 = remove_999, \
+                                             noise_variance= noise_var, \
+                                             n_classes = "multiclass", \
+                                             train_size = train_size, \
+                                             train_size2 = train_size2, \
+                                             valid_size = valid_size)
 
-
+    
     #RANDOM FOREST:
     #kwargs_grad = {}
-    kwargs_rdf = {'n_estimators': 100}
+    #kwargs_rdf = {'n_estimators': 100}
     print "Training on the train set ..."
-    predictor_s = randomForest.train_classifier(train_s[1], train_s[2], kwargs_rdf)
+    #predictor_s = randomForest.train_classifier(train_s[1], train_s[2], kwargs_rdf)
 
+    #XGBOOST
+    kwargs_xgb = {'bst_parameters': \
+                {'booster_type': 0,
+                     #'objective': 'binary:logitraw',
+                     'objective': 'multi:softprob', 'num_class': 5,
+                     'bst:eta': 0.1, # the bigger the more conservative
+                     'bst:subsample': 1, # prevent over fitting if <1
+                     'bst:max_depth': max_depth, 'eval_metric': 'auc', 'silent': 1,
+                     'nthread': 8 }, \
+                'n_rounds': n_rounds}
 
-    yPredictedTest = []
-    yProbaTest = []
+    predictor_s = xgBoost.train_classifier(train_s[1], train_s[2], train_s[3], 550000, kwargs_xgb)
+    
+    #TEST / SUBMISSION
+    """
+    yProbaTest_s = []
+    yProbaTestBinary_s = []
 
     print "Classifying the test set..."
     for i in range(8):
-        yProba = randomForest.predict_proba(predictor_s[i], test_s[1][i])
-        yProbaTest.append(yProba)
-
-    print yProbaTest[0].shape
-
-    print "Finalizing the vectors for the submission..."
-
-    yProbaTestFinal = []
-
+        yProbaTest = xgBoost.predict_proba(predictor_s[i], test_s[1][i])
+        yProbaTest_s.append(yProbaTest)
+    print "Making the binary proba vector..."
     for i in range(8):
-        yProbaTestFinal.append(np.zeros(yPredictedTest[i].shape[0]))
+        yProbaTestBinary_s.append(np.zeros(yProbaTest_s[i].shape[0]))
     for i in range(8):
-        for j in range(yPredictedTest[i].shape[0]):
-            yProbaTestFinal[i][j] = 1 - yProbaTest[i][j][0]
+        for j in range(yProbaTest_s[i].shape[0]):
+            yProbaTestBinary_s[i][j] = 1 - yProbaTest_s[i][j][0]
 
-    yPredicted_s, yPredicted = tresholding.get_yPredicted_ratio_8(yProbaTestFinal, [0.11328125, 0.1142578125, 0.375, 0.2265625, 0.0107421875, 0.046875, 0.08984375, 0.029296875])
-    #yPredictedTest_conca = preTreatment.concatenate_vectors(yPredictedTest)
-    yPredictedTest_conca = yPredicted
-    yProbaTestFinal_conca = preTreatment.concatenate_vectors(yProbaTestFinal)
-    IDTest_conca = preTreatment.concatenate_vectors(test_s[0])
+    print "Concatenating the vectors..."
+    yProbaTestBinary = preTreatment.concatenate_vectors(yProbaTestBinary_s)
+    IDs = preTreatment.concatenate_vectors(test_s[0])
 
-    #Let's make all the 1,2,3,4 signal to 1
-    for i in range(yPredictedTest_conca.shape[0]):
-        if yPredictedTest_conca[i] >=1:
-            yPredictedTest_conca[i] = 1
 
-    # Let's treshold
-    #yPredictedTest_conca_treshold = tresholding.get_yPredicted_ratio(yProbaTestFinal_conca, 0.16)
-    #let's rank the proba
-    yProbaTestFinal_conca_ranked = submission.rank_signals(yProbaTestFinal_conca)
-    # let's make the ID int
-    for i in IDTest_conca:
-        IDTest_conca_int = IDTest_conca.astype(np.int64)
+    yProbaTestBinaryRanked = submission.rank_signals(yProbaTestBinary)
+    
+    yPredictedTest = tresholding.get_yPredicted_ratio(yProbaTestBinary, 0.15)
 
-    sub = submission.print_submission(IDTest_conca_int, yProbaTestFinal_conca_ranked, yPredictedTest_conca, name = 'submission_rdf_ratiocombine')
+    s = submission.print_submission(IDs, yProbaTestBinaryRanked, yPredictedTest, "xgBoost5class8groups4") 
 
-    return sub
+    """
+    
+
+    # TRAIN AND VALID
+    
+    yPredictedTrain2_s = []
+    yProbaTrain2_s = []
+    yProbaTrain2Binary_s = []
+    yPredictedValid_s = []
+    yProbaValid_s = []
+    yProbaValidBinary_s = []
+
+    print "Classifying the train2 set..."
+    for i in range(8):
+        yProbaTrain2 = xgBoost.predict_proba(predictor_s[i], train2_s[1][i])
+        yProbaTrain2_s.append(yProbaTrain2)
+    print "Classifying the valid set..."
+    for i in range(8):
+        yProbaValid = xgBoost.predict_proba(predictor_s[i], valid_s[1][i])
+        yProbaValid_s.append(yProbaValid)
+
+    print yProbaTrain2_s[0].shape
+
+    print "Making the binary proba vector..."
+    for i in range(8):
+        yProbaTrain2Binary_s.append(np.zeros(yProbaTrain2_s[i].shape[0]))
+        yProbaValidBinary_s.append(np.zeros(yProbaValid_s[i].shape[0]))
+    for i in range(8):
+        for j in range(yProbaTrain2_s[i].shape[0]):
+            yProbaTrain2Binary_s[i][j] = 1 - yProbaTrain2_s[i][j][0]
+        for j in range(yProbaValid_s[i].shape[0]):
+            yProbaValidBinary_s[i][j] = 1- yProbaValid_s[i][j][0]
+
+    print "Concatenating the vectors..."
+    yProbaTrain2Binary = preTreatment.concatenate_vectors(yProbaTrain2Binary_s)
+    yProbaValidBinary = preTreatment.concatenate_vectors(yProbaValidBinary_s)
+    yTrain2 = preTreatment.concatenate_vectors(train2_s[2])
+    yValid = preTreatment.concatenate_vectors(valid_s[2])
+    weightsTrain2 = preTreatment.concatenate_vectors(train2_s[3])
+    weightsValid = preTreatment.concatenate_vectors(valid_s[3])
+
+    best_ams_train2_global, best_ratio_global = tresholding.best_ratio(yProbaTrain2Binary, yTrain2, weightsTrain2)
+    best_ams_train2_combinaison, best_ratio_combinaison = tresholding.best_ratio_combinaison_global(yProbaTrain2Binary_s, train2_s[2], train2_s[3], 10)
+
+    yPredictedValid = tresholding.get_yPredicted_ratio(yProbaValidBinary, 0.15)
+    yPredictedValid_best_ratio_global = tresholding.get_yPredicted_ratio(yProbaValidBinary, best_ratio)
+    yPredictedValid_best_ratio_combinaison_s, yPredicted_best_ratio_combinaison = tresholding.get_yPredicted_ratio_8(yProbaTrain2Binary_s, best_ratio_combinaison)
+
+    #Let's compute the predicted AMS
+    s, b = submission.get_s_b(yPredictedValid015, yValid, weightsValid)
+    AMS = hbc.AMS(s,b)
+    s_best_ratio_combinaison, b_best_ratio_combinaison = submission.get_s_b(yPredictedValid_best_ratio_combinaison, yValid, weightsValid)
+    AMS_best_ratio_combinaison = hbc.AMS(s_best_ratio_combinaison, b_best_ratio_combinaison)
+    s_best_ratio_combinaison, b_best_ratio_combinaison = submission.get_s_b(yPredictedValid_best_ratio_global, yValid, weightsValid)
+    AMS_best_ratio_global = hbc.AMS(s_best_ratio_global, b_best_ratio_global)
+
+    print "AMS 0.15 = %f" %AMS
+    print " "
+    print "AMS best ratio combi= %f" %AMS_best_ratio_combinaison
+    print "best AMS train2 ratio combinaison= %f" %best_ams_train2_combinaison
+    print "best ratio combinaison train 2 = %f" %best_ratio_combinaison
+    print " "
+    print "AMS best ratio global= %f" %AMS_best_ratio_global
+    print "best AMS train2 ratio combinaison= %f" %best_ams_train2_global
+    print "best ratio combinaison train 2 = %f" %best_ratio_global
+ 
+
+    return AMS
+
+def main():
+    AMS_max = 0.
+    for i in range(4):
+        for j in range(3):
+            print "i, j", i, j
+            AMS = train(2 + 2*i, 10 +j*20)
+            if AMS_max < AMS:
+                AMS_max = AMS
+                best_params = (4 +2*i, 10 + j*10)
+    print "AMS_max : %f" %AMS_max
+    print "best params : %i, %i" %best_params
+    return AMS_max, best_params
+
 
 if __name__ == '__main__':
-    main()
+    train(2, 1)
 

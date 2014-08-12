@@ -39,6 +39,7 @@ def print_submission(testIDs, RankOrder, yLabels,
         else:
             labels.append('b')
 
+    testIDs = testIDs.astype(np.int64)
     labels = np.array(labels)
 
     sub = np.array([[str(testIDs[i]), str(RankOrder[i]), labels[i] ] for i in range(len(testIDs))])
@@ -80,13 +81,24 @@ def get_s_b(yPredicted, yValidation, weightsValidation):
                 print "yValidation.shape= ", yValidation.shape
                 print "weightsValidation.shape= ", weightsValidation.shape
             exit()
+        #Balance the weights
+        sumW_total = 411691.836 #sum of the weights on all the training set (250 000)
+        sumW = sum(weightsValidation)
+        weightsValidationBalanced = weightsValidation * sumW_total/sumW
 
+<<<<<<< HEAD
         s = np.dot(yPredicted*yValidation, weightsValidation)
         #yPredictedComp = np.ones(yPredicted.shape) - yPredicted
         #vector with label 0 for event and label 1 for non event
         yValidationComp = np.ones(yValidation.shape[0]) - yValidation
         #vector with label 0 for event and label 1 for non event
         b = np.dot(yPredicted*yValidationComp, weightsValidation)
+=======
+        s = np.dot(yPredicted*yValidation, weightsValidationBalanced)
+        #yPredictedComp = np.ones(yPredicted.shape) - yPredicted #vector with label 0 for event and label 1 for non event
+        yValidationComp = np.ones(yValidation.shape[0]) - yValidation #vector with label 0 for event and label 1 for non event
+        b = np.dot(yPredicted*yValidationComp, weightsValidationBalanced)
+>>>>>>> 0f6d96e59d08b83d891c061998d4d6a1f66148b5
 
         return s, b
 
