@@ -109,14 +109,12 @@ for importance_lim in np.arange(0.0, 0.1 , 0.001):
 
         # Looking for the best threshold:
         if type(train_s[1]) == list:
-
-            print ("+++ predProba_Train2_s[0][1] =",  predProba_Train2_s[0][1])
             best_ams_train2, best_ratio = tresholding.\
                                     best_ratio_combinaison_global(
                                                         predProba_Train2_s,
                                                         train_RM_s_2[2],
                                                         train_RM_s_2[3],
-                                                        20)
+                                                        5)
         else:
             best_ams_train2, best_ratio = tresholding.best_ratio(
                                                                 predProba_Train2,
@@ -124,8 +122,8 @@ for importance_lim in np.arange(0.0, 0.1 , 0.001):
                                                                 weightsTrain2)
 
 
-        print "Train2 - best ratio : %f - best ams : %f" \
-                %(best_ratio, best_ams_train2)
+        print "Train2 - best ratio : %s - best ams : %f" \
+                %(', '.join(map(str,best_ratio)), best_ams_train2)
         print(" ")
 
 

@@ -259,13 +259,15 @@ def best_ratio_combinaison_global(yProba_s, yValidation_s, weightsValidation_s,
     returns the best ratio combinaison global after n iterations
     """
     AMS_max = 0.
+    best_ratio_comb = [0.,0.,0.,0.,0.,0.,0.,0.]
     ratio_s = []
     for i in range(8):
         ratio_s.append([0, 0.25,0.5])
 
     for n in range(max_iters):
         # print "iteration globale : %i" %n
-        AMS_new, ratio_comb = best_ratio_combinaison(yProba_s, yValidation_s, weightsValidation_s, ratio_s)
+        AMS_new, ratio_comb = best_ratio_combinaison(yProba_s, yValidation_s,
+                                                     weightsValidation_s, ratio_s)
         for i in range(8):
             # Case 1 : minimum
             if ratio_comb[i] == ratio_s[i][0]:
@@ -273,12 +275,16 @@ def best_ratio_combinaison_global(yProba_s, yValidation_s, weightsValidation_s,
                     ratio_s[i] = [0, ratio_s[i][0], ratio_s[i][1]]
                 else:
                     ratio_s[i] = [0, ratio_s[i][1]/2, ratio_s[i][1]]
+
             # Case 2 : maximum
             if ratio_comb[i] == ratio_s[i][2]:
-                ratio_s[i] = [ratio_s[i][1], ratio_s[i][2], 2*ratio_s[i][2] - ratio_s[i][1]]
+                ratio_s[i] = [ratio_s[i][1], ratio_s[i][2],
+                                    2*ratio_s[i][2] -  ratio_s[i][1]]
             else:
-                ratio_s[i] = [(ratio_s[i][1]+ratio_s[i][0])/2, ratio_s[i][1], (ratio_s[i][2] + ratio_s[i][1])/2]
-        if AMS_max < AMS_new:
+                ratio_s[i] = [(ratio_s[i][1]+ratio_s[i][0])/2,
+                                ratio_s[i][1], (ratio_s[i][2] + ratio_s[i][1])/2]
+
+        if AMS_new > AMS_max:
             AMS_max = AMS_new
             best_ratio_comb = ratio_comb
             #else:
