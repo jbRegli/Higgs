@@ -89,7 +89,7 @@ for importance_lim in np.arange(0.0, 0.1 , 0.001):
                      'bst:subsample': 1, # prevent over fitting if <1
                      'bst:max_depth': 15, 'eval_metric': 'auc', 'silent': 1,
                      'nthread': 8 }, \
-                'n_rounds': 120}
+                'n_rounds': 10}
 
         print "Getting the classifiers..."
         # Training:
@@ -108,8 +108,22 @@ for importance_lim in np.arange(0.0, 0.1 , 0.001):
         weightsTrain2 = preTreatment.concatenate_vectors(train_RM_s_2[3])
 
         # Looking for the best threshold:
-        best_ams_train2, best_ratio = tresholding.best_ratio(predProba_Train2,
-                                                        yTrain2, weightsTrain2)
+        if type(train_s[1]) == list:
+
+            print ("+++ predProba_Train2_s[0][1] =",  predProba_Train2_s[0][1])
+            best_ams_train2, best_ratio = tresholding.\
+                                    best_ratio_combinaison_global(
+                                                        predProba_Train2_s,
+                                                        train_RM_s_2[2],
+                                                        train_RM_s_2[3],
+                                                        20)
+        else:
+            best_ams_train2, best_ratio = tresholding.best_ratio(
+                                                                predProba_Train2,
+                                                                yTrain2,
+                                                                weightsTrain2)
+
+
         print "Train2 - best ratio : %f - best ams : %f" \
                 %(best_ratio, best_ams_train2)
         print(" ")

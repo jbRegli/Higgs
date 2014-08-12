@@ -157,7 +157,6 @@ def best_ratio(yProba, yValidation, weightsValidation, pas = 0.01):
     best_ams = 0.
 
     for ratio in ratio_s:
-
         yPredicted_prov = get_yPredicted_ratio(yProba, ratio)
 
         # if we work with multi-class:
@@ -223,16 +222,32 @@ def best_ratio_combinaison(yProba_s, yValidation_s, weightsValidation_s, ratio_s
     ratio_7_s = [0.003,0.004,0.005,0.006]
     ratio_8_s = [0.007,0.008,0.009,0.01]
     """
-    g_combinaisons = itertools.product(ratio_s[0], ratio_s[1], ratio_s[2], ratio_s[3],
-                                       ratio_s[4], ratio_s[5], ratio_s[6], ratio_s[7])
+    g_combinaisons = itertools.product(ratio_s[0], ratio_s[1],
+                                       ratio_s[2], ratio_s[3],
+                                       ratio_s[4], ratio_s[5],
+                                       ratio_s[6], ratio_s[7])
+
+    # if we work with multi-class:
+    if len(yProba_s[0].shape) == 2:
+            if yProba_s[0].shape[1] == 5:
+                for i,subset in enumerate(yProba_s):
+                    yProba_s[i] =  preTreatment.multiclass2binary(subset)
+
     compteur = 0
+
     for combinaison in g_combinaisons:
         #if compteur%10000==0:
             # print "number of iterations : %i" %compteur
         compteur +=1
+
         L = list(combinaison)
+
         yPredicted_s, yPredicted_conca = get_yPredicted_ratio_8(yProba_s, L)
-        finals, finalb, s_s, b_s = submission.get_s_b(yPredicted_s, yValidation_s, weightsValidation_s)
+
+        finals, finalb, s_s, b_s = submission.get_s_b(yPredicted_s,
+                                                      yValidation_s,
+                                                      weightsValidation_s)
+
         AMS = hbc.AMS(finals, finalb)
         if AMS > AMS_max:
             AMS_max = AMS

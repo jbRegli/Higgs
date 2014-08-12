@@ -61,7 +61,14 @@ def get_s_b(yPredicted, yValidation, weightsValidation):
     validation set, and returns the weighted sum of the real positive (s) and the the
     weighted sum of the real negative (b)
     """
+    print ("+++ get_s_b: type(yPredicted)= ", type(yPredicted))
+
     if type(yPredicted) != list:
+        print ("+++ get_s_b: yPredicted.shape= ", yPredicted.shape)
+        print ("+++ get_s_b: yValidation.shape= ", yValidation.shape)
+        print ("+++ get_s_b: weightsValidation.shape= ", weightsValidation.shape)
+
+
         if yPredicted.shape[0] != yValidation.shape[0] or \
                 yValidation.shape[0] != weightsValidation.shape[0]:
             print "submission.get_s_b: "
@@ -74,15 +81,16 @@ def get_s_b(yPredicted, yValidation, weightsValidation):
                 print "weightsValidation.shape= ", weightsValidation.shape
             exit()
 
-
         s = np.dot(yPredicted*yValidation, weightsValidation)
-        #yPredictedComp = np.ones(yPredicted.shape) - yPredicted #vector with label 0 for event and label 1 for non event
-        yValidationComp = np.ones(yValidation.shape[0]) - yValidation #vector with label 0 for event and label 1 for non event
+        #yPredictedComp = np.ones(yPredicted.shape) - yPredicted
+        #vector with label 0 for event and label 1 for non event
+        yValidationComp = np.ones(yValidation.shape[0]) - yValidation
+        #vector with label 0 for event and label 1 for non event
         b = np.dot(yPredicted*yValidationComp, weightsValidation)
 
         return s, b
 
-    if type(yPredicted) == list:
+    else:
         final_s, final_b, s_s, b_s = get_s_b_8(yPredicted, yValidation, weightsValidation)
 
         return final_s, final_b, s_s, b_s
@@ -128,7 +136,7 @@ def rank_signals(proba_prediction):
     """
     temp = proba_prediction.argsort()
     rank_prediction = np.arange(len(proba_prediction))[temp.argsort()]
-    rank_prediction += np.ones(len(rank_prediction)) 
+    rank_prediction += np.ones(len(rank_prediction))
     #rank_prediction = ss.rankdata(proba_prediction,method = 'ordinal')
 
     return rank_prediction
