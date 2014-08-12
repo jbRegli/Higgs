@@ -51,12 +51,12 @@ def train(max_depth, n_rounds):
     train_size = 200000
     train_size2 = 25000
     valid_size = 25000
-    remove_999 = True
+    remove_999 = False
 
     # Import the training data:
     print("Extracting the data sets...")
     start = time.clock()
-    train_s, train2_s, valid_s, test_s = tokenizer.extract_data(split= split, \
+    train_s, train2_s, valid_s,  test_s = tokenizer.extract_data(split= split, \
                                              normalize= normalize, \
                                              remove_999 = remove_999, \
                                              noise_variance= noise_var, \
@@ -74,7 +74,7 @@ def train(max_depth, n_rounds):
 
     #XGBOOST
     kwargs_xgb = {'bst_parameters': \
-                {'booster_type': 0,
+                {'booster_type': 0, \
                      #'objective': 'binary:logitraw',
                      'objective': 'multi:softprob', 'num_class': 5,
                      'bst:eta': 0.1, # the bigger the more conservative
@@ -110,11 +110,10 @@ def train(max_depth, n_rounds):
     
     yPredictedTest = tresholding.get_yPredicted_ratio(yProbaTestBinary, 0.15)
 
-    s = submission.print_submission(IDs, yProbaTestBinaryRanked, yPredictedTest, "xgBoost5class8groups4") 
+    s = submission.print_submission(IDs, yProbaTestBinaryRanked, yPredictedTest, "newAMSmesure") 
 
-    """
     
-
+    """
     # TRAIN AND VALID
     
     yPredictedTrain2_s = []
@@ -133,8 +132,6 @@ def train(max_depth, n_rounds):
         yProbaValid = xgBoost.predict_proba(predictor_s[i], valid_s[1][i])
         yProbaValid_s.append(yProbaValid)
 
-    print yProbaTrain2_s[0].shape
-
     print "Making the binary proba vector..."
     for i in range(8):
         yProbaTrain2Binary_s.append(np.zeros(yProbaTrain2_s[i].shape[0]))
@@ -143,7 +140,7 @@ def train(max_depth, n_rounds):
         for j in range(yProbaTrain2_s[i].shape[0]):
             yProbaTrain2Binary_s[i][j] = 1 - yProbaTrain2_s[i][j][0]
         for j in range(yProbaValid_s[i].shape[0]):
-            yProbaValidBinary_s[i][j] = 1- yProbaValid_s[i][j][0]
+            yProbaValidBinary_s[i][j] = 1 - yProbaValid_s[i][j][0]
 
     print "Concatenating the vectors..."
     yProbaTrain2Binary = preTreatment.concatenate_vectors(yProbaTrain2Binary_s)
@@ -153,34 +150,39 @@ def train(max_depth, n_rounds):
     weightsTrain2 = preTreatment.concatenate_vectors(train2_s[3])
     weightsValid = preTreatment.concatenate_vectors(valid_s[3])
 
+    print "Putting all the real labels to 1"
+    yTrain2 = preTreatment.multiclass2binary(yTrain2)
+    yValid = preTreatment.multiclass2binary(yValid)
+
+    print "Getting the best ratios..."
     best_ams_train2_global, best_ratio_global = tresholding.best_ratio(yProbaTrain2Binary, yTrain2, weightsTrain2)
-    best_ams_train2_combinaison, best_ratio_combinaison = tresholding.best_ratio_combinaison_global(yProbaTrain2Binary_s, train2_s[2], train2_s[3], 10)
+    #best_ams_train2_combinaison, best_ratio_combinaison = tresholding.best_ratio_combinaison_global(yProbaTrain2Binary_s, train2_s[2], train2_s[3], 1)
 
     yPredictedValid = tresholding.get_yPredicted_ratio(yProbaValidBinary, 0.15)
-    yPredictedValid_best_ratio_global = tresholding.get_yPredicted_ratio(yProbaValidBinary, best_ratio)
-    yPredictedValid_best_ratio_combinaison_s, yPredicted_best_ratio_combinaison = tresholding.get_yPredicted_ratio_8(yProbaTrain2Binary_s, best_ratio_combinaison)
+    yPredictedValid_best_ratio_global = tresholding.get_yPredicted_ratio(yProbaValidBinary, best_ratio_global)
+    #yPredictedValid_best_ratio_combinaison_s, yPredictedValid_best_ratio_combinaison = tresholding.get_yPredicted_ratio_8(yProbaTrain2Binary_s, best_ratio_combinaison)
 
     #Let's compute the predicted AMS
-    s, b = submission.get_s_b(yPredictedValid015, yValid, weightsValid)
+    s, b = submission.get_s_b(yPredictedValid, yValid, weightsValid)
     AMS = hbc.AMS(s,b)
-    s_best_ratio_combinaison, b_best_ratio_combinaison = submission.get_s_b(yPredictedValid_best_ratio_combinaison, yValid, weightsValid)
-    AMS_best_ratio_combinaison = hbc.AMS(s_best_ratio_combinaison, b_best_ratio_combinaison)
-    s_best_ratio_combinaison, b_best_ratio_combinaison = submission.get_s_b(yPredictedValid_best_ratio_global, yValid, weightsValid)
+    #s_best_ratio_combinaison, b_best_ratio_combinaison = submission.get_s_b(yPredictedValid_best_ratio_combinaison, yValid, weightsValid)
+    #AMS_best_ratio_combinaison = hbc.AMS(s_best_ratio_combinaison, b_best_ratio_combinaison)
+    s_best_ratio_global, b_best_ratio_global = submission.get_s_b(yPredictedValid_best_ratio_global, yValid, weightsValid)
     AMS_best_ratio_global = hbc.AMS(s_best_ratio_global, b_best_ratio_global)
 
     print "AMS 0.15 = %f" %AMS
     print " "
-    print "AMS best ratio combi= %f" %AMS_best_ratio_combinaison
-    print "best AMS train2 ratio combinaison= %f" %best_ams_train2_combinaison
-    print "best ratio combinaison train 2 = %f" %best_ratio_combinaison
+    #print "AMS best ratio combi= %f" %AMS_best_ratio_combinaison
+    #print "best AMS train2 ratio combinaison= %f" %best_ams_train2_combinaison
+    #print "best ratio combinaison train 2 = %s" %str(best_ratio_combinaison)
     print " "
-    print "AMS best ratio global= %f" %AMS_best_ratio_global
-    print "best AMS train2 ratio combinaison= %f" %best_ams_train2_global
-    print "best ratio combinaison train 2 = %f" %best_ratio_global
+    print "best AMS valid ratio global= %f" %AMS_best_ratio_global
+    print "best AMS train2 ratio global= %f" %best_ams_train2_global
+    print "best ratio global train2 = %f" %best_ratio_global
  
 
     return AMS
-
+    
 def main():
     AMS_max = 0.
     for i in range(4):
@@ -196,5 +198,5 @@ def main():
 
 
 if __name__ == '__main__':
-    train(2, 1)
-
+    train(6, 150)
+    #main()

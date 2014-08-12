@@ -108,6 +108,10 @@ def get_numerical_score(yPredicted, yValidation):
 
 
 def get_s_b_8(yPredicted_s, yValidation_s, weightsValidation_s):
+    """
+    returns the balances final s and b for the whole set and the balanced s and b for each group
+    """
+    sumW_total = 411691.836
     final_s = 0.
     final_b =0.
     s_s = []
@@ -116,8 +120,11 @@ def get_s_b_8(yPredicted_s, yValidation_s, weightsValidation_s):
         s, b = get_s_b(yPredicted_s[n], yValidation_s[n], weightsValidation_s[n])
         s_s.append(s)
         b_s.append(b)
-        final_s +=s
-        final_b +=b
+        final_s +=s * (sum(weightsValidation_s[n]/sumW_total))
+        final_b +=b * (sum(weightsValidation_s[n]/sumW_total))
+    final_s *= sumW_total/sum(sum(yValidation_s[n]) for n in range(8))
+    final_b *= sumW_total/sum(sum(yValidation_s[n]) for n in range(8))
+
 
     return final_s, final_b, s_s, b_s
 

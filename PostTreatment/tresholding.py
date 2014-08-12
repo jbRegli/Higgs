@@ -99,17 +99,6 @@ def get_yPredicted_ratio(yProba, ratio):
     yPredicted = np.zeros_like(yProba)
 
     if ratio !=0:
-        # if we work with multi-class:
-        if len(yProba.shape) == 2:
-            if yProba.shape[1] == 5:
-                # Maximum on the label s over a line sorted
-                yProbaSorted = yProba[np.max(yProba[:,1:4], axis=1).argsort()]
-                treshold = yProbaSorted[int((1. - float(ratio))*len(yProba))]
-                yPredicted = get_yPredicted_treshold(yProba, treshold)
-            else:
-                print "Error: in get_yPredicted_ratio() the shape of the input isn't correct"
-
-        else:
             yProbaSorted = yProba[yProba.argsort()]
             treshold = np.max(yProbaSorted[int((1. - float(ratio))*len(yProba))])
             yPredicted = get_yPredicted_treshold(yProba, treshold)
@@ -158,17 +147,9 @@ def best_ratio(yProba, yValidation, weightsValidation, pas = 0.01):
 
     for ratio in ratio_s:
 
-        yPredicted_prov = get_yPredicted_ratio(yProba, ratio)
+        yPredicted = get_yPredicted_ratio(yProba, ratio)
 
-        # if we work with multi-class:
-        if len(yPredicted_prov.shape) == 2:
-            if yPredicted_prov.shape[1] == 5:
-                yPredicted = np.ones(yPredicted_prov.shape[0])
-                yPredicted[yPredicted_prov[:,4] == 0] = 0
-            else:
-                print "Error: in best_ratio() the shape of the input isn't correct"
-        else:
-            yPredicted = yPredicted_prov
+
 
         s, b = submission.get_s_b(yPredicted, yValidation, weightsValidation)
 
