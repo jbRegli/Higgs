@@ -253,7 +253,8 @@ def best_ratio_combinaison(yProba_s, yValidation_s, weightsValidation_s, ratio_s
 
     return AMS_max, best_ratio_comb
 
-def best_ratio_combinaison_global(yProba_s, yValidation_s, weightsValidation_s, max_iters):
+def best_ratio_combinaison_global(yProba_s, yValidation_s, weightsValidation_s,
+                                  max_iters):
     """
     returns the best ratio combinaison global after n iterations
     """

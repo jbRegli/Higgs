@@ -22,7 +22,7 @@ print("---------------------------- Import: ---------------------------")
 
 split = True
 norm = True
-remove_999 = False
+remove_999 = True
 n_classes = "multiclass" #"binary"
 
 train_s, train_s_2, valid_s_2, test_s = tokenizer.extract_data(
@@ -86,8 +86,8 @@ for importance_lim in np.arange(0.0, 0.1 , 0.001):
                      #'objective': 'binary:logitraw',
                      'objective': 'multi:softprob', 'num_class': 5,
                      'bst:eta': 0.1, # the bigger the more conservative
-                     'bst:subsample': 1, # prevent over fitting if <1
-                     'bst:max_depth': 15, 'eval_metric': 'auc', 'silent': 1,
+                     'bst:subsample': 0.8, # prevent over fitting if <1
+                     'bst:max_depth': 12, 'eval_metric': 'auc', 'silent': 1,
                      'nthread': 8 }, \
                 'n_rounds': 10}
 

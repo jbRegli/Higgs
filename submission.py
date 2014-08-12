@@ -86,24 +86,17 @@ def get_s_b(yPredicted, yValidation, weightsValidation):
         sumW = sum(weightsValidation)
         weightsValidationBalanced = weightsValidation * sumW_total/sumW
 
-<<<<<<< HEAD
-        s = np.dot(yPredicted*yValidation, weightsValidation)
-        #yPredictedComp = np.ones(yPredicted.shape) - yPredicted
-        #vector with label 0 for event and label 1 for non event
-        yValidationComp = np.ones(yValidation.shape[0]) - yValidation
-        #vector with label 0 for event and label 1 for non event
-        b = np.dot(yPredicted*yValidationComp, weightsValidation)
-=======
+
         s = np.dot(yPredicted*yValidation, weightsValidationBalanced)
         #yPredictedComp = np.ones(yPredicted.shape) - yPredicted #vector with label 0 for event and label 1 for non event
         yValidationComp = np.ones(yValidation.shape[0]) - yValidation #vector with label 0 for event and label 1 for non event
         b = np.dot(yPredicted*yValidationComp, weightsValidationBalanced)
->>>>>>> 0f6d96e59d08b83d891c061998d4d6a1f66148b5
 
         return s, b
 
     else:
-        final_s, final_b, s_s, b_s = get_s_b_8(yPredicted, yValidation, weightsValidation)
+        final_s, final_b, s_s, b_s = get_s_b_8(yPredicted, yValidation,
+                                               weightsValidation)
 
         return final_s, final_b, s_s, b_s
 
