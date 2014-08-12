@@ -62,13 +62,8 @@ def get_s_b(yPredicted, yValidation, weightsValidation):
     validation set, and returns the weighted sum of the real positive (s) and the the
     weighted sum of the real negative (b)
     """
-    print ("+++ get_s_b: type(yPredicted)= ", type(yPredicted))
 
     if type(yPredicted) != list:
-        print ("+++ get_s_b: yPredicted.shape= ", yPredicted.shape)
-        print ("+++ get_s_b: yValidation.shape= ", yValidation.shape)
-        print ("+++ get_s_b: weightsValidation.shape= ", weightsValidation.shape)
-
 
         if yPredicted.shape[0] != yValidation.shape[0] or \
                 yValidation.shape[0] != weightsValidation.shape[0]:
