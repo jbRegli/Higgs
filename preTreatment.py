@@ -182,8 +182,8 @@ def translate_01(x_train, x_test):
             x_train[i][x_train[i]!=-999.] -= minimum_train
             x_train[i][x_train[i]!=-999.] /= (maximum_train - minimum_train)
 
-            minimum_train = np.min(x_train[i][x_train[i]!=-999.])
-            maximum_train = np.max(x_train[i][x_train[i]!=-999.])
+            minimum_test = np.min(x_train[i][x_train[i]!=-999.])
+            maximum_test = np.max(x_train[i][x_train[i]!=-999.])
 
             x_test[i][x_test[i]!=-999.] -= minimum_test
             x_test[i][x_test[i]!=-999.] /= (maximum_test - minimum_test)
