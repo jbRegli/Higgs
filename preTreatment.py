@@ -169,28 +169,28 @@ def translate_01(x_train, x_test):
     shape = x_train.shape
 
     # Transpose the input to work on line
-    x_train = x_train.T
-    x_test = x_test.T
+    x_train_copy = copy.deepcopy(x_train.T)
+    x_test_copy = copy.deepcopy(x_test.T)
 
     for i in xrange(x_train.shape[0]):
         # Don't normalize the column 22: Decision parameter
         if i != 22 :
             # Translate the data without taking into account the -999:
-            minimum_train = np.min(x_train[i][x_train[i]!=-999.])
-            maximum_train = np.max(x_train[i][x_train[i]!=-999.])
+            minimum_train = np.min(x_train_copy[i][x_train_copy[i]!=-999.])
+            maximum_train = np.max(x_train_copy[i][x_train_copy[i]!=-999.])
 
-            x_train[i][x_train[i]!=-999.] -= minimum_train
-            x_train[i][x_train[i]!=-999.] /= (maximum_train - minimum_train)
+            x_train_copy[i][x_train_copy[i]!=-999.] -= minimum_train
+            x_train_copy[i][x_train_copy[i]!=-999.] /= (maximum_train - minimum_train)
 
-            minimum_test = np.min(x_train[i][x_train[i]!=-999.])
-            maximum_test = np.max(x_train[i][x_train[i]!=-999.])
+            minimum_test = np.min(x_test_copy[i][x_test_copy[i]!=-999.])
+            maximum_test = np.max(x_test_copy[i][x_test_copy[i]!=-999.])
 
-            x_test[i][x_test[i]!=-999.] -= minimum_test
-            x_test[i][x_test[i]!=-999.] /= (maximum_test - minimum_test)
+            x_test_copy[i][x_test_copy[i]!=-999.] -= minimum_test
+            x_test_copy[i][x_test_copy[i]!=-999.] /= (maximum_test - minimum_test)
 
     # Transpose back to return the same shape
-    x_train= x_train.T
-    x_test = x_test.T
+    x_train= copy.deepcopy(x_train_copy.T)
+    x_test = copy.deepcopy(x_test_copy.T)
 
     # Test:
     if x_train.shape != shape:
