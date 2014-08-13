@@ -172,7 +172,7 @@ def translate_01(x_train, x_test):
     x_train_copy = copy.deepcopy(x_train.T)
     x_test_copy = copy.deepcopy(x_test.T)
 
-    for i in xrange(x_train.shape[0]):
+    for i in xrange(x_train_copy.shape[0]):
         # Don't normalize the column 22: Decision parameter
         if i != 22 :
             # Translate the data without taking into account the -999:
