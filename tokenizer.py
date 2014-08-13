@@ -13,7 +13,8 @@ import preTreatment
 
 
 def get_all_data(normalize = True, noise_variance = 0., n_classes = "binary",
-                 train_size = 200000, train_size2 = 25000, valid_size = 25000):
+                 train_size = 200000, train_size2 = 25000, valid_size = 25000,
+                 datapath = ""):
     """
     normalize : binary
     if True normalize all the data
@@ -42,7 +43,7 @@ def get_all_data(normalize = True, noise_variance = 0., n_classes = "binary",
     weightsValidation : np array of size((1-training_ratio)*250000) of float representing the weights
     """
     # Extracting training.csv:
-    all = list(csv.reader(open("training.csv","rb"), delimiter=','))
+    all = list(csv.reader(open(datapath + "training.csv","rb"), delimiter=','))
 
     names_train = np.array([row for row in all[0][1:-2]])
 
@@ -51,7 +52,7 @@ def get_all_data(normalize = True, noise_variance = 0., n_classes = "binary",
     eventID = np.array([int(row[0]) for row in all[1:]])
 
     # Extracting test.csv
-    test = list(csv.reader(open("test.csv", "rb"),delimiter=','))
+    test = list(csv.reader(open(datapath + "test.csv", "rb"),delimiter=','))
 
     names_test = np.array([row for row in test[0][1:-2]])
 
@@ -169,7 +170,8 @@ def get_all_data(normalize = True, noise_variance = 0., n_classes = "binary",
 
 def get_8_bins(normalize = True, noise_variance = 0., remove_999= True,
                 n_classes = "binary",
-                train_size = 200000, train_size2 = 25000, valid_size = 25000):
+                train_size = 200000, train_size2 = 25000, valid_size = 25000,
+                datapath = ""):
     """
     returns (xsTrain_s, yTrain_s, weightsTrain_s), (xsValidation_s, yValidation_s, weightsValidation_s)
     list of the data containing the eight different groups
@@ -180,28 +182,39 @@ def get_8_bins(normalize = True, noise_variance = 0., remove_999= True,
         Train, Train2, Validation, Test = get_all_data(normalize = normalize,
                                      noise_variance = noise_variance,
                                      n_classes = n_classes, train_size = train_size,
-                                     train_size2 = train_size2, valid_size = valid_size)
+                                     train_size2 = train_size2,
+                                     valid_size = valid_size,
+                                     datapath= datapath)
     if train_size2 !=0 and valid_size ==0:
         Train, Train2, Test = get_all_data(normalize = normalize,
                                      noise_variance = noise_variance,
                                      n_classes = n_classes, train_size = train_size,
-                                     train_size2 = train_size2, valid_size = valid_size)
+                                     train_size2 = train_size2,
+                                     valid_size = valid_size,
+                                     datapath= datapath)
+
     if train_size2 ==0 and valid_size !=0:
         Train, Validation, Test = get_all_data(normalize = normalize,
                                      noise_variance = noise_variance,
                                      n_classes = n_classes, train_size = train_size,
-                                     train_size2 = train_size2, valid_size = valid_size)
+                                     train_size2 = train_size2,
+                                     valid_size = valid_size,
+                                    datapath= datapath)
+
     if train_size2==0 and valid_size ==0:
         Train, Test = get_all_data(normalize = normalize,
                                      noise_variance = noise_variance,
                                      n_classes = n_classes, train_size = train_size,
-                                     train_size2 = train_size2, valid_size = valid_size)
+                                     train_size2 = train_size2,
+                                     valid_size = valid_size,
+                                     datapath= datapath)
+
 
     ID_train, xsTrain, yTrain, weightsTrain, nameTrain  = Train[0], Train[1], \
                                                 Train[2], Train[3], Train[4]
     if train_size2 !=0:
-        ID_train2, xsTrain2, yTrain2, weightsTrain2, nameTrain2  = Train2[0], Train2[1], \
-                                            Train2[2], Train2[3], Train2[4]
+        ID_train2, xsTrain2, yTrain2, weightsTrain2, nameTrain2  = Train2[0], \
+                                        Train2[1], Train2[2], Train2[3], Train2[4]
     if valid_size !=0:
         ID_valid, xsValid, yValid, weightsValid, nameValid = Validation[0], \
                                                     Validation[1], Validation[2],\
@@ -298,7 +311,8 @@ def get_8_bins(normalize = True, noise_variance = 0., remove_999= True,
 def extract_data(split= True, normalize= True,
                  noise_variance= 0., remove_999= True,
                  n_classes = "binary", train_size = 200000, train_size2 = 25000,
-                 valid_size = 25000):
+                 valid_size = 25000,
+                 datapath= ""):
     """
     Function wrapping the extraction of the data for any of the possible cases.
     """
@@ -308,7 +322,8 @@ def extract_data(split= True, normalize= True,
                           noise_variance= noise_variance,
                           remove_999 = remove_999, n_classes = n_classes,
                           train_size = train_size, train_size2 = train_size2,
-                          valid_size = valid_size)
+                          valid_size = valid_size,
+                          datapath= datapath)
     else:
         # Extract the data as a unique dataset:
         return get_all_data(normalize= normalize,
@@ -316,6 +331,7 @@ def extract_data(split= True, normalize= True,
                             n_classes = n_classes,
                             train_size = train_size,
                             train_size2 = train_size2,
-                            valid_size = valid_size)
+                            valid_size = valid_size,
+                            datapath= datapath)
 
 

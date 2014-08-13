@@ -6,9 +6,11 @@ import numpy as np
 import copy
 import sys
 
+sys.path.append('/home/momo/Higgs/PostTreatment/')
 sys.path.append('PostTreatment/')
 import tresholding
 
+sys.path.append('/home/momo/Higgs/Analyses/')
 sys.path.append('Analyses/')
 import randomForest
 
