@@ -14,7 +14,7 @@ import preTreatment
 
 def get_all_data(normalize = True, noise_variance = 0., n_classes = "binary",
                  train_size = 200000, train_size2 = 25000, valid_size = 25000,
-                 datapath = ""):
+                 datapath = "", translate= False):
     """
     normalize : binary
     if True normalize all the data
@@ -63,6 +63,11 @@ def get_all_data(normalize = True, noise_variance = 0., n_classes = "binary",
     if normalize == True:
         print("    Normalizing...")
         xs, xsTest = preTreatment.normalize(xs, xsTest)
+
+    # translate
+    if translate == True:
+        print("    Translating in [0,1]...")
+        xs, xsTest = preTreatment.translate_01(xs, xsTest)
 
     # Add gaussian noise
     if noise_variance != 0.:
@@ -171,7 +176,7 @@ def get_all_data(normalize = True, noise_variance = 0., n_classes = "binary",
 def get_8_bins(normalize = True, noise_variance = 0., remove_999= True,
                 n_classes = "binary",
                 train_size = 200000, train_size2 = 25000, valid_size = 25000,
-                datapath = ""):
+                datapath = "", translate= False):
     """
     returns (xsTrain_s, yTrain_s, weightsTrain_s), (xsValidation_s, yValidation_s, weightsValidation_s)
     list of the data containing the eight different groups
@@ -181,33 +186,41 @@ def get_8_bins(normalize = True, noise_variance = 0., remove_999= True,
     if train_size2 !=0 and valid_size !=0:
         Train, Train2, Validation, Test = get_all_data(normalize = normalize,
                                      noise_variance = noise_variance,
-                                     n_classes = n_classes, train_size = train_size,
+                                     n_classes = n_classes,
+                                     train_size = train_size,
                                      train_size2 = train_size2,
                                      valid_size = valid_size,
-                                     datapath= datapath)
+                                     datapath= datapath,
+                                     translate = translate)
     if train_size2 !=0 and valid_size ==0:
         Train, Train2, Test = get_all_data(normalize = normalize,
                                      noise_variance = noise_variance,
-                                     n_classes = n_classes, train_size = train_size,
+                                     n_classes = n_classes,
+                                     train_size = train_size,
                                      train_size2 = train_size2,
                                      valid_size = valid_size,
-                                     datapath= datapath)
+                                     datapath= datapath,
+                                     translate = translate)
 
     if train_size2 ==0 and valid_size !=0:
         Train, Validation, Test = get_all_data(normalize = normalize,
                                      noise_variance = noise_variance,
-                                     n_classes = n_classes, train_size = train_size,
+                                     n_classes = n_classes,
+                                     train_size = train_size,
                                      train_size2 = train_size2,
                                      valid_size = valid_size,
-                                    datapath= datapath)
+                                    datapath= datapath,
+                                    translate = translate)
 
     if train_size2==0 and valid_size ==0:
         Train, Test = get_all_data(normalize = normalize,
                                      noise_variance = noise_variance,
-                                     n_classes = n_classes, train_size = train_size,
+                                     n_classes = n_classes,
+                                     train_size = train_size,
                                      train_size2 = train_size2,
                                      valid_size = valid_size,
-                                     datapath= datapath)
+                                     datapath= datapath,
+                                     translate = translate)
 
 
     ID_train, xsTrain, yTrain, weightsTrain, nameTrain  = Train[0], Train[1], \
@@ -228,12 +241,12 @@ def get_8_bins(normalize = True, noise_variance = 0., remove_999= True,
             preTreatment.split_8_matrix(ID_train, xsTrain, yTrain, weightsTrain)
     if train_size2 !=0:
         ID_train2_s, xsTrain2_s, yTrain2_s, weightsTrain2_s = \
-            preTreatment.split_8_matrix(ID_train2, xsTrain2, yTrain2, weightsTrain2)
+            preTreatment.split_8_matrix(ID_train2, xsTrain2, yTrain2,
+                                            weightsTrain2)
     if valid_size !=0:
         print("    Splitting the valid set")
         ID_valid_s, xsValid_s,yValid_s, weightsValid_s = \
             preTreatment.split_8_matrix(ID_valid, xsValid, yValid, weightsValid)
-
 
     print("    Splitting the test set")
     ID_test_s, xsTest_s = preTreatment.split_8_matrix(ID_test, xsTest)
@@ -312,7 +325,7 @@ def extract_data(split= True, normalize= True,
                  noise_variance= 0., remove_999= True,
                  n_classes = "binary", train_size = 200000, train_size2 = 25000,
                  valid_size = 25000,
-                 datapath= ""):
+                 datapath= "", translate = False):
     """
     Function wrapping the extraction of the data for any of the possible cases.
     """
@@ -323,7 +336,7 @@ def extract_data(split= True, normalize= True,
                           remove_999 = remove_999, n_classes = n_classes,
                           train_size = train_size, train_size2 = train_size2,
                           valid_size = valid_size,
-                          datapath= datapath)
+                          datapath= datapath, translate = translate)
     else:
         # Extract the data as a unique dataset:
         return get_all_data(normalize= normalize,
@@ -332,6 +345,6 @@ def extract_data(split= True, normalize= True,
                             train_size = train_size,
                             train_size2 = train_size2,
                             valid_size = valid_size,
-                            datapath= datapath)
+                            datapath= datapath, translate = translate)
 
 

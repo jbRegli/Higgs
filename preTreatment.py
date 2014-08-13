@@ -135,10 +135,8 @@ def normalize(x_train, x_test):
     x_test = x_test.T
 
     for i in xrange(x_train.shape[0]):
-        # Don't normalize the column 0: envent id
-
         # Don't normalize the column 22: Decision parameter
-        if i != 22 & i!= 0:
+        if i != 22:
             # Normalize the data without taking into account the -999:
             mean = np.mean(x_train[i][x_train[i]!=-999.])
             variance = np.var(x_train[i][x_train[i]!=-999.])
@@ -159,6 +157,49 @@ def normalize(x_train, x_test):
         exit()
 
     return x_train, x_test
+
+
+def translate_01(x_train, x_test):
+    """
+    Given a train set and a test set, translate them between [0,1] without taking
+    into account the undefined variables (ie x[i][j] = -999)
+    """
+    # Memorize the shape of the input t test if the output's shape has not been
+    # modified
+    shape = x_train.shape
+
+    # Transpose the input to work on line
+    x_train = x_train.T
+    x_test = x_test.T
+
+    for i in xrange(x_train.shape[0]):
+        # Don't normalize the column 22: Decision parameter
+        if i != 22 :
+            # Translate the data without taking into account the -999:
+            minimum_train = np.min(x_train[i][x_train[i]!=-999.])
+            maximum_train = np.max(x_train[i][x_train[i]!=-999.])
+
+            x_train[i][x_train[i]!=-999.] -= minimum_train
+            x_train[i][x_train[i]!=-999.] /= (maximum_train - minimum_train)
+
+            minimum_train = np.min(x_train[i][x_train[i]!=-999.])
+            maximum_train = np.max(x_train[i][x_train[i]!=-999.])
+
+            x_test[i][x_test[i]!=-999.] -= minimum_test
+            x_test[i][x_test[i]!=-999.] /= (maximum_test - minimum_test)
+
+    # Transpose back to return the same shape
+    x_train= x_train.T
+    x_test = x_test.T
+
+    # Test:
+    if x_train.shape != shape:
+        print("Error in the translation to [0,1], x.input and x.output have different shapes")
+        exit()
+
+    return x_train, x_test
+
+
 
 
 def add_noise(x):
