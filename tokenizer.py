@@ -279,7 +279,7 @@ def get_8_bins(normalize = True, noise_variance = 0., remove_999= True,
             nameTest_s[i] = np.delete(nameTest_s[i], 22)
 
             # List of columns to be removed: if there is a -999
-            toBeRemoved = np.sum(xsTrain_s[i]==-999, axis=0) >= 1
+            toBeRemoved = np.sum(xsTrain_s[i]==-999., axis=0) >= 1
             tBR_ind = []
             for j,elmt in enumerate(toBeRemoved):
                 if elmt == True:
