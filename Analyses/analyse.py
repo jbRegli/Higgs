@@ -16,7 +16,7 @@ sys.path.append('../')
 import HiggsBosonCompetition_AMSMetric_rev1 as hbc
 import preTreatment
 import submission
-import xgBoost
+#import xgBoost
 
 sys.path.append('../PostTreatment')
 import tresholding
